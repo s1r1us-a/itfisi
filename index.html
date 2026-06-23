@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interaktive Lernplattform für Fachinformatiker:innen Systemintegration – Vorbereitung auf die IHK-Abschlussprüfung AP1 & AP2.">
+  <title>FiSi-Lernplattform · IHK-Prüfungsvorbereitung</title>
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Diagramme (Chart.js) und Syntax-Highlighting (highlight.js) via CDN.
+       Beide werden defensiv genutzt: fehlt der Zugriff, bleibt die App nutzbar. -->
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖧</text></svg>">
+</head>
+<body>
+
+  <!-- Kopfzeile -->
+  <header class="topbar">
+    <button id="burger" class="burger" aria-label="Navigation öffnen/schließen" aria-controls="sidebar">
+      <span></span><span></span><span></span>
+    </button>
+
+    <a href="#/dashboard" class="brand">
+      <span class="brand-mark" aria-hidden="true">🖧</span>
+      <span class="brand-text">FiSi<span class="brand-accent">.lernen</span></span>
+    </a>
+
+    <div class="search-box">
+      <span class="search-icon" aria-hidden="true">🔎</span>
+      <input id="search-input" type="search" placeholder="Themen, Fragen, Begriffe suchen …" autocomplete="off" aria-label="Globale Suche">
+      <div id="search-results" class="search-results" hidden></div>
+    </div>
+
+    <button id="theme-toggle" class="icon-btn" aria-label="Hell-/Dunkelmodus umschalten" title="Hell-/Dunkelmodus">☀️</button>
+  </header>
+
+  <div class="layout">
+    <!-- Seitenleiste -->
+    <aside id="sidebar" class="sidebar" aria-label="Hauptnavigation">
+      <nav id="sidebar-nav" class="sidebar-nav"></nav>
+      <footer class="sidebar-foot">
+        <p>Geschlechtsneutral · fachlich geprüft · ohne Gewähr</p>
+      </footer>
+    </aside>
+    <div id="nav-overlay" class="nav-overlay" aria-hidden="true"></div>
+
+    <!-- Hauptinhalt -->
+    <main id="view" class="view" tabindex="-1"></main>
+  </div>
+
+  <!-- Benachrichtigungen (Achievements) -->
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <!-- noscript-Hinweis -->
+  <noscript>
+    <p style="padding:2rem;text-align:center">Diese Lernplattform benötigt aktiviertes JavaScript.</p>
+  </noscript>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
