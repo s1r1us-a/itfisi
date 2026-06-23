@@ -917,6 +917,28 @@ export const questions = [
     back: "Kranken-, Pflege-, Renten-, Arbeitslosen- und Unfallversicherung.",
     explanation: "Die Unfallversicherung zahlt allein der Arbeitgeber." },
 
+  /* ===================== LÜCKENTEXTE (cloze) ===================== */
+  { id: "q-osi-cloze-1", topicId: "osi-tcpip", type: "cloze", difficulty: "mittel",
+    question: "Ein Switch arbeitet auf OSI-Schicht {{}} und ein Router auf Schicht {{}}.",
+    blanks: [["2", "zwei", "schicht 2"], ["3", "drei", "schicht 3"]],
+    explanation: "Switch = Schicht 2 (MAC), Router = Schicht 3 (IP)." },
+  { id: "q-sub-cloze-1", topicId: "subnetting", type: "cloze", difficulty: "schwer",
+    question: "Die Subnetzmaske /24 lautet dezimal 255.255.255.{{}} und bietet {{}} nutzbare Hosts.",
+    blanks: [["0"], ["254"]],
+    explanation: "/24 ⇒ 255.255.255.0, 2^8 − 2 = 254 nutzbare Hosts." },
+  { id: "q-krypto-cloze-1", topicId: "krypto", type: "cloze", difficulty: "mittel",
+    question: "Bei AES handelt es sich um ein {{}} Verfahren, bei RSA um ein {{}} Verfahren.",
+    blanks: [["symmetrisches", "symmetrisch"], ["asymmetrisches", "asymmetrisch"]],
+    explanation: "AES = symmetrisch (ein Schlüssel), RSA = asymmetrisch (Schlüsselpaar)." },
+  { id: "q-dhcp-cloze-1", topicId: "dhcp-dns", type: "cloze", difficulty: "leicht",
+    question: "Der DHCP-Server nutzt UDP-Port {{}}, der Client UDP-Port {{}}.",
+    blanks: [["67"], ["68"]],
+    explanation: "Server 67, Client 68 (UDP)." },
+  { id: "q-kalk-cloze-1", topicId: "kalkulation", type: "cloze", difficulty: "mittel",
+    question: "Listeneinkaufspreis − Rabatt = {{}}; davon − Skonto = {{}}.",
+    blanks: [["zieleinkaufspreis"], ["bareinkaufspreis"]],
+    explanation: "Reihenfolge der Bezugskalkulation: Rabatt, dann Skonto, dann Bezugskosten." },
+
 ];
 
 /* ------------------------------------------------------------------ *

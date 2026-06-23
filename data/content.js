@@ -115,7 +115,7 @@ export const topics = [
       "TCP/IP: Anwendung · Transport · Internet · Netzzugang",
       "PDU: Schicht4=Segment, 3=Paket, 2=Frame, 1=Bit",
     ],
-    questionIds: ["q-osi-1","q-osi-2","q-osi-3","q-osi-match-1","fc-osi-1","fc-osi-2"],
+    questionIds: ["q-osi-1","q-osi-2","q-osi-3","q-osi-match-1","q-osi-cloze-1","fc-osi-1","fc-osi-2"],
   },
 
   {
@@ -194,7 +194,7 @@ export const topics = [
       "Maskenwerte: 128·192·224·240·248·252·254·255",
       "Übe interaktiv im Subnetting-Trainer!",
     ],
-    questionIds: ["q-sub-1","q-sub-2","q-sub-calc-1","q-sub-calc-2","fc-sub-1"],
+    questionIds: ["q-sub-1","q-sub-2","q-sub-calc-1","q-sub-calc-2","q-sub-cloze-1","fc-sub-1"],
   },
 
   {
@@ -434,7 +434,7 @@ export const topics = [
       "DNS-Port: 53 (UDP/TCP)",
       "DORA = Discover·Offer·Request·Acknowledge",
     ],
-    questionIds: ["q-dhcp-1","q-dns-1","q-dns-match-1","q-dhcp-tf-1","fc-dns-1","fc-dhcp-1"],
+    questionIds: ["q-dhcp-1","q-dns-1","q-dns-match-1","q-dhcp-tf-1","q-dhcp-cloze-1","fc-dns-1","fc-dhcp-1"],
   },
 
   {
@@ -651,7 +651,7 @@ export const topics = [
       "Hybrid: asym. Schlüsseltausch + sym. Daten",
       "PKI: CA signiert X.509-Zertifikate",
     ],
-    questionIds: ["q-krypto-1","q-krypto-2","q-krypto-tf-1","q-krypto-match-1","fc-krypto-1"],
+    questionIds: ["q-krypto-1","q-krypto-2","q-krypto-tf-1","q-krypto-match-1","q-krypto-cloze-1","fc-krypto-1"],
   },
 
   {
@@ -1503,7 +1503,7 @@ done</code></pre>` },
       "+Handlungskosten=Selbstkosten +Gewinn=BVP",
       "Wirtschaftlichkeit=Ertrag/Aufwand",
     ],
-    questionIds: ["q-kalk-1","q-kalk-calc-1","q-kalk-tf-1","fc-kalk-1"],
+    questionIds: ["q-kalk-1","q-kalk-calc-1","q-kalk-tf-1","q-kalk-cloze-1","fc-kalk-1"],
   },
 
   {
