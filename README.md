@@ -21,12 +21,20 @@ Die Anwendung deckt die komplette Ausbildung ab – mit echten Lerninhalten, vie
   Multiple Choice (einfach/mehrfach), Wahr/Falsch, Lückentext, Zuordnung (Drag & Drop),
   Karteikarten (Flip), Rechenaufgaben, sowie die gemischte **Prüfungssimulation mit Timer**.
 - **Lernmodi:** Themen-Quiz, Schwachstellen-Training, Spaced Repetition (Leitner-Prinzip),
-  Zufallsabfrage und „Frage des Tages“.
+  Zufallsabfrage, „Frage des Tages“ und **ganzheitliche Prüfungsaufgaben** (handlungs-
+  orientierte Fallaufgaben mit mehreren Teilfragen wie in der echten IHK-Prüfung).
+- **Geführte Lernpfade:** kuratierte, geordnete Wege durch die Themen (z. B. AP1-Crashkurs,
+  Netzwerktechnik komplett, IT-Sicherheit) mit „Weiter“-Flow und Fortschritt.
+- **Lernplan & Prüfungs-Countdown:** Prüfungstermin setzen, Countdown und automatisch
+  verteilter Lernplan offener Themen samt fälliger Wiederholungen.
 - **Statistik-Dashboard:** Gesamt- und Bereichsfortschritt, Richtig-/Falsch-Quote,
-  Lernverlauf, Aktivitäts-Heatmap (GitHub-Stil), Schwachstellen-Empfehlung,
-  Achievements/Badges und Punkte-/Level-System.
-- **Interaktive Werkzeuge:** Subnetting-Trainer (mit Lösungsweg binär/dezimal),
-  Befehls-Trainer (CLI/SQL/PowerShell/Bash), klickbares OSI-Modell, animierte Schaubilder
+  Lernverlauf, Aktivitäts-Heatmap (GitHub-Stil), **Wissensradar** (Quiz-Leistung vs.
+  Selbsteinschätzung), Schwachstellen-Empfehlung, Achievements/Badges und Punkte-/Level-System.
+- **Interaktive Werkzeuge:** Subnetting-Trainer (Lösungsweg binär/dezimal),
+  **IPv6-Trainer** (Verkürzen/Expandieren, RFC 5952), **Zahlensystem-Trainer**
+  (bin/dez/hex + Speichergrößen), **Logik-Trainer** (Gatter & Ausdrücke),
+  **Netzplan-Rechner** (kritischer Pfad/Puffer), **SQL-Sandbox** (echtes SQLite via sql.js),
+  Befehls-Trainer und **Terminal-Simulator**, klickbares OSI-Modell, animierte Schaubilder
   (DORA, TCP-Handshake, RAID, AD-Struktur) und Pomodoro-Lerntimer.
 - **Komfort:** globale Live-Suche, Glossar mit Verlinkung im Fließtext, Notizen &
   Favoriten pro Thema, Druck-/Spickzettel-Ansicht, Code-Kopierbuttons,
@@ -84,6 +92,8 @@ Die Erweiterung **„Live Server“** installieren und `index.html` per
 /data/
   content.js         Alle Lerninhalte (Themen, Texte, Beispiele) als Datenobjekte
   questions.js       Alle Fragen, Karteikarten und Aufgaben als Datenobjekte
+  scenarios.js       Ganzheitliche Prüfungsaufgaben (Fallkontext + Teilfragen)
+  paths.js           Geführte Lernpfade (geordnete Themenfolgen)
   glossary.js        Glossarbegriffe
 /README.md
 ```
