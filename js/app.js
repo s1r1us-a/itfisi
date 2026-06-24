@@ -753,7 +753,13 @@ function renderTools() {
     <header class="page-head"><h1>🛠️ Interaktive Werkzeuge</h1></header>
     <div class="tools-tabs" role="tablist">
       <button class="tools-tab active" data-tool="subnet" role="tab">🧮 Subnetting</button>
+      <button class="tools-tab" data-tool="ipv6" role="tab">🆕 IPv6</button>
+      <button class="tools-tab" data-tool="number" role="tab">🔢 Zahlensysteme</button>
+      <button class="tools-tab" data-tool="logic" role="tab">🔌 Logik</button>
+      <button class="tools-tab" data-tool="netzplan" role="tab">📈 Netzplan</button>
+      <button class="tools-tab" data-tool="sql" role="tab">🧾 SQL</button>
       <button class="tools-tab" data-tool="command" role="tab">⌨️ Befehle</button>
+      <button class="tools-tab" data-tool="cli" role="tab">🖥️ Terminal</button>
       <button class="tools-tab" data-tool="osi" role="tab">🗂️ OSI-Modell</button>
       <button class="tools-tab" data-tool="pomodoro" role="tab">⏱️ Pomodoro</button>
     </div>
@@ -763,7 +769,13 @@ function renderTools() {
     clearPomodoro();
     $$(".tools-tab", v).forEach((b) => b.classList.toggle("active", b.dataset.tool === tool));
     if (tool === "subnet") tools.renderSubnettingTrainer(host);
+    else if (tool === "ipv6") tools.renderIpv6Trainer(host);
+    else if (tool === "number") tools.renderNumberConverter(host);
+    else if (tool === "logic") tools.renderLogicTrainer(host);
+    else if (tool === "netzplan") tools.renderNetzplan(host);
+    else if (tool === "sql") tools.renderSqlSandbox(host);
     else if (tool === "command") tools.renderCommandTrainer(host);
+    else if (tool === "cli") tools.renderCliSimulator(host);
     else if (tool === "osi") { host.innerHTML = `<div class="tool-card"><h3>🗂️ Interaktives OSI-Modell</h3><div id="osi-host"></div></div>`; tools.renderVisual("osi", $("#osi-host", host)); }
     else if (tool === "pomodoro") { host.innerHTML = `<div class="tool-card"><h3>⏱️ Pomodoro-Lerntimer</h3><div id="pomo-host"></div></div>`; pomodoroCleanup = tools.renderPomodoro($("#pomo-host", host)); }
   };

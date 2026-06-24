@@ -467,6 +467,18 @@ pre code { background: none; padding: 0; }
 .cmd-result.wrong { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 10%, var(--surface)); }
 .cmd-result.hint { border-color: var(--warn); }
 
+/* Netzplan: kritischer Pfad hervorheben */
+.np-crit td { background: color-mix(in srgb, var(--bad) 14%, var(--surface)); font-weight: 700; }
+
+/* CLI-Simulator */
+.cli-screen { background: #0d1117; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .8rem 1rem; max-height: 320px; overflow-y: auto; font-family: var(--mono); font-size: .9rem; color: #e6edf3; }
+.cli-line { white-space: pre-wrap; word-break: break-word; }
+.cli-out { white-space: pre-wrap; margin: .15rem 0; }
+.cli-ok { color: var(--good); }
+.cli-err { color: var(--bad); }
+.cli-sys { color: var(--text-muted); }
+.cli-entry { background: none; border: none; padding: .2rem 0; }
+
 .pomodoro { text-align: center; padding: 1.5rem; border-radius: var(--radius); }
 .pomodoro.focus { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
 .pomodoro.break { background: color-mix(in srgb, var(--accent-2) 10%, var(--surface)); }
