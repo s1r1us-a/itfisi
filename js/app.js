@@ -157,6 +157,17 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+/** Packt breite Tabellen in einen horizontal scrollbaren Wrapper (Mobile). */
+function wrapTables(root) {
+  if (!root) return;
+  root.querySelectorAll("table").forEach((tbl) => {
+    if (tbl.parentElement && tbl.parentElement.classList.contains("table-wrap")) return;
+    const wrap = el("div", { class: "table-wrap" });
+    tbl.parentNode.insertBefore(wrap, tbl);
+    wrap.append(tbl);
+  });
+}
+
 /* ------------------------------------------------------------------ *
  *  Glossar-Verlinkung im Fließtext
  * ------------------------------------------------------------------ */
@@ -409,6 +420,8 @@ function renderTopic(id) {
   if (t.visual) tools.renderVisual(t.visual, $("#topic-visual", v));
   // Code-Blöcke aufwerten
   tools.enhanceCodeBlocks(v);
+  // Breite Tabellen mobil scrollbar machen
+  wrapTables($(".topic-body", v));
   // Glossar verlinken
   linkifyGlossary($(".topic-body", v));
 
