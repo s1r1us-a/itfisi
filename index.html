@@ -36,6 +36,9 @@
     </div>
 
     <button id="theme-toggle" class="icon-btn" aria-label="Hell-/Dunkelmodus umschalten" title="Hell-/Dunkelmodus">☀️</button>
+
+    <!-- Konto-Bereich (E-Mail + Abmelden), per JS befüllt -->
+    <div id="account-box" class="account-box" hidden></div>
   </header>
 
   <div class="layout">
@@ -51,6 +54,9 @@
     <!-- Hauptinhalt -->
     <main id="view" class="view" tabindex="-1"></main>
   </div>
+
+  <!-- Anmeldung/Registrierung (Login-Gate); per JS befüllt, im eingeloggten Zustand ausgeblendet -->
+  <div id="auth-screen" class="auth-screen"></div>
 
   <!-- Benachrichtigungen (Achievements) -->
   <div id="toasts" class="toasts" aria-live="polite"></div>
