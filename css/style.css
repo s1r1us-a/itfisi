@@ -207,6 +207,37 @@ h1,h2,h3,h4 { line-height: 1.25; }
 .daily-card .daily-head h2 { margin: 0; }
 .daily-actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }
 
+/* Prüfungs-Countdown */
+.countdown { display: flex; align-items: baseline; gap: .6rem; margin-top: 1rem; }
+.countdown-num { font-size: 2.6rem; font-weight: 800; letter-spacing: -.02em; background: linear-gradient(90deg, var(--accent), var(--accent-3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.countdown-label { color: var(--text-muted); font-weight: 600; }
+.countdown-banner { display: flex; align-items: center; gap: .9rem; text-decoration: none; color: var(--text); background: linear-gradient(120deg, color-mix(in srgb, var(--accent) 14%, var(--surface)), var(--surface)); border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); }
+.countdown-banner:hover { text-decoration: none; transform: translateY(-2px); box-shadow: var(--shadow); }
+.countdown-banner .countdown-num { font-size: 2rem; }
+
+/* Lernplan-Liste */
+.plan-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .6rem; }
+.plan-day { display: grid; grid-template-columns: 110px 1fr; gap: .8rem; align-items: start; padding: .7rem .9rem; background: var(--surface-2); border-radius: var(--radius-sm); border: 1px solid var(--border); }
+.plan-date { font-weight: 700; color: var(--accent); font-size: .86rem; }
+.plan-items { display: flex; flex-wrap: wrap; gap: .4rem; }
+.plan-topic { font-size: .84rem; padding: .25rem .6rem; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; color: var(--text); }
+.plan-topic:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+@media (max-width: 560px) { .plan-day { grid-template-columns: 1fr; } }
+
+/* Lernpfade */
+.path-steps { list-style: none; padding: 0; margin: 1.4rem 0 0; display: flex; flex-direction: column; gap: .5rem; }
+.path-step { display: flex; align-items: center; gap: .8rem; padding: .7rem .9rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); transition: var(--transition); }
+.path-step.current { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent); }
+.path-step.done { opacity: .82; }
+.path-num { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--surface-2); border: 1px solid var(--border); }
+.path-step.done .path-num { background: var(--good); color: #fff; border-color: var(--good); }
+.path-step.current .path-num { background: var(--accent); color: #fff; border-color: var(--accent); }
+.path-link { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .35rem; color: var(--text); text-decoration: none; }
+.path-link:hover { text-decoration: none; }
+.path-title { font-weight: 600; }
+.path-bar .progress { height: 6px; }
+@media (max-width: 560px) { .path-step { flex-wrap: wrap; } .path-link { flex-basis: 100%; order: 3; } }
+
 .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
 .tile {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);

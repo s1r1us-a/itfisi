@@ -8,6 +8,7 @@
 
 import * as content from "../data/content.js";
 import { glossary, getGlossaryTerm } from "../data/glossary.js";
+import { paths, getPath } from "../data/paths.js";
 import { getQuestion, questions as ALL_QUESTIONS } from "../data/questions.js";
 import * as stats from "./stats.js";
 import * as quiz from "./quiz.js";
@@ -70,6 +71,8 @@ function buildSidebar() {
   quick.append(
     navLink("🏠 Dashboard", "#/dashboard"),
     navLink("📈 Statistik", "#/stats"),
+    navLink("🗓️ Lernplan", "#/plan"),
+    navLink("🧭 Lernpfade", "#/paths"),
     navLink("📝 Prüfungssimulation", "#/exam"),
     navLink("🎯 Üben & Wiederholen", "#/practice"),
     navLink("🛠️ Werkzeuge", "#/tools"),
@@ -276,6 +279,9 @@ function router() {
     case "quiz": renderQuizView(parts[1]); break;
     case "exam": renderExamSetup(); break;
     case "practice": renderPractice(); break;
+    case "plan": renderPlan(); break;
+    case "paths": renderPaths(); break;
+    case "path": renderPath(parts[1]); break;
     case "stats": renderStats(); break;
     case "glossary": renderGlossary(query.term); break;
     case "favorites": renderFavorites(); break;
@@ -319,6 +325,8 @@ function renderDashboard() {
       <div class="stat-pill"><span class="pill-num">${stats.getState().totals.answered}</span><span class="pill-label">Fragen</span></div>
       <div class="stat-pill"><span class="pill-num">${stats.overallAccuracy()}%</span><span class="pill-label">Trefferquote</span></div>
     </section>
+
+    ${(() => { const d = stats.daysUntilExam(); return d != null ? `<a class="card countdown-banner" href="#/plan"><span class="countdown-num">${d}</span><span class="countdown-label">Tag${d === 1 ? "" : "e"} bis zur Prüfung – zum Lernplan →</span></a>` : ""; })()}
 
     <section class="card daily-card">
       <div class="daily-head"><h2>🎯 Tagesziel</h2><span>${today} / ${goal} Fragen</span></div>
@@ -570,6 +578,142 @@ function startExam(kind) {
     onFinish: () => { location.hash = "#/stats"; },
   }).mount(host);
   host.scrollIntoView({ behavior: "smooth" });
+}
+
+/* ------------------------------------------------------------------ *
+ *  Ansicht: Geführte Lernpfade
+ * ------------------------------------------------------------------ */
+
+function pathProgress(p) {
+  const ts = p.topicIds.map(getTopic).filter(Boolean);
+  if (!ts.length) return 0;
+  return Math.round(ts.reduce((a, t) => a + stats.topicProgressPct(t), 0) / ts.length);
+}
+
+function renderPaths() {
+  const v = main();
+  v.innerHTML = `
+    <header class="page-head"><div>
+      <h1>🧭 Geführte Lernpfade</h1>
+      <p class="lead">Strukturierte Wege durch die Themen – Schritt für Schritt von den Grundlagen zur Prüfungsreife.</p>
+    </div></header>
+    <section class="tiles">
+      ${paths.map((p) => { const pct = pathProgress(p); return `
+        <a class="tile tile-link" href="#/path/${p.id}">
+          <div class="tile-icon">${p.icon}</div>
+          <h3>${escapeHtml(p.title)}</h3>
+          <p class="tile-count">${p.topicIds.length} Themen</p>
+          <div class="progress sm"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <span class="tile-pct">${pct}% abgeschlossen</span>
+          <p class="muted" style="font-size:.82rem;margin:.6rem 0 0">${escapeHtml(p.description)}</p>
+        </a>`; }).join("")}
+    </section>`;
+}
+
+function renderPath(id) {
+  const p = getPath(id);
+  if (!p) { main().innerHTML = `<p class="notice">Lernpfad nicht gefunden.</p>`; return; }
+  const v = main();
+  const steps = p.topicIds.map(getTopic).filter(Boolean).map((t) => ({ t, pct: stats.topicProgressPct(t) }));
+  const next = steps.find((s) => s.pct < 100);
+  const pct = pathProgress(p);
+
+  v.innerHTML = `
+    <header class="page-head"><div>
+      <span class="crumb"><a href="#/paths">Lernpfade</a></span>
+      <h1>${p.icon} ${escapeHtml(p.title)}</h1>
+      <p class="lead">${escapeHtml(p.description)}</p>
+    </div></header>
+
+    <section class="card">
+      <div class="daily-head"><h2>Fortschritt</h2><span>${pct}%</span></div>
+      <div class="progress"><div class="progress-fill" style="width:${pct}%"></div></div>
+      ${next ? `<div class="topic-cta"><a class="btn btn-primary btn-lg" href="#/topic/${next.t.id}">▶ Weiter: ${escapeHtml(next.t.title)}</a></div>`
+        : `<p class="notice" style="margin-top:1rem">🎉 Pfad abgeschlossen! Teste dich in der Prüfungssimulation.</p>`}
+    </section>
+
+    <ol class="path-steps">
+      ${steps.map((s, i) => `
+        <li class="path-step ${s.pct >= 100 ? "done" : s === next ? "current" : ""}">
+          <span class="path-num">${s.pct >= 100 ? "✓" : i + 1}</span>
+          <a class="path-link" href="#/topic/${s.t.id}">
+            <span class="path-title">${s.t.icon || ""} ${escapeHtml(s.t.title)}</span>
+            <span class="path-bar"><span class="progress sm"><span class="progress-fill" style="width:${s.pct}%"></span></span></span>
+          </a>
+          <a class="btn btn-small" href="#/quiz/${s.t.id}">Quiz</a>
+        </li>`).join("")}
+    </ol>`;
+}
+
+/* ------------------------------------------------------------------ *
+ *  Ansicht: Lernplan & Prüfungs-Countdown
+ * ------------------------------------------------------------------ */
+
+function renderPlan() {
+  const v = main();
+  const examTs = stats.getExamDate();
+  const days = stats.daysUntilExam();
+  const examInput = examTs ? stats.todayKey(new Date(examTs)) : "";
+
+  // Offene Themen (noch nicht vollständig gelernt), nach Fortschritt sortiert
+  const openTopics = topics
+    .map((t) => ({ t, pct: stats.topicProgressPct(t) }))
+    .filter((x) => x.pct < 100)
+    .sort((a, b) => a.pct - b.pct);
+  const due = stats.dueQuestionIds().length;
+  const weak = stats.weakQuestionIds().length;
+
+  // Plan: offene Themen gleichmäßig auf die verbleibenden (max. 14 angezeigten) Tage verteilen
+  const planDays = days && days > 0 ? Math.min(days, 14) : 7;
+  const perDay = Math.max(1, Math.ceil(openTopics.length / planDays));
+  const schedule = [];
+  for (let d = 0; d < planDays && openTopics.length; d++) {
+    const date = new Date(); date.setDate(date.getDate() + d);
+    schedule.push({ date, items: openTopics.splice(0, perDay).map((x) => x.t) });
+  }
+
+  v.innerHTML = `
+    <header class="page-head"><h1>🗓️ Lernplan & Prüfungs-Countdown</h1></header>
+
+    <section class="card">
+      <h2>Prüfungstermin</h2>
+      <label class="goal-edit">Datum deiner Prüfung:
+        <input type="date" id="exam-date" value="${examInput}" min="${stats.todayKey()}">
+      </label>
+      ${examTs ? `<button class="btn btn-small btn-danger" id="exam-clear" style="margin-left:.6rem">Termin entfernen</button>` : ""}
+      ${days != null ? `<div class="countdown"><span class="countdown-num">${days}</span><span class="countdown-label">Tag${days === 1 ? "" : "e"} bis zur Prüfung</span></div>`
+        : `<p class="muted" style="margin-top:.8rem">Setze einen Termin, um Countdown und Lernplan zu erhalten.</p>`}
+    </section>
+
+    <section class="stat-strip">
+      <div class="stat-pill"><span class="pill-num">${openTopics.length + schedule.reduce((a, s) => a + s.items.length, 0)}</span><span class="pill-label">offene Themen</span></div>
+      <div class="stat-pill"><span class="pill-num">${due}</span><span class="pill-label">fällige Wiederholungen</span></div>
+      <div class="stat-pill"><span class="pill-num">${weak}</span><span class="pill-label">Schwachstellen</span></div>
+    </section>
+
+    <section class="card">
+      <h2>📋 Dein Lernplan</h2>
+      ${due || weak ? `<div class="daily-actions" style="margin-bottom:1rem">
+        ${due ? `<a class="btn btn-primary" href="#/practice?mode=leitner">🔁 ${due} Wiederholungen fällig</a>` : ""}
+        ${weak ? `<a class="btn" href="#/practice?mode=weak">🩹 ${weak} Schwachstellen üben</a>` : ""}
+      </div>` : ""}
+      ${schedule.length ? `<ol class="plan-list">${schedule.map((s) => `
+        <li class="plan-day">
+          <div class="plan-date">${s.date.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" })}</div>
+          <div class="plan-items">${s.items.map((t) => `<a class="plan-topic" href="#/topic/${t.id}">${t.icon || "•"} ${escapeHtml(t.title)}</a>`).join("")}</div>
+        </li>`).join("")}</ol>`
+        : `<p class="notice">🎉 Alle Themen sind durchgearbeitet! Konzentriere dich auf Wiederholungen und Prüfungssimulationen.</p>`}
+    </section>`;
+
+  const dateInput = $("#exam-date", v);
+  dateInput.addEventListener("change", () => {
+    if (dateInput.value) {
+      const ts = new Date(dateInput.value + "T00:00:00").getTime();
+      stats.setExamDate(ts);
+    }
+    renderPlan();
+  });
+  $("#exam-clear", v)?.addEventListener("click", () => { stats.setExamDate(null); renderPlan(); });
 }
 
 /* ------------------------------------------------------------------ *

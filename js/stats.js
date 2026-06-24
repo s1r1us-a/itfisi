@@ -147,6 +147,16 @@ export function getStreak() { return state.streak; }
 export function getDailyGoal() { return state.dailyGoal; }
 export function setDailyGoal(n) { state.dailyGoal = Math.max(1, parseInt(n, 10) || 20); save(); }
 
+export function getExamDate() { return state.examDate || null; }
+export function setExamDate(ts) { state.examDate = ts || null; save(); }
+/** Tage bis zum Prüfungstermin (>=0), oder null wenn kein Termin gesetzt. */
+export function daysUntilExam() {
+  if (!state.examDate) return null;
+  const today = new Date(todayKey() + "T00:00:00").getTime();
+  const exam = new Date(todayKey(new Date(state.examDate)) + "T00:00:00").getTime();
+  return Math.max(0, Math.round((exam - today) / 86400000));
+}
+
 export function answeredToday() {
   const e = state.history[todayKey()];
   return e ? e.answered : 0;
