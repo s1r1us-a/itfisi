@@ -511,6 +511,9 @@ pre code { background: none; padding: 0; }
 .toast.show { transform: translateX(0); }
 .toast-icon { font-size: 1.7rem; }
 .achievement-toast strong { color: var(--warn); }
+.toast-good { border-left-color: var(--good); }
+.toast-bad  { border-left-color: var(--bad); }
+.toast-info { border-left-color: var(--accent); }
 
 /* =================================================================
    Responsiv

@@ -106,7 +106,7 @@ function navGroup(title, list) {
   wrap.append(head);
   list.forEach((t) => {
     const a = el("a", { class: "nav-link nav-topic", href: `#/topic/${t.id}`, "data-topic": t.id });
-    a.innerHTML = `<span class="nav-topic-icon">${t.icon || "•"}</span><span>${t.title}</span>`;
+    a.innerHTML = `<span class="nav-topic-icon">${escapeHtml(t.icon || "•")}</span><span>${escapeHtml(t.title)}</span>`;
     wrap.append(a);
   });
   return wrap;
@@ -144,12 +144,11 @@ function initSearch() {
     const hits = SEARCH_INDEX.filter((e) => e.text.includes(q)).slice(0, 12);
     results.hidden = false;
     results.innerHTML = hits.length
-      ? hits.map((h) => `<a class="search-hit" href="${h.href}"><span class="hit-icon">${h.icon}</span><span class="hit-body"><span class="hit-type">${h.type}</span><span class="hit-title">${h.title}</span></span></a>`).join("")
+      ? hits.map((h) => `<a class="search-hit" href="${escapeHtml(h.href)}"><span class="hit-icon">${escapeHtml(h.icon)}</span><span class="hit-body"><span class="hit-type">${escapeHtml(h.type)}</span><span class="hit-title">${escapeHtml(h.title)}</span></span></a>`).join("")
       : `<p class="search-empty">Keine Treffer für „${escapeHtml(q)}“.</p>`;
   };
   input.addEventListener("input", run);
   input.addEventListener("focus", run);
-  $$(".search-hit", results); // noop
   results.addEventListener("click", () => { results.hidden = true; input.value = ""; });
   document.addEventListener("click", (e) => { if (!e.target.closest(".search-box")) results.hidden = true; });
 }
@@ -166,7 +165,15 @@ const GLOSSARY_RE = (() => {
   const terms = glossary.map((g) => g.term).filter((t) => t.length > 2)
     .sort((a, b) => b.length - a.length)
     .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-  return new RegExp(`\\b(${terms.join("|")})\\b`, "g");
+  // Ohne Terme würde `\b()\b` entstehen → leere Gruppe matcht überall. Lieber ein
+  // Muster, das nie trifft, plus try/catch gegen evtl. ungültige Term-Kombinationen.
+  if (!terms.length) return /$^/;
+  try {
+    return new RegExp(`\\b(${terms.join("|")})\\b`, "g");
+  } catch (e) {
+    console.warn("Glossar-Regex konnte nicht erstellt werden.", e);
+    return /$^/;
+  }
 })();
 
 /** Verlinkt bekannte Glossarbegriffe in einem Container (nur einmal je Begriff). */
@@ -209,18 +216,31 @@ function linkifyGlossary(root) {
   });
 }
 
+let glossPopoverCleanup = null;
+function closeGlossaryPopover() {
+  if (glossPopoverCleanup) { glossPopoverCleanup(); glossPopoverCleanup = null; }
+}
+
 function showGlossaryPopover(anchor) {
-  $$(".gloss-popover").forEach((p) => p.remove());
+  // Vorhandenes Popover samt Listener sauber entfernen (kein Listener-Leak).
+  closeGlossaryPopover();
   const term = anchor.dataset.term;
   const g = getGlossaryTerm(term);
   if (!g) return;
   const pop = el("div", { class: "gloss-popover" });
-  pop.innerHTML = `<strong>${g.term}</strong><p>${g.definition}</p>${g.related && g.related.length ? `<a href="#/topic/${g.related[0]}">Zum Thema →</a>` : ""}`;
+  pop.innerHTML = `<strong>${escapeHtml(g.term)}</strong><p>${escapeHtml(g.definition)}</p>${g.related && g.related.length ? `<a href="#/topic/${encodeURIComponent(g.related[0])}">Zum Thema →</a>` : ""}`;
   document.body.append(pop);
+
+  // Breite mobil-sicher begrenzen und Position an den Viewport clampen.
+  const popW = pop.getBoundingClientRect().width || Math.min(320, window.innerWidth - 16);
   const r = anchor.getBoundingClientRect();
+  const maxLeft = window.scrollX + window.innerWidth - popW - 8;
   pop.style.top = (window.scrollY + r.bottom + 6) + "px";
-  pop.style.left = Math.min(window.scrollX + r.left, window.innerWidth - 320) + "px";
-  const close = (e) => { if (!e.target.closest(".gloss-popover") && e.target !== anchor) { pop.remove(); document.removeEventListener("click", close); } };
+  pop.style.left = Math.max(window.scrollX + 8, Math.min(window.scrollX + r.left, maxLeft)) + "px";
+
+  const close = (e) => { if (!e.target.closest(".gloss-popover") && e.target !== anchor) closeGlossaryPopover(); };
+  // Cleanup kapselt Entfernen von DOM + Listener, damit auch Navigation aufräumt.
+  glossPopoverCleanup = () => { pop.remove(); document.removeEventListener("click", close); };
   setTimeout(() => document.addEventListener("click", close), 0);
 }
 
@@ -230,6 +250,7 @@ function showGlossaryPopover(anchor) {
 
 function router() {
   clearPomodoro();
+  closeGlossaryPopover();
   stats.destroyAllCharts();
   const hash = location.hash.replace(/^#/, "") || "/dashboard";
   const [path, queryStr] = hash.split("?");
@@ -645,10 +666,26 @@ function exportData() {
 function importData(e) {
   const file = e.target.files[0];
   if (!file) return;
+  // Grobe Plausibilitätsprüfung vor dem Einlesen (Typ/Größe).
+  const looksJson = /\.json$/i.test(file.name) || file.type === "application/json" || file.type === "";
+  if (!looksJson) { showToast("⚠️", "Import abgebrochen", "Bitte eine JSON-Datei wählen.", "bad"); e.target.value = ""; return; }
+  if (file.size > 5 * 1024 * 1024) { showToast("⚠️", "Datei zu groß", "Die Sicherung sollte unter 5 MB liegen.", "bad"); e.target.value = ""; return; }
+
   const reader = new FileReader();
   reader.onload = () => {
-    try { stats.importJSON(reader.result); alert("Lernstand erfolgreich importiert."); router(); }
-    catch (err) { alert("Import fehlgeschlagen: " + err.message); }
+    try {
+      stats.importJSON(reader.result);
+      showToast("✅", "Import erfolgreich", "Dein Lernstand wurde übernommen.", "good");
+      router();
+    } catch (err) {
+      showToast("⚠️", "Import fehlgeschlagen", "Die Datei ist keine gültige Lernstand-Sicherung.", "bad");
+    } finally {
+      e.target.value = ""; // erlaubt erneutes Wählen derselben Datei
+    }
+  };
+  reader.onerror = () => {
+    showToast("⚠️", "Lesefehler", "Die Datei konnte nicht gelesen werden.", "bad");
+    e.target.value = "";
   };
   reader.readAsText(file);
 }
@@ -731,18 +768,33 @@ function renderCheatsheet(id) {
   const v = main();
   v.innerHTML = `
     <header class="page-head no-print"><div><span class="crumb">Spickzettel</span><h1>${t.title}</h1></div>
-      <div class="topic-actions"><button class="btn btn-small" onclick="window.print()">🖨️ Drucken</button><a class="btn btn-small" href="#/topic/${id}">← Thema</a></div></header>
+      <div class="topic-actions"><button class="btn btn-small" id="cheat-print">🖨️ Drucken</button><a class="btn btn-small" href="#/topic/${id}">← Thema</a></div></header>
     <article class="cheatsheet">
       <h2 class="print-only">${t.title}</h2>
       <p class="cheat-summary">${t.summary}</p>
       ${t.cheatsheet && t.cheatsheet.length ? `<ul class="cheat-list">${t.cheatsheet.map((c) => `<li>${c}</li>`).join("")}</ul>` : ""}
       ${t.merksaetze && t.merksaetze.length ? `<h3>Merksätze</h3><ul class="cheat-list">${t.merksaetze.map((m) => `<li>${m}</li>`).join("")}</ul>` : ""}
     </article>`;
+  $("#cheat-print", v)?.addEventListener("click", () => window.print());
 }
 
 /* ------------------------------------------------------------------ *
  *  Achievement-Toasts
  * ------------------------------------------------------------------ */
+
+/**
+ * Zeigt einen Toast an. `kind` (good|bad|info) steuert die Akzentfarbe.
+ * Inhalt wird escaped, daher sicher auch für dynamische Texte.
+ */
+function showToast(icon, title, body = "", kind = "info", ms = 4200) {
+  const host = $("#toasts");
+  if (!host) return;
+  const toast = el("div", { class: `toast toast-${kind}` },
+    `<span class="toast-icon">${escapeHtml(icon)}</span><div><strong>${escapeHtml(title)}</strong>${body ? `<br>${escapeHtml(body)}` : ""}</div>`);
+  host.append(toast);
+  setTimeout(() => toast.classList.add("show"), 10);
+  setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 400); }, ms);
+}
 
 function showAchievementToasts() {
   const popped = stats.popAchievements();
@@ -750,7 +802,7 @@ function showAchievementToasts() {
     const a = stats.ACHIEVEMENTS.find((x) => x.id === id);
     if (!a) return;
     setTimeout(() => {
-      const toast = el("div", { class: "toast achievement-toast" }, `<span class="toast-icon">${a.icon}</span><div><strong>Erfolg freigeschaltet!</strong><br>${a.title} – ${a.desc}</div>`);
+      const toast = el("div", { class: "toast achievement-toast" }, `<span class="toast-icon">${escapeHtml(a.icon)}</span><div><strong>Erfolg freigeschaltet!</strong><br>${escapeHtml(a.title)} – ${escapeHtml(a.desc)}</div>`);
       $("#toasts").append(toast);
       setTimeout(() => toast.classList.add("show"), 10);
       setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 400); }, 4200);
@@ -783,6 +835,13 @@ function init() {
   stats.onChange(() => { /* Header wird bei Navigation neu gerendert; hier bewusst minimal */ });
 
   router();
+
+  // Hinweis, falls localStorage nicht verfügbar ist (z. B. privater Modus):
+  // Fortschritt wird dann nur temporär im Speicher gehalten.
+  if (stats.isUsingFallback()) {
+    setTimeout(() => showToast("ℹ️", "Speicher nicht verfügbar",
+      "Dein Fortschritt wird nur temporär gespeichert (z. B. privater Modus). Nutze Export für eine Sicherung.", "info", 7000), 800);
+  }
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

@@ -118,14 +118,14 @@ export function renderSubnettingTrainer(container) {
         <div class="subnet-result" hidden></div>
       </div>`;
 
-    container.querySelector(".subnet-new").onclick = newTask;
-    container.querySelector(".subnet-check").onclick = check;
-    container.querySelector(".subnet-solution").onclick = showSolution;
+    container.querySelector(".subnet-new").addEventListener("click", newTask);
+    container.querySelector(".subnet-check").addEventListener("click", check);
+    container.querySelector(".subnet-solution").addEventListener("click", showSolution);
     container.querySelectorAll(".subnet-grid input").forEach((i) =>
       i.addEventListener("keydown", (e) => { if (e.key === "Enter") check(); }));
   }
 
-  function val(sel) { return container.querySelector(sel).value.trim(); }
+  function val(sel) { return (container.querySelector(sel)?.value ?? "").trim(); }
 
   function check() {
     const inf = current.info;
@@ -210,12 +210,12 @@ export function renderCommandTrainer(container) {
     const input = container.querySelector(".cmd-input");
     input.focus();
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") check(); });
-    container.querySelector(".cmd-check").onclick = check;
-    container.querySelector(".cmd-new").onclick = pick;
-    container.querySelector(".cmd-hint").onclick = () => {
+    container.querySelector(".cmd-check").addEventListener("click", check);
+    container.querySelector(".cmd-new").addEventListener("click", pick);
+    container.querySelector(".cmd-hint").addEventListener("click", () => {
       const r = container.querySelector(".cmd-result"); r.hidden = false;
       r.className = "cmd-result hint"; r.textContent = "💡 " + task.hint;
-    };
+    });
   }
   function check() {
     const v = container.querySelector(".cmd-input").value.toLowerCase().trim().replace(/\s+/g, " ");
@@ -397,9 +397,9 @@ export function renderPomodoro(container) {
           <button class="btn pomo-switch" type="button">${mode === "focus" ? "→ Pause" : "→ Fokus"}</button>
         </div>
       </div>`;
-    container.querySelector(".pomo-toggle").onclick = toggle;
-    container.querySelector(".pomo-reset").onclick = reset;
-    container.querySelector(".pomo-switch").onclick = switchMode;
+    container.querySelector(".pomo-toggle").addEventListener("click", toggle);
+    container.querySelector(".pomo-reset").addEventListener("click", reset);
+    container.querySelector(".pomo-switch").addEventListener("click", switchMode);
   }
   function tick() {
     remaining -= 1;
