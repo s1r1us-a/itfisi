@@ -54,6 +54,8 @@ function defaultState() {
     favorites: [],           // [topicId]
     streak: { current: 0, longest: 0, lastDay: null },
     dailyGoal: 20,
+    selfAssessment: {},      // bereichId -> 1..5 (Selbsteinschätzung)
+    examDate: null,          // Prüfungstermin (timestamp) für Countdown/Lernplan
     settings: { theme: "dark", view: "lernfeld" },
     totals: { answered: 0, correct: 0, quizzesDone: 0, examsDone: 0 },
     createdAt: Date.now(),
@@ -533,6 +535,39 @@ export function renderAccuracyDoughnut(canvas) {
     },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: c.text } } } },
   });
+}
+
+/** Wissensradar: Quiz-Trefferquote vs. Selbsteinschätzung je Bereich. */
+export function renderRadarChart(canvas, topics, bereiche) {
+  if (typeof Chart === "undefined" || !canvas) { fallbackChartMsg(canvas); return; }
+  const acc = accuracyByBereich(topics, bereiche);
+  const c = chartColors();
+  destroyChart("radar");
+  const labels = bereiche.map((b) => b.title.replace(/ \(.*\)/, ""));
+  const quizData = bereiche.map((b) => acc[b.id]?.pct ?? 0);
+  const selfData = bereiche.map((b) => (state.selfAssessment[b.id] ? state.selfAssessment[b.id] * 20 : 0));
+  chartInstances.radar = new Chart(canvas, {
+    type: "radar",
+    data: {
+      labels,
+      datasets: [
+        { label: "Quiz-Leistung %", data: quizData, borderColor: c.accent, backgroundColor: c.accent + "33", pointBackgroundColor: c.accent },
+        { label: "Selbsteinschätzung", data: selfData, borderColor: c.accent2, backgroundColor: c.accent2 + "22", pointBackgroundColor: c.accent2 },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: c.text } } },
+      scales: { r: { suggestedMin: 0, suggestedMax: 100, angleLines: { color: c.grid }, grid: { color: c.grid }, pointLabels: { color: c.text }, ticks: { display: false } } },
+    },
+  });
+}
+
+export function getSelfAssessment(id) { return state.selfAssessment[id] || 0; }
+export function setSelfAssessment(id, value) {
+  const v = Math.max(0, Math.min(5, Number(value) || 0));
+  if (v === 0) delete state.selfAssessment[id]; else state.selfAssessment[id] = v;
+  save();
 }
 
 function baseChartOptions(c) {

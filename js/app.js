@@ -612,6 +612,21 @@ function renderStats() {
       <div class="bereich-bars">${bereiche.map((b) => { const r = acc[b.id]; const pct = r && r.pct != null ? r.pct : 0; return `<div class="bb-row"><span class="bb-label">${b.icon} ${b.title}</span><div class="progress sm"><div class="progress-fill" style="width:${pct}%"></div></div><span class="bb-pct">${r && r.pct != null ? pct + "%" : "—"}</span></div>`; }).join("")}</div>
     </section>
 
+    <section class="card">
+      <h2>🧭 Wissensradar</h2>
+      <p class="muted">Vergleicht deine Quiz-Leistung mit deiner Selbsteinschätzung (1–5) je Bereich.</p>
+      <div class="stat-cols radar-cols">
+        <div class="chart-wrap tall"><canvas id="chart-radar"></canvas></div>
+        <div class="self-grid">${bereiche.map((b) => `
+          <div class="self-row">
+            <span class="self-label">${b.icon} ${b.title.replace(/ \(.*\)/, "")}</span>
+            <span class="self-stars" data-bereich="${b.id}" role="radiogroup" aria-label="Selbsteinschätzung ${escapeHtml(b.title)}">
+              ${[1, 2, 3, 4, 5].map((n) => `<button class="self-star ${stats.getSelfAssessment(b.id) >= n ? "on" : ""}" data-val="${n}" title="${n}/5" aria-label="${n} von 5">★</button>`).join("")}
+            </span>
+          </div>`).join("")}</div>
+      </div>
+    </section>
+
     <section class="card weak-card">
       <h2>🩹 Schwachstellen-Empfehlung</h2>
       ${weakest.length ? `<p>Diese Bereiche solltest du als Nächstes üben:</p><ul class="weak-list">${weakest.map((w) => `<li><span>${w.title}</span><span class="bb-pct">${w.pct}%</span></li>`).join("")}</ul><a class="btn btn-primary" href="#/practice?mode=weak">Schwachstellen jetzt üben</a>` : `<p>Noch zu wenig Daten – beantworte ein paar Quizze, dann erhältst du hier gezielte Empfehlungen.</p>`}
@@ -631,9 +646,24 @@ function renderStats() {
   stats.renderHistoryChart($("#chart-history", v), 14);
   stats.renderAccuracyDoughnut($("#chart-acc", v));
   stats.renderBereichChart($("#chart-bereich", v), topics, bereiche);
+  stats.renderRadarChart($("#chart-radar", v), topics, bereiche);
 
   renderHeatmap($("#heatmap", v));
   renderBadges($("#badges", v));
+
+  // Selbsteinschätzung (Sterne) → Radar live aktualisieren
+  $$(".self-stars", v).forEach((group) => {
+    const id = group.dataset.bereich;
+    group.addEventListener("click", (e) => {
+      const btn = e.target.closest(".self-star");
+      if (!btn) return;
+      let val = Number(btn.dataset.val);
+      if (stats.getSelfAssessment(id) === val) val = 0; // erneuter Klick = zurücksetzen
+      stats.setSelfAssessment(id, val);
+      $$(".self-star", group).forEach((s) => s.classList.toggle("on", Number(s.dataset.val) <= val));
+      stats.renderRadarChart($("#chart-radar", v), topics, bereiche);
+    });
+  });
 
   // Tagesziel
   $("#goal-input", v).addEventListener("change", (e) => stats.setDailyGoal(e.target.value));

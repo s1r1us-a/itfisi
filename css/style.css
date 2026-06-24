@@ -436,6 +436,17 @@ pre code { background: none; padding: 0; }
 .badge-desc { display: block; font-size: .74rem; color: var(--text-muted); margin-top: .2rem; }
 .goal-edit input { width: 80px; margin-left: .5rem; padding: .4rem; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); }
 
+/* Wissensradar / Selbsteinschätzung */
+.radar-cols { grid-template-columns: 1.4fr 1fr; align-items: center; }
+.self-grid { display: flex; flex-direction: column; gap: .5rem; }
+.self-row { display: flex; justify-content: space-between; align-items: center; gap: .6rem; font-size: .86rem; }
+.self-label { color: var(--text-muted); }
+.self-stars { display: inline-flex; gap: .1rem; flex: none; }
+.self-star { background: none; border: none; cursor: pointer; font-size: 1.15rem; line-height: 1; color: var(--border); padding: .1rem; transition: var(--transition); }
+.self-star.on { color: var(--warn); }
+.self-star:hover { transform: scale(1.15); }
+@media (max-width: 900px) { .radar-cols { grid-template-columns: 1fr; } }
+
 /* =================================================================
    Werkzeuge
    ================================================================= */
