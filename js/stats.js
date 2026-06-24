@@ -360,6 +360,88 @@ export function weakestBereiche(topics, bereiche, limit = 3) {
     .slice(0, limit);
 }
 
+/* ------------------------------------------------------------------ *
+ *  Erweiterte persönliche Statistiken (abgeleitet, kein neues Tracking)
+ * ------------------------------------------------------------------ */
+
+/** Anzahl Tage mit Lernaktivität. */
+export function studyDays() {
+  return Object.keys(state.history).length;
+}
+
+/** Durchschnittlich beantwortete Fragen pro aktivem Lerntag. */
+export function avgPerDay() {
+  const days = studyDays();
+  if (!days) return 0;
+  return Math.round((state.totals.answered / days) * 10) / 10;
+}
+
+/** Produktivster Tag: { date, answered } oder null. */
+export function bestDay() {
+  let best = null;
+  for (const [date, e] of Object.entries(state.history)) {
+    if (!best || e.answered > best.answered) best = { date, answered: e.answered };
+  }
+  return best;
+}
+
+/** Anzahl „gemeisterter“ Karten (Leitner-Box 5). */
+export function masteredCount() {
+  return Object.values(state.questionStats).filter((qs) => qs.box >= 5).length;
+}
+
+/** Gesamtzahl richtig beantworteter Fragen (kumuliert). */
+export function totalCorrect() { return state.totals.correct; }
+/** Gesamtzahl falsch beantworteter Fragen (kumuliert). */
+export function totalWrong() { return Math.max(0, state.totals.answered - state.totals.correct); }
+
+/**
+ * Trefferquote je Aufgabentyp.
+ * allQuestions: Array aller Fragen (aus questions.js) zum Nachschlagen des Typs.
+ * Liefert Array [{ type, answered, correct, pct }] sortiert nach Häufigkeit.
+ */
+export function accuracyByQuestionType(allQuestions) {
+  const byId = {};
+  for (const q of allQuestions || []) byId[q.id] = q;
+  const buckets = {};
+  for (const [id, qs] of Object.entries(state.questionStats)) {
+    const q = byId[id];
+    if (!q) continue;
+    const type = q.type || "sonstige";
+    const b = buckets[type] || (buckets[type] = { type, answered: 0, correct: 0 });
+    b.answered += qs.correct + qs.wrong;
+    b.correct += qs.correct;
+  }
+  return Object.values(buckets)
+    .map((b) => ({ ...b, pct: b.answered ? Math.round((b.correct / b.answered) * 100) : null }))
+    .filter((b) => b.answered > 0)
+    .sort((a, b) => b.answered - a.answered);
+}
+
+/**
+ * Kuratierter, öffentlich teilbarer Snapshot des eigenen Profils für die
+ * Community (Leaderboard + fremde Profile). Enthält KEINE E-Mail und keine
+ * sensiblen Rohdaten – nur aggregierte Lernstatistiken.
+ */
+export function publicProfileSnapshot() {
+  const lvl = getLevel();
+  const s = state.streak;
+  return {
+    level: lvl.level,
+    points: state.points,
+    streak: { current: s.current || 0, longest: s.longest || 0 },
+    accuracy: overallAccuracy(),
+    answered: state.totals.answered,
+    correct: state.totals.correct,
+    quizzesDone: state.totals.quizzesDone,
+    examsDone: state.totals.examsDone,
+    mastered: masteredCount(),
+    studyDays: studyDays(),
+    achievementIds: ACHIEVEMENTS.filter((a) => hasAchievement(a.id)).map((a) => a.id),
+    createdAt: state.createdAt || Date.now(),
+  };
+}
+
 /** Verlauf der letzten n Tage als Array {date, answered, correct}. */
 export function historySeries(days = 14) {
   const out = [];

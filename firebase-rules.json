@@ -5,6 +5,28 @@
         ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null && auth.uid === $uid"
       }
+    },
+    "profiles": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "profileLikes": {
+      "$uid": {
+        ".read": "auth != null",
+        "$likerUid": {
+          ".write": "auth != null && auth.uid === $likerUid"
+        }
+      }
+    },
+    "profileComments": {
+      "$uid": {
+        ".read": "auth != null",
+        "$cid": {
+          ".write": "auth != null && (!data.exists() ? newData.child('authorUid').val() === auth.uid : (data.child('authorUid').val() === auth.uid || $uid === auth.uid))"
+        }
+      }
     }
   }
 }
