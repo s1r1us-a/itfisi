@@ -13,6 +13,11 @@ import {
   signOut,
   sendPasswordResetEmail,
   onAuthStateChanged,
+  updateProfile,
+  updatePassword,
+  verifyBeforeUpdateEmail,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 /** Registriert einen neuen Account. Gibt das User-Objekt zurück. */
@@ -48,6 +53,48 @@ export function currentUser() {
 }
 
 /* ------------------------------------------------------------------ *
+ *  Account-Verwaltung (Anzeigename, E-Mail, Passwort)
+ * ------------------------------------------------------------------ */
+
+/** Setzt/aktualisiert den Anzeigenamen des aktuellen Accounts. */
+export async function updateDisplayName(name) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("not-signed-in");
+  await updateProfile(user, { displayName: name });
+  return user;
+}
+
+/**
+ * Bestätigt die Identität erneut (für sensible Änderungen wie E-Mail/Passwort).
+ * Firebase verlangt dafür eine kürzliche Anmeldung; bei falschem Passwort wirft
+ * Firebase auth/invalid-credential bzw. auth/wrong-password.
+ */
+export async function reauthenticate(currentPassword) {
+  const user = auth.currentUser;
+  if (!user || !user.email) throw new Error("not-signed-in");
+  const cred = EmailAuthProvider.credential(user.email, currentPassword);
+  return reauthenticateWithCredential(user, cred);
+}
+
+/**
+ * Ändert die E-Mail-Adresse. Verwendet verifyBeforeUpdateEmail: Firebase sendet
+ * einen Bestätigungslink an die NEUE Adresse; erst nach Klick wird sie aktiv.
+ * Erfordert das aktuelle Passwort (Reauthentifizierung).
+ */
+export async function changeEmail(newEmail, currentPassword) {
+  await reauthenticate(currentPassword);
+  await verifyBeforeUpdateEmail(auth.currentUser, newEmail);
+}
+
+/**
+ * Ändert das Passwort. Erfordert das aktuelle Passwort (Reauthentifizierung).
+ */
+export async function changePassword(newPassword, currentPassword) {
+  await reauthenticate(currentPassword);
+  await updatePassword(auth.currentUser, newPassword);
+}
+
+/* ------------------------------------------------------------------ *
  *  Fehlertexte (Firebase-Code → Deutsch)
  * ------------------------------------------------------------------ */
 
@@ -63,7 +110,9 @@ const ERROR_MESSAGES = {
   "auth/user-disabled": "Dieses Konto wurde deaktiviert.",
   "auth/too-many-requests": "Zu viele Versuche. Bitte versuche es später erneut.",
   "auth/network-request-failed": "Netzwerkfehler. Bitte prüfe deine Internetverbindung.",
-  "auth/operation-not-allowed": "Anmeldung per E-Mail/Passwort ist nicht aktiviert.",
+  "auth/operation-not-allowed": "Diese Aktion ist derzeit nicht erlaubt.",
+  "auth/requires-recent-login": "Bitte melde dich aus Sicherheitsgründen erneut an und versuche es noch einmal.",
+  "auth/invalid-new-email": "Die neue E-Mail-Adresse ist ungültig.",
 };
 
 /**

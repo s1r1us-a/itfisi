@@ -20,6 +20,8 @@ import {
   set,
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 import * as stats from "./stats.js";
+import * as social from "./social.js";
+import * as auth from "./auth.js";
 
 const SAVE_DEBOUNCE_MS = 1500;
 
@@ -30,6 +32,24 @@ let ready = false;          // erst nach initialem Laden schreiben
 
 function stateRef(uid) {
   return ref(db, `users/${uid}/state`);
+}
+
+/** Aktueller Anzeigename (Firebase-Auth ist die kanonische Quelle). */
+function currentDisplayName() {
+  const u = auth.currentUser();
+  if (u && u.displayName) return u.displayName;
+  if (u && u.email) return u.email.split("@")[0];
+  return "Lernende:r";
+}
+
+/**
+ * Veröffentlicht den kuratierten, öffentlichen Profil-Snapshot (für Community/
+ * Leaderboard). Defensiv: scheitert das Schreiben (z. B. Regeln noch nicht
+ * deployt), bleibt die App voll funktionsfähig.
+ */
+function publishPublicProfile(uid) {
+  return social.publishProfile(uid, currentDisplayName(), stats.publicProfileSnapshot())
+    .catch((e) => console.warn("Öffentliches Profil konnte nicht veröffentlicht werden.", e));
 }
 
 /** Schreibt den aktuellen State (debounced) in die Cloud. */
@@ -44,7 +64,10 @@ function flush() {
   if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
   if (!ready || !activeUid) return Promise.resolve();
   const uid = activeUid;
-  return set(stateRef(uid), stats.getState()).catch((e) => {
+  return set(stateRef(uid), stats.getState()).then(() => {
+    // Öffentlichen Profil-Snapshot aktuell halten (Community/Leaderboard).
+    return publishPublicProfile(uid);
+  }).catch((e) => {
     console.warn("Cloud-Speichern fehlgeschlagen (Offline-Cache bleibt erhalten).", e);
   });
 }
@@ -74,6 +97,19 @@ export async function start(user) {
   } catch (e) {
     console.warn("Cloud-Laden fehlgeschlagen – es wird der lokale Stand verwendet.", e);
   }
+
+  // Anzeigenamen für neue Accounts vorbelegen (Default = E-Mail-Lokalteil),
+  // damit Begrüßung und Community sofort einen Namen zeigen.
+  try {
+    if (!user.displayName && user.email) {
+      await auth.updateDisplayName(user.email.split("@")[0]);
+    }
+  } catch (e) {
+    console.warn("Anzeigename konnte nicht vorbelegt werden.", e);
+  }
+
+  // Erstes öffentliches Profil veröffentlichen (Community/Leaderboard).
+  await publishPublicProfile(uid);
 
   ready = true;
 

@@ -16,6 +16,7 @@ import * as quiz from "./quiz.js";
 import * as tools from "./tools.js";
 import * as auth from "./auth.js";
 import * as cloud from "./cloud.js";
+import * as social from "./social.js";
 
 const { topics, lernfelder, examAreas, bereiche, getTopic } = content;
 
@@ -74,6 +75,8 @@ function buildSidebar() {
   quick.append(
     navLink("🏠 Dashboard", "#/dashboard"),
     navLink("📈 Statistik", "#/stats"),
+    navLink("👥 Community", "#/community"),
+    navLink("🧑 Mein Profil", "#/profile"),
     navLink("🗓️ Lernplan", "#/plan"),
     navLink("🧭 Lernpfade", "#/paths"),
     navLink("📝 Prüfungssimulation", "#/exam"),
@@ -161,6 +164,14 @@ function initSearch() {
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+/** Anzeigename des aktuellen Accounts (Fallback: E-Mail-Lokalteil bzw. „Lernende:r“). */
+function displayName() {
+  const u = auth.currentUser();
+  if (u && u.displayName) return u.displayName;
+  if (u && u.email) return u.email.split("@")[0];
+  return "Lernende:r";
 }
 
 /** Packt breite Tabellen in einen horizontal scrollbaren Wrapper (Mobile). */
@@ -290,6 +301,9 @@ function router() {
     case "favorites": renderFavorites(); break;
     case "tools": renderTools(); break;
     case "cheatsheet": renderCheatsheet(parts[1]); break;
+    case "profile": renderProfile(); break;
+    case "community": renderCommunity(); break;
+    case "user": renderUserProfile(parts[1]); break;
     default: renderDashboard();
   }
   highlightActiveNav();
@@ -312,7 +326,7 @@ function renderDashboard() {
   v.innerHTML = `
     <header class="page-head">
       <div>
-        <h1>Willkommen zurück 👋</h1>
+        <h1>Willkommen zurück, ${escapeHtml(displayName())} 👋</h1>
         <p class="lead">Deine Lernplattform für die IHK-Abschlussprüfung Fachinformatiker:in Systemintegration.</p>
       </div>
       <div class="view-toggle" role="group" aria-label="Ansicht wählen">
@@ -765,6 +779,15 @@ function renderStats() {
       <div class="bereich-bars">${bereiche.map((b) => { const r = acc[b.id]; const pct = r && r.pct != null ? r.pct : 0; return `<div class="bb-row"><span class="bb-label">${b.icon} ${b.title}</span><div class="progress sm"><div class="progress-fill" style="width:${pct}%"></div></div><span class="bb-pct">${r && r.pct != null ? pct + "%" : "—"}</span></div>`; }).join("")}</div>
     </section>
 
+    <section class="card"><h2>Trefferquote je Aufgabentyp</h2>
+      ${(() => {
+        const QT = { "mc-single": "🔘 Multiple Choice (einfach)", "mc-multi": "☑️ Multiple Choice (mehrfach)", "truefalse": "✔️ Wahr/Falsch", "cloze": "✍️ Lückentext", "match": "🔗 Zuordnung", "flashcard": "🃏 Karteikarten", "calc": "🧮 Rechenaufgaben" };
+        const rows = stats.accuracyByQuestionType(ALL_QUESTIONS);
+        if (!rows.length) return `<p class="muted">Noch keine Daten – beantworte ein paar Fragen verschiedener Typen.</p>`;
+        return `<div class="bereich-bars">${rows.map((r) => `<div class="bb-row"><span class="bb-label">${QT[r.type] || escapeHtml(r.type)}</span><div class="progress sm"><div class="progress-fill" style="width:${r.pct ?? 0}%"></div></div><span class="bb-pct">${r.pct != null ? r.pct + "%" : "—"} <span class="muted">(${r.answered})</span></span></div>`).join("")}</div>`;
+      })()}
+    </section>
+
     <section class="card">
       <h2>🧭 Wissensradar</h2>
       <p class="muted">Vergleicht deine Quiz-Leistung mit deiner Selbsteinschätzung (1–5) je Bereich.</p>
@@ -849,6 +872,381 @@ function renderBadges(container) {
     const earned = stats.hasAchievement(a.id);
     return `<div class="badge-item ${earned ? "earned" : "locked"}" title="${a.desc}"><span class="badge-icon">${a.icon}</span><span class="badge-title">${a.title}</span><span class="badge-desc">${a.desc}</span></div>`;
   }).join("");
+}
+
+/* ------------------------------------------------------------------ *
+ *  Ansicht: Mein Profil & Einstellungen
+ * ------------------------------------------------------------------ */
+
+/** Stat-Strip-HTML aus einem öffentlichen Profil-Snapshot. */
+function publicStatStripHtml(p) {
+  const streak = p.streak || { current: 0, longest: 0 };
+  return `
+    <section class="stat-strip">
+      <div class="stat-pill"><span class="pill-num">Lvl ${p.level ?? 1}</span><span class="pill-label">Level</span></div>
+      <div class="stat-pill"><span class="pill-num">${p.points ?? 0}</span><span class="pill-label">Punkte</span></div>
+      <div class="stat-pill"><span class="pill-num">🔥 ${streak.current ?? 0}</span><span class="pill-label">Streak</span></div>
+      <div class="stat-pill"><span class="pill-num">${p.answered ?? 0}</span><span class="pill-label">Fragen</span></div>
+      <div class="stat-pill"><span class="pill-num">${p.accuracy ?? 0}%</span><span class="pill-label">Trefferquote</span></div>
+      <div class="stat-pill"><span class="pill-num">${p.mastered ?? 0}</span><span class="pill-label">gemeistert</span></div>
+    </section>`;
+}
+
+/** Achievement-Badges aus einer Liste von IDs (für öffentliche Profile). */
+function renderBadgesFromIds(container, ids) {
+  const earned = new Set(ids || []);
+  container.innerHTML = stats.ACHIEVEMENTS.map((a) => {
+    const has = earned.has(a.id);
+    return `<div class="badge-item ${has ? "earned" : "locked"}" title="${escapeHtml(a.desc)}"><span class="badge-icon">${a.icon}</span><span class="badge-title">${escapeHtml(a.title)}</span><span class="badge-desc">${escapeHtml(a.desc)}</span></div>`;
+  }).join("");
+}
+
+function renderProfile() {
+  const v = main();
+  const user = auth.currentUser();
+  if (!user) { v.innerHTML = `<p class="notice warn">Bitte melde dich an.</p>`; return; }
+
+  const lvl = stats.getLevel();
+  const streak = stats.getStreak();
+  const best = stats.bestDay();
+
+  v.innerHTML = `
+    <header class="page-head">
+      <div>
+        <h1>🧑 Mein Profil</h1>
+        <p class="lead">Hallo ${escapeHtml(displayName())} – hier verwaltest du deinen Account und siehst deine Statistiken.</p>
+      </div>
+      <a class="btn btn-small" href="#/user/${encodeURIComponent(user.uid)}">Öffentliches Profil ansehen →</a>
+    </header>
+
+    <section class="stat-strip">
+      <div class="stat-pill"><span class="pill-num">Lvl ${lvl.level}</span><span class="pill-label">${lvl.into}/${lvl.needed} XP</span></div>
+      <div class="stat-pill"><span class="pill-num">${stats.getPoints()}</span><span class="pill-label">Punkte</span></div>
+      <div class="stat-pill"><span class="pill-num">🔥 ${streak.current}</span><span class="pill-label">Streak</span></div>
+      <div class="stat-pill"><span class="pill-num">${stats.overallAccuracy()}%</span><span class="pill-label">Trefferquote</span></div>
+      <div class="stat-pill"><span class="pill-num">${stats.getState().totals.answered}</span><span class="pill-label">Fragen</span></div>
+      <div class="stat-pill"><span class="pill-num">${stats.masteredCount()}</span><span class="pill-label">gemeistert</span></div>
+    </section>
+
+    <section class="stat-strip">
+      <div class="stat-pill"><span class="pill-num">${stats.studyDays()}</span><span class="pill-label">Lerntage</span></div>
+      <div class="stat-pill"><span class="pill-num">${stats.avgPerDay()}</span><span class="pill-label">Ø Fragen/Tag</span></div>
+      <div class="stat-pill"><span class="pill-num">${best ? best.answered : 0}</span><span class="pill-label">bester Tag</span></div>
+      <div class="stat-pill"><span class="pill-num">${stats.totalCorrect()}</span><span class="pill-label">richtig</span></div>
+      <div class="stat-pill"><span class="pill-num">${stats.totalWrong()}</span><span class="pill-label">falsch</span></div>
+      <div class="stat-pill"><span class="pill-num">🔥 ${streak.longest}</span><span class="pill-label">längster Streak</span></div>
+    </section>
+
+    <div class="profile-grid">
+      <section class="card settings-card">
+        <h2>Anzeigename</h2>
+        <p class="muted">So erscheinst du in der Community und in der Begrüßung.</p>
+        <form id="name-form">
+          <label class="auth-field"><span>Anzeigename</span>
+            <input type="text" id="name-input" maxlength="40" required value="${escapeHtml(user.displayName || "")}" placeholder="z. B. Alex">
+          </label>
+          <p class="auth-message" id="name-msg" role="alert" hidden></p>
+          <button type="submit" class="btn btn-primary" id="name-submit">Namen speichern</button>
+        </form>
+      </section>
+
+      <section class="card settings-card">
+        <h2>E-Mail-Adresse</h2>
+        <p class="muted">Aktuell: <strong>${escapeHtml(user.email || "")}</strong>. Du erhältst einen Bestätigungslink an die neue Adresse.</p>
+        <form id="email-form">
+          <label class="auth-field"><span>Neue E-Mail-Adresse</span>
+            <input type="email" id="email-new" autocomplete="email" required placeholder="neu@beispiel.de">
+          </label>
+          <label class="auth-field"><span>Aktuelles Passwort</span>
+            <input type="password" id="email-pw" autocomplete="current-password" required placeholder="Zur Bestätigung">
+          </label>
+          <p class="auth-message" id="email-msg" role="alert" hidden></p>
+          <button type="submit" class="btn btn-primary" id="email-submit">E-Mail ändern</button>
+        </form>
+      </section>
+
+      <section class="card settings-card">
+        <h2>Passwort</h2>
+        <p class="muted">Wähle ein neues Passwort (mindestens 6 Zeichen).</p>
+        <form id="pw-form">
+          <label class="auth-field"><span>Neues Passwort</span>
+            <input type="password" id="pw-new" autocomplete="new-password" required minlength="6" placeholder="Mindestens 6 Zeichen">
+          </label>
+          <label class="auth-field"><span>Aktuelles Passwort</span>
+            <input type="password" id="pw-cur" autocomplete="current-password" required placeholder="Zur Bestätigung">
+          </label>
+          <p class="auth-message" id="pw-msg" role="alert" hidden></p>
+          <div class="form-row">
+            <button type="submit" class="btn btn-primary" id="pw-submit">Passwort ändern</button>
+            <button type="button" class="btn" id="pw-reset">Reset-Mail senden</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  `;
+
+  const setMsg = (id, text, kind = "error") => {
+    const m = $(id, v);
+    m.textContent = text;
+    m.className = `auth-message auth-message-${kind === "error" ? "error" : "success"}`;
+    m.hidden = false;
+  };
+  const busy = (btn, on, label) => {
+    btn.disabled = on;
+    if (on) { btn.dataset.label = btn.textContent; btn.textContent = "Bitte warten …"; }
+    else { btn.textContent = label || btn.dataset.label || btn.textContent; }
+  };
+
+  // Anzeigename ändern
+  $("#name-form", v).addEventListener("submit", async (e) => {
+    e.preventDefault();
+    $("#name-msg", v).hidden = true;
+    const btn = $("#name-submit", v);
+    const name = $("#name-input", v).value.trim();
+    if (!name) { setMsg("#name-msg", "Bitte gib einen Namen ein."); return; }
+    busy(btn, true);
+    try {
+      await auth.updateDisplayName(name);
+      await social.publishProfile(user.uid, name, stats.publicProfileSnapshot()).catch(() => {});
+      renderAccountBox(auth.currentUser());
+      setMsg("#name-msg", "Anzeigename gespeichert.", "success");
+      showToast("✅", "Gespeichert", "Dein Anzeigename wurde aktualisiert.", "good");
+    } catch (err) {
+      setMsg("#name-msg", auth.mapError(err));
+    } finally { busy(btn, false, "Namen speichern"); }
+  });
+
+  // E-Mail ändern
+  $("#email-form", v).addEventListener("submit", async (e) => {
+    e.preventDefault();
+    $("#email-msg", v).hidden = true;
+    const btn = $("#email-submit", v);
+    const newEmail = $("#email-new", v).value.trim();
+    const pw = $("#email-pw", v).value;
+    busy(btn, true);
+    try {
+      await auth.changeEmail(newEmail, pw);
+      setMsg("#email-msg", "Bestätigungslink an die neue Adresse gesendet. Erst nach Klick wird sie aktiv.", "success");
+      showToast("✉️", "Fast geschafft", "Bitte bestätige die neue E-Mail über den Link in deinem Postfach.", "info", 6000);
+      $("#email-form", v).reset();
+    } catch (err) {
+      setMsg("#email-msg", auth.mapError(err));
+    } finally { busy(btn, false, "E-Mail ändern"); }
+  });
+
+  // Passwort ändern
+  $("#pw-form", v).addEventListener("submit", async (e) => {
+    e.preventDefault();
+    $("#pw-msg", v).hidden = true;
+    const btn = $("#pw-submit", v);
+    const newPw = $("#pw-new", v).value;
+    const curPw = $("#pw-cur", v).value;
+    busy(btn, true);
+    try {
+      await auth.changePassword(newPw, curPw);
+      setMsg("#pw-msg", "Passwort erfolgreich geändert.", "success");
+      showToast("✅", "Gespeichert", "Dein Passwort wurde geändert.", "good");
+      $("#pw-form", v).reset();
+    } catch (err) {
+      setMsg("#pw-msg", auth.mapError(err));
+    } finally { busy(btn, false, "Passwort ändern"); }
+  });
+
+  // Passwort-Reset-Mail
+  $("#pw-reset", v).addEventListener("click", async () => {
+    const btn = $("#pw-reset", v);
+    btn.disabled = true;
+    try {
+      await auth.sendReset(user.email);
+      setMsg("#pw-msg", "Reset-Mail gesendet (falls ein Konto existiert).", "success");
+    } catch (err) {
+      setMsg("#pw-msg", auth.mapError(err));
+    } finally { btn.disabled = false; }
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ *  Ansicht: Community (Leaderboard + alle Accounts)
+ * ------------------------------------------------------------------ */
+
+function renderCommunity() {
+  const v = main();
+  const myUid = auth.currentUser()?.uid || null;
+  const hash = location.hash;
+
+  v.innerHTML = `
+    <header class="page-head">
+      <div>
+        <h1>👥 Community</h1>
+        <p class="lead">Alle Lernenden im Vergleich – Bestenliste und Profile.</p>
+      </div>
+    </header>
+    <div id="community-body"><p class="muted">Lade Community …</p></div>`;
+
+  social.getLeaderboard().then((profiles) => {
+    if (location.hash !== hash) return; // Navigation in der Zwischenzeit
+    const body = $("#community-body", v);
+    if (!body) return;
+    if (!profiles.length) {
+      body.innerHTML = `<section class="card"><p>Noch keine Profile vorhanden. Sobald sich Accounts anmelden und lernen, erscheinen sie hier.</p></section>`;
+      return;
+    }
+
+    const top = profiles.slice(0, 20);
+    const rows = top.map((p) => `
+      <tr class="${p.uid === myUid ? "lb-me" : ""}">
+        <td class="lb-rank"><span class="rank-badge rank-${p.rank <= 3 ? p.rank : "n"}">${p.rank}</span></td>
+        <td class="lb-name"><a href="#/user/${encodeURIComponent(p.uid)}">${escapeHtml(p.displayName || "Lernende:r")}</a>${p.uid === myUid ? ' <span class="lb-you">(du)</span>' : ""}</td>
+        <td class="lb-num">Lvl ${p.level ?? 1}</td>
+        <td class="lb-num">${p.points ?? 0}</td>
+        <td class="lb-num">🔥 ${(p.streak && p.streak.current) || 0}</td>
+        <td class="lb-num">${p.accuracy ?? 0}%</td>
+      </tr>`).join("");
+
+    const cards = profiles.map((p) => `
+      <a class="card community-card" href="#/user/${encodeURIComponent(p.uid)}">
+        <div class="cc-avatar" aria-hidden="true">${escapeHtml((p.displayName || "L").trim().charAt(0).toUpperCase() || "L")}</div>
+        <div class="cc-name">${escapeHtml(p.displayName || "Lernende:r")}${p.uid === myUid ? ' <span class="lb-you">(du)</span>' : ""}</div>
+        <div class="cc-stats"><span>Lvl ${p.level ?? 1}</span><span>${p.points ?? 0} Pkt</span><span>${p.accuracy ?? 0}%</span></div>
+      </a>`).join("");
+
+    body.innerHTML = `
+      <section class="card">
+        <h2>🏆 Bestenliste</h2>
+        <div class="table-wrap">
+          <table class="leaderboard">
+            <thead><tr><th>#</th><th>Name</th><th>Level</th><th>Punkte</th><th>Streak</th><th>Quote</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </section>
+      <h2 class="section-title">Alle Mitglieder (${profiles.length})</h2>
+      <section class="community-grid">${cards}</section>`;
+  }).catch((err) => {
+    if (location.hash !== hash) return;
+    const body = $("#community-body", v);
+    if (body) body.innerHTML = `<section class="card"><p class="notice warn">Community konnte nicht geladen werden. Sind die Datenbank-Regeln für <code>profiles</code> freigegeben?</p></section>`;
+    console.warn("Community-Laden fehlgeschlagen.", err);
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ *  Ansicht: Öffentliches Profil einer Person
+ * ------------------------------------------------------------------ */
+
+function renderUserProfile(uid) {
+  const v = main();
+  if (!uid) { v.innerHTML = `<p class="notice warn">Kein Profil angegeben.</p>`; return; }
+  const myUid = auth.currentUser()?.uid || null;
+  const isMe = uid === myUid;
+  const hash = location.hash;
+
+  v.innerHTML = `<div id="profile-body"><p class="muted">Lade Profil …</p></div>`;
+
+  social.getProfile(uid).then((p) => {
+    if (location.hash !== hash) return;
+    const body = $("#profile-body", v);
+    if (!body) return;
+    if (!p) {
+      body.innerHTML = `<section class="card"><p>Dieses Profil existiert nicht (mehr).</p><a class="btn" href="#/community">← Zur Community</a></section>`;
+      return;
+    }
+
+    body.innerHTML = `
+      <header class="page-head">
+        <div>
+          <h1>🧑 ${escapeHtml(p.displayName || "Lernende:r")}${isMe ? ' <span class="lb-you">(du)</span>' : ""}</h1>
+          <p class="lead">${isMe ? "Das sehen andere von deinem Profil." : "Öffentliches Lernprofil."} Mitglied seit ${p.createdAt ? new Date(p.createdAt).toLocaleDateString("de-DE") : "—"}.</p>
+        </div>
+        <a class="btn btn-small" href="#/community">← Community</a>
+      </header>
+
+      ${publicStatStripHtml(p)}
+
+      <section class="card">
+        <div class="profile-likes">
+          <button class="btn like-btn" id="like-btn" aria-pressed="false"><span id="like-emoji">🤍</span> <span id="like-count">…</span></button>
+          <span class="muted">Zeig deine Anerkennung für den Lernfortschritt.</span>
+        </div>
+      </section>
+
+      <section class="card"><h2>🏆 Erfolge</h2><div class="badges" id="pub-badges"></div></section>
+
+      <section class="card comments-card">
+        <h2>💬 Kommentare</h2>
+        <div class="comments" id="comments"><p class="muted">Lade Kommentare …</p></div>
+        <form class="comment-form" id="comment-form">
+          <input type="text" id="comment-input" maxlength="1000" required placeholder="Schreib etwas Nettes …" aria-label="Kommentar">
+          <button type="submit" class="btn btn-primary">Senden</button>
+        </form>
+      </section>`;
+
+    renderBadgesFromIds($("#pub-badges", v), p.achievementIds);
+
+    // Likes
+    const likeBtn = $("#like-btn", v);
+    const paintLikes = ({ count, likedByMe }) => {
+      $("#like-count", v).textContent = count;
+      $("#like-emoji", v).textContent = likedByMe ? "❤️" : "🤍";
+      likeBtn.classList.toggle("active", likedByMe);
+      likeBtn.setAttribute("aria-pressed", likedByMe ? "true" : "false");
+    };
+    social.getLikes(uid, myUid).then(paintLikes).catch(() => { $("#like-count", v).textContent = "0"; });
+    likeBtn.addEventListener("click", async () => {
+      likeBtn.disabled = true;
+      try { paintLikes(await social.toggleLike(uid, myUid)); }
+      catch (err) { showToast("⚠️", "Like fehlgeschlagen", "Bitte später erneut versuchen.", "bad"); }
+      finally { likeBtn.disabled = false; }
+    });
+
+    // Kommentare
+    const loadComments = async () => {
+      const box = $("#comments", v);
+      try {
+        const list = await social.getComments(uid);
+        if (location.hash !== hash) return;
+        if (!list.length) { box.innerHTML = `<p class="muted">Noch keine Kommentare. Sei die erste Person!</p>`; return; }
+        box.innerHTML = list.map((c) => {
+          const canDelete = c.authorUid === myUid || isMe;
+          return `<div class="comment">
+            <div class="comment-head"><strong>${escapeHtml(c.authorName || "Lernende:r")}</strong>
+              <span class="comment-date">${c.createdAt ? new Date(c.createdAt).toLocaleDateString("de-DE") : ""}</span>
+              ${canDelete ? `<button class="comment-del" data-id="${escapeHtml(c.id)}" title="Kommentar löschen" aria-label="Kommentar löschen">✕</button>` : ""}
+            </div>
+            <p class="comment-text">${escapeHtml(c.text || "")}</p>
+          </div>`;
+        }).join("");
+        $$(".comment-del", box).forEach((b) => b.addEventListener("click", async () => {
+          b.disabled = true;
+          try { await social.deleteComment(uid, b.dataset.id); await loadComments(); }
+          catch (err) { b.disabled = false; showToast("⚠️", "Löschen fehlgeschlagen", "", "bad"); }
+        }));
+      } catch (err) {
+        box.innerHTML = `<p class="muted">Kommentare konnten nicht geladen werden.</p>`;
+      }
+    };
+    loadComments();
+
+    $("#comment-form", v).addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = $("#comment-input", v);
+      const text = input.value.trim();
+      if (!text) return;
+      input.disabled = true;
+      try {
+        await social.addComment(uid, myUid, displayName(), text);
+        input.value = "";
+        await loadComments();
+      } catch (err) {
+        showToast("⚠️", "Kommentar fehlgeschlagen", "Bitte später erneut versuchen.", "bad");
+      } finally { input.disabled = false; input.focus(); }
+    });
+  }).catch((err) => {
+    if (location.hash !== hash) return;
+    const body = $("#profile-body", v);
+    if (body) body.innerHTML = `<section class="card"><p class="notice warn">Profil konnte nicht geladen werden. Sind die Datenbank-Regeln freigegeben?</p><a class="btn" href="#/community">← Zur Community</a></section>`;
+    console.warn("Profil-Laden fehlgeschlagen.", err);
+  });
 }
 
 function exportData() {
@@ -1036,7 +1434,8 @@ function renderAccountBox(user) {
   box.innerHTML = "";
   if (!user) { box.hidden = true; return; }
   box.hidden = false;
-  const label = el("span", { class: "account-email", title: user.email || "" }, escapeHtml(user.email || ""));
+  const name = user.displayName || (user.email ? user.email.split("@")[0] : "Profil");
+  const label = el("a", { class: "account-name", href: "#/profile", title: `Profil & Einstellungen (${user.email || ""})` }, `🧑 ${escapeHtml(name)}`);
   const btn = el("button", { class: "account-logout", "aria-label": "Abmelden", title: "Abmelden" }, "Abmelden");
   btn.addEventListener("click", async () => {
     btn.disabled = true;
