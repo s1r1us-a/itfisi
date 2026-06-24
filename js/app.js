@@ -9,6 +9,7 @@
 import * as content from "../data/content.js";
 import { glossary, getGlossaryTerm } from "../data/glossary.js";
 import { paths, getPath } from "../data/paths.js";
+import { scenarios } from "../data/scenarios.js";
 import { getQuestion, questions as ALL_QUESTIONS } from "../data/questions.js";
 import * as stats from "./stats.js";
 import * as quiz from "./quiz.js";
@@ -492,15 +493,21 @@ function renderPractice() {
       <a class="mode-card ${weak ? "" : "disabled"}" href="${weak ? "#/practice?mode=weak" : "#"}"><span class="mode-icon">🩹</span><h3>Schwachstellen</h3><p>${weak ? `${weak} zuletzt falsch beantwortete Fragen gezielt wiederholen.` : "Noch keine Schwachstellen erfasst."}</p></a>
       <a class="mode-card" href="#/practice?mode=leitner"><span class="mode-icon">🗂️</span><h3>Karteikarten (Leitner)</h3><p>${due} fällige Karten nach dem Spaced-Repetition-Prinzip.</p></a>
       <a class="mode-card" href="#/practice?mode=flashall"><span class="mode-icon">🃏</span><h3>Alle Karteikarten</h3><p>Alle Karteikarten gemischt durchgehen.</p></a>
+      <a class="mode-card" href="#/practice?mode=scenario"><span class="mode-icon">🧩</span><h3>Ganzheitliche Aufgaben</h3><p>${scenarios.length} handlungsorientierte Fallaufgaben mit mehreren Teilfragen – wie in der echten IHK-Prüfung.</p></a>
       <a class="mode-card" href="#/exam"><span class="mode-icon">📝</span><h3>Prüfungssimulation</h3><p>Realistischer Test mit Timer und Auswertung (AP1/AP2).</p></a>
     </section>`;
 }
 
 function runPracticeMode(mode) {
   const v = main();
-  let list = [], title = "", isFlash = false;
+  let list = [], title = "", isFlash = false, noShuffle = false;
 
   switch (mode) {
+    case "scenario": {
+      // Szenarien in der Reihenfolge belassen; nur die Reihenfolge der Fälle mischen.
+      list = quiz.expandScenarios(quiz.shuffle(scenarios));
+      title = "Ganzheitliche Aufgaben"; noShuffle = true; break;
+    }
     case "daily": {
       list = [quiz.questionOfTheDay()]; title = "Frage des Tages"; break;
     }
@@ -534,7 +541,7 @@ function runPracticeMode(mode) {
   if (isFlash) {
     new quiz.FlashcardSession(list, { onAnswered: showAchievementToasts, onFinish: () => (location.hash = "#/practice") }).mount(host);
   } else {
-    new quiz.QuizSession(quiz.shuffle(list), { title, onAnswered: showAchievementToasts, onFinish: () => (location.hash = "#/practice") }).mount(host);
+    new quiz.QuizSession(noShuffle ? list : quiz.shuffle(list), { title, onAnswered: showAchievementToasts, onFinish: () => (location.hash = "#/practice") }).mount(host);
   }
 }
 

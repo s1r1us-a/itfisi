@@ -355,6 +355,11 @@ pre code { background: none; padding: 0; }
 .quiz-progressbar-fill { height: 100%; background: var(--accent); transition: width .3s; }
 .quiz-question { font-size: 1.2rem; margin: .3rem 0 1.1rem; }
 
+/* Ganzheitliche Aufgaben: gemeinsamer Fallkontext */
+.scenario-context { background: color-mix(in srgb, var(--accent-3) 8%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent-3) 28%, var(--border)); border-left: 4px solid var(--accent-3); border-radius: var(--radius-sm); padding: .9rem 1.1rem; margin-bottom: 1.1rem; }
+.scenario-head { font-size: .76rem; text-transform: uppercase; letter-spacing: .06em; color: var(--accent-3); font-weight: 800; margin-bottom: .4rem; }
+.scenario-context p { margin: .3rem 0; }
+
 .choices { display: flex; flex-direction: column; gap: .6rem; }
 .choices-tf { flex-direction: row; }
 .choice { display: flex; align-items: center; gap: .7rem; padding: .8rem 1rem; border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); }

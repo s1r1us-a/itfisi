@@ -49,6 +49,30 @@ export function questionsFromIds(ids) {
   return ids.map(getQuestion).filter(Boolean);
 }
 
+/**
+ * „Faltet" eine Szenario-Aufgabe in ihre Teilaufgaben auf. Jede Teilaufgabe wird
+ * eine normale Frage mit eigenem (synthetischem) id/topicId und behält den
+ * gemeinsamen Kontext über `_scenario`-Metadaten, damit die Engine sie wie
+ * gewohnt bewerten kann. So bleibt der Quiz-Kern unverändert.
+ */
+export function expandScenario(s) {
+  return (s.parts || []).map((part, i) => ({
+    ...part,
+    id: `${s.id}-p${i + 1}`,
+    topicId: part.topicId || s.topicId,
+    difficulty: part.difficulty || s.difficulty || "mittel",
+    _scenario: s.scenario,
+    _scenarioTitle: s.title,
+    _partIndex: i + 1,
+    _partCount: s.parts.length,
+  }));
+}
+
+/** Faltet mehrere Szenarien nacheinander auf (Reihenfolge bleibt erhalten). */
+export function expandScenarios(list) {
+  return list.flatMap(expandScenario);
+}
+
 /* ------------------------------------------------------------------ *
  *  QuizSession
  * ------------------------------------------------------------------ */
@@ -147,7 +171,15 @@ export class QuizSession {
   /* ---------- Rendering je Typ ---------- */
 
   renderQuestion(q) {
+    // Gemeinsamer Szenario-Kontext (bei ganzheitlichen Aufgaben)
+    const scenarioBanner = q._scenario
+      ? `<div class="scenario-context"><div class="scenario-head">🧩 ${escapeHtml(q._scenarioTitle || "Ganzheitliche Aufgabe")} · Teil ${q._partIndex}/${q._partCount}</div>${q._scenario}</div>`
+      : "";
     const prompt = `<h3 class="quiz-question">${q.question}</h3>`;
+    return scenarioBanner + this.renderBody(q, prompt);
+  }
+
+  renderBody(q, prompt) {
     switch (q.type) {
       case "mc-single":
       case "mc-multi":
