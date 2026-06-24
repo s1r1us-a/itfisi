@@ -13,7 +13,10 @@
  *  - Chart.js-Diagramme (defensiv: funktioniert auch ohne CDN)
  */
 
-const STORAGE_KEY = "fisi-lernplattform-v1";
+const STORAGE_BASE_KEY = "fisi-lernplattform-v1";
+// Aktiver localStorage-Schlüssel. Wird pro Account erweitert (siehe setUserScope),
+// damit mehrere Konten am selben Gerät getrennte Offline-Caches haben.
+let STORAGE_KEY = STORAGE_BASE_KEY;
 
 /* ------------------------------------------------------------------ *
  *  Speicher: localStorage mit Fallback auf In-Memory
@@ -468,6 +471,38 @@ export function resetAll() {
   subnetSolved = 0;
   pendingAchievements = [];
   save();
+}
+
+/* ------------------------------------------------------------------ *
+ *  Cloud-Anbindung (Auth + Realtime Database, siehe cloud.js)
+ * ------------------------------------------------------------------ */
+
+/**
+ * Übernimmt einen aus der Cloud geladenen State (Objekt) als aktuellen Stand.
+ * Objektbasiertes Gegenstück zu importJSON (ohne Text-Parsing). Fehlende Felder
+ * werden mit den Defaults ergänzt, anschließend wird persistiert und benachrichtigt.
+ */
+export function hydrate(obj) {
+  if (typeof obj !== "object" || obj === null) return false;
+  state = Object.assign(defaultState(), obj);
+  subnetSolved = 0;
+  pendingAchievements = [];
+  save();
+  return true;
+}
+
+/**
+ * Setzt den localStorage-Cache-Schlüssel auf den aktuellen Account, damit mehrere
+ * Konten am selben Gerät getrennte Offline-Caches haben. uid=null setzt auf den
+ * Basis-Schlüssel zurück. Der Stand wird aus dem (Account-)Cache neu geladen;
+ * die Cloud bleibt die maßgebliche Quelle (siehe cloud.js).
+ */
+export function setUserScope(uid) {
+  STORAGE_KEY = uid ? `${STORAGE_BASE_KEY}::${uid}` : STORAGE_BASE_KEY;
+  state = load();
+  subnetSolved = 0;
+  pendingAchievements = [];
+  notify();
 }
 
 /* ------------------------------------------------------------------ *

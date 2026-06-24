@@ -14,6 +14,8 @@ import { getQuestion, questions as ALL_QUESTIONS } from "../data/questions.js";
 import * as stats from "./stats.js";
 import * as quiz from "./quiz.js";
 import * as tools from "./tools.js";
+import * as auth from "./auth.js";
+import * as cloud from "./cloud.js";
 
 const { topics, lernfelder, examAreas, bereiche, getTopic } = content;
 
@@ -1024,11 +1026,128 @@ function openMobileNav() { document.body.classList.add("nav-open"); }
 function closeMobileNav() { document.body.classList.remove("nav-open"); }
 
 /* ------------------------------------------------------------------ *
- *  Initialisierung
+ *  Authentifizierung: Login-Screen & Konto-Steuerung
  * ------------------------------------------------------------------ */
 
-function init() {
-  initTheme();
+/** Befüllt den Konto-Bereich im Header (E-Mail + Abmelden). */
+function renderAccountBox(user) {
+  const box = $("#account-box");
+  if (!box) return;
+  box.innerHTML = "";
+  if (!user) { box.hidden = true; return; }
+  box.hidden = false;
+  const label = el("span", { class: "account-email", title: user.email || "" }, escapeHtml(user.email || ""));
+  const btn = el("button", { class: "account-logout", "aria-label": "Abmelden", title: "Abmelden" }, "Abmelden");
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    try { await auth.logout(); }
+    catch (e) { btn.disabled = false; showToast("⚠️", "Abmelden fehlgeschlagen", auth.mapError(e), "bad"); }
+  });
+  box.append(label, btn);
+}
+
+/**
+ * Rendert den Login-/Registrierungs-/Passwort-Reset-Screen.
+ * mode: "login" | "register" | "reset"
+ */
+function renderAuthScreen(mode = "login") {
+  const host = $("#auth-screen");
+  if (!host) return;
+
+  const tab = (m, text) => `<button type="button" class="auth-tab ${mode === m ? "active" : ""}" data-mode="${m}">${text}</button>`;
+  const titles = { login: "Anmelden", register: "Konto erstellen", reset: "Passwort zurücksetzen" };
+  const submitLabels = { login: "Anmelden", register: "Registrieren", reset: "Link senden" };
+
+  host.innerHTML = `
+    <div class="auth-card">
+      <div class="auth-brand"><span aria-hidden="true">🖧</span> FiSi<span class="brand-accent">.lernen</span></div>
+      <p class="auth-sub">Melde dich an, um deinen Lernfortschritt zu speichern und geräteübergreifend zu nutzen.</p>
+
+      <div class="auth-tabs" role="tablist">
+        ${tab("login", "Anmelden")}
+        ${tab("register", "Registrieren")}
+      </div>
+
+      <h1 class="auth-title">${titles[mode]}</h1>
+
+      <form id="auth-form" novalidate>
+        <label class="auth-field">
+          <span>E-Mail-Adresse</span>
+          <input type="email" id="auth-email" autocomplete="email" required placeholder="name@beispiel.de">
+        </label>
+        ${mode !== "reset" ? `
+        <label class="auth-field">
+          <span>Passwort</span>
+          <input type="password" id="auth-password" autocomplete="${mode === "register" ? "new-password" : "current-password"}" required minlength="6" placeholder="Mindestens 6 Zeichen">
+        </label>` : ""}
+
+        <p class="auth-message" id="auth-message" role="alert" hidden></p>
+
+        <button type="submit" class="auth-submit" id="auth-submit">${submitLabels[mode]}</button>
+      </form>
+
+      <div class="auth-links">
+        ${mode === "login" ? `<button type="button" class="auth-link" data-mode="reset">Passwort vergessen?</button>` : ""}
+        ${mode !== "login" ? `<button type="button" class="auth-link" data-mode="login">Zurück zur Anmeldung</button>` : ""}
+      </div>
+    </div>`;
+
+  // Moduswechsel (Tabs + Links)
+  $$("[data-mode]", host).forEach((b) => b.addEventListener("click", () => renderAuthScreen(b.dataset.mode)));
+
+  const form = $("#auth-form", host);
+  const msg = $("#auth-message", host);
+  const submit = $("#auth-submit", host);
+
+  function showMessage(text, kind = "error") {
+    msg.textContent = text;
+    msg.className = `auth-message auth-message-${kind}`;
+    msg.hidden = false;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msg.hidden = true;
+    const email = $("#auth-email", host).value.trim();
+    const pwEl = $("#auth-password", host);
+    const password = pwEl ? pwEl.value : "";
+    submit.disabled = true;
+    const prevLabel = submit.textContent;
+    submit.textContent = "Bitte warten …";
+    try {
+      if (mode === "login") {
+        await auth.login(email, password);
+        // Weiter geht es über den onAuthChange-Listener (startApp).
+      } else if (mode === "register") {
+        await auth.register(email, password);
+        // onAuthChange übernimmt; neuer Account startet mit (ggf. migriertem) Stand.
+      } else {
+        await auth.sendReset(email);
+        showMessage("Falls ein Konto existiert, wurde eine E-Mail zum Zurücksetzen gesendet.", "success");
+        submit.disabled = false;
+        submit.textContent = prevLabel;
+      }
+    } catch (err) {
+      showMessage(auth.mapError(err), "error");
+      submit.disabled = false;
+      submit.textContent = prevLabel;
+    }
+  });
+
+  $("#auth-email", host)?.focus();
+}
+
+/* ------------------------------------------------------------------ *
+ *  Initialisierung & Login-Gate
+ * ------------------------------------------------------------------ */
+
+let appStarted = false;
+
+/** Startet die eigentliche App (nur einmal, nach erfolgreicher Anmeldung). */
+function startApp() {
+  if (appStarted) { router(); return; }
+  appStarted = true;
+
   buildSidebar();
   initSearch();
 
@@ -1048,6 +1167,36 @@ function init() {
     setTimeout(() => showToast("ℹ️", "Speicher nicht verfügbar",
       "Dein Fortschritt wird nur temporär gespeichert (z. B. privater Modus). Nutze Export für eine Sicherung.", "info", 7000), 800);
   }
+}
+
+function init() {
+  initTheme();
+  // Solange der Anmeldestatus noch geprüft wird, App-Shell ausgeblendet halten.
+  document.body.classList.add("logged-out");
+  const authHost = $("#auth-screen");
+  if (authHost) authHost.innerHTML = `<div class="auth-card auth-loading"><p>Wird geladen …</p></div>`;
+
+  auth.onAuthChange(async (user) => {
+    if (user) {
+      // Eingeloggt: Account-Cache wählen, Cloud laden/migrieren, App starten.
+      stats.setUserScope(user.uid);
+      await cloud.start(user);
+      document.body.classList.remove("logged-out");
+      const host = $("#auth-screen");
+      if (host) { host.hidden = true; host.innerHTML = ""; }
+      renderAccountBox(user);
+      startApp();
+    } else {
+      // Abgemeldet: Sync beenden, App-Shell verbergen, Login-Screen zeigen.
+      await cloud.stop();
+      stats.setUserScope(null);
+      renderAccountBox(null);
+      document.body.classList.add("logged-out");
+      const host = $("#auth-screen");
+      if (host) host.hidden = false;
+      renderAuthScreen("login");
+    }
+  });
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

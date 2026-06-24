@@ -692,3 +692,82 @@ body::after {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
   body::after { opacity: .35; }
 }
+
+/* =================================================================
+   Authentifizierung: Login-Gate & Konto-Bereich
+   ================================================================= */
+
+/* Konto-Box im Header (E-Mail + Abmelden) */
+.account-box { display: flex; align-items: center; gap: .6rem; flex: none; }
+.account-email {
+  max-width: 14ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: .85rem; color: var(--text-muted);
+}
+.account-logout {
+  background: var(--surface); border: 1px solid var(--border); color: var(--text);
+  padding: .45rem .8rem; border-radius: 999px; font-size: .85rem; font-weight: 600;
+  cursor: pointer; transition: var(--transition); flex: none;
+}
+.account-logout:hover { background: var(--surface-2); transform: translateY(-1px); }
+.account-logout:disabled { opacity: .6; cursor: default; transform: none; }
+
+/* Im abgemeldeten Zustand die App-Shell ausblenden, nur den Login-Screen zeigen */
+body.logged-out .topbar,
+body.logged-out .layout,
+body.logged-out #toasts { display: none !important; }
+
+/* Login-/Registrierungs-/Reset-Screen */
+.auth-screen[hidden] { display: none; }
+.auth-screen {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+  background: var(--bg);
+  overflow-y: auto;
+}
+.auth-card {
+  width: 100%; max-width: 420px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 2rem 1.8rem;
+}
+.auth-card.auth-loading { text-align: center; color: var(--text-muted); }
+.auth-brand { font-weight: 800; font-size: 1.4rem; letter-spacing: -.02em; }
+.auth-brand span { margin-right: .3rem; }
+.auth-sub { color: var(--text-muted); font-size: .92rem; margin: .5rem 0 1.4rem; }
+
+.auth-tabs { display: flex; gap: .4rem; background: var(--surface-2); padding: .35rem; border-radius: 999px; margin-bottom: 1.4rem; }
+.auth-tab {
+  flex: 1; padding: .55rem .8rem; border: none; border-radius: 999px;
+  background: transparent; color: var(--text-muted); font-size: .9rem; font-weight: 600; cursor: pointer;
+  transition: var(--transition);
+}
+.auth-tab.active { background: var(--accent); color: #fff; }
+
+.auth-title { font-size: 1.25rem; margin: 0 0 1.1rem; }
+
+.auth-field { display: block; margin-bottom: 1rem; }
+.auth-field > span { display: block; font-size: .82rem; color: var(--text-muted); margin-bottom: .35rem; }
+.auth-field input {
+  width: 100%; padding: .7rem .9rem; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--bg-2); color: var(--text); font-size: .95rem;
+  transition: var(--transition);
+}
+.auth-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,141,239,.18); outline: none; }
+
+.auth-message {
+  padding: .65rem .8rem; border-radius: var(--radius-sm); font-size: .88rem; margin: 0 0 1rem;
+  border: 1px solid var(--border);
+}
+.auth-message-error { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, var(--border)); background: color-mix(in srgb, var(--bad) 12%, transparent); }
+.auth-message-success { color: var(--good); border-color: color-mix(in srgb, var(--good) 45%, var(--border)); background: color-mix(in srgb, var(--good) 12%, transparent); }
+
+.auth-submit {
+  width: 100%; padding: .8rem 1rem; border: none; border-radius: var(--radius-sm);
+  background: var(--accent); color: #fff; font-size: .98rem; font-weight: 700; cursor: pointer;
+  transition: var(--transition);
+}
+.auth-submit:hover { filter: brightness(1.05); transform: translateY(-1px); }
+.auth-submit:disabled { opacity: .7; cursor: default; transform: none; }
+
+.auth-links { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem; margin-top: 1.1rem; }
+.auth-link { background: none; border: none; color: var(--accent); font-size: .86rem; cursor: pointer; padding: .2rem; }
+.auth-link:hover { text-decoration: underline; }

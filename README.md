@@ -39,8 +39,13 @@ Die Anwendung deckt die komplette Ausbildung ab – mit echten Lerninhalten, vie
 - **Komfort:** globale Live-Suche, Glossar mit Verlinkung im Fließtext, Notizen &
   Favoriten pro Thema, Druck-/Spickzettel-Ansicht, Code-Kopierbuttons,
   **Dark-/Light-Mode** und vollständige Tastatur-/Mobilbedienung.
-- **Persistenz:** Lernstand im `localStorage` mit robustem In-Memory-Fallback,
-  **Export/Import als JSON** und Reset-Funktion. Die App stürzt nie ab.
+- **Konten & Cloud-Synchronisation:** Anmeldung per **E-Mail & Passwort** (Registrieren, Login,
+  **Passwort-Reset** per E-Mail) über **Firebase Authentication**. Jeder Account ist getrennt und
+  hat seinen **eigenen Fortschritt + eigene Statistiken**, gespeichert in der **Firebase Realtime
+  Database** und geräteübergreifend synchron. Die App ist **nur nach Login** nutzbar.
+- **Persistenz:** Lernstand pro Account in der **Realtime Database**; `localStorage` dient als
+  robuster Offline-Cache (mit In-Memory-Fallback). Zusätzlich **Export/Import als JSON** und
+  Reset-Funktion. Die App stürzt nie ab.
 
 ---
 
@@ -78,6 +83,47 @@ Die Erweiterung **„Live Server“** installieren und `index.html` per
 
 ---
 
+## 🔐 Konten & Cloud-Synchronisation (Firebase)
+
+Login, Registrierung, Passwort-Reset und die Speicherung des Lernstands laufen über **Firebase**
+(Authentication + Realtime Database). Das Firebase-SDK wird als **ES-Modul vom CDN** geladen –
+weiterhin **kein npm, kein Build** nötig.
+
+**Beteiligte Dateien:**
+
+```
+/js/firebase.js       Firebase-Initialisierung (Config, exportiert auth & db)
+/js/auth.js           Registrieren, Login, Logout, Passwort-Reset (deutsche Fehlertexte)
+/js/cloud.js          Synchronisation des Lernstands mit der Realtime Database
+/firebase-rules.json  Sicherheitsregeln der Realtime Database (in Konsole einfügen)
+```
+
+**Einmaliges Setup in der [Firebase-Konsole](https://console.firebase.google.com/):**
+
+1. **Authentication → Sign-in method → E-Mail/Passwort** aktivieren.
+2. **Realtime Database** anlegen (bereits erfolgt) und die **Regeln** aus `firebase-rules.json`
+   einfügen, damit jeder Account ausschließlich seinen eigenen Knoten `/users/{uid}` liest/schreibt.
+3. **Authentication → Settings → Authorized domains:** die Hosting-Domain (und ggf. `localhost`)
+   eintragen.
+4. In `js/firebase.js` müssen `apiKey`, `authDomain`, `databaseURL`, `projectId` usw. zum eigenen
+   Projekt passen (Werte aus *Projekteinstellungen → Allgemein → Web-App*).
+
+> **Sicherheit:** Die Firebase-Web-Config (inkl. `apiKey`) ist absichtlich öffentlich. Der Schutz
+> der Daten erfolgt über die **Datenbank-Regeln**, nicht über Geheimhaltung der Config.
+
+**Datenmodell der Realtime Database:**
+
+```
+/users/{uid}/state     komplettes Lernstand-Objekt (Statistik, Fortschritt, Notizen …)
+/users/{uid}/profile   { email, createdAt }
+```
+
+Beim ersten Login eines neuen Accounts wird ein evtl. vorhandener lokaler Stand einmalig
+hochgeladen; danach „gewinnt" stets der Cloud-Stand, der bei Änderungen automatisch
+(verzögert) zurückgeschrieben wird.
+
+---
+
 ## 📁 Dateistruktur
 
 ```
@@ -85,10 +131,14 @@ Die Erweiterung **„Live Server“** installieren und `index.html` per
 /css/
   style.css          Komplettes Styling, Theming über CSS Custom Properties
 /js/
-  app.js             App-Logik, Navigation, Hash-Routing, State-Anbindung, Ansichten
+  app.js             App-Logik, Navigation, Hash-Routing, State-Anbindung, Ansichten, Login-Gate
   quiz.js            Quiz-/Abfrage-/Prüfungslogik (alle Aufgabentypen, Leitner, Timer)
-  stats.js           Statistik & Fortschritt, localStorage-Persistenz, Charts
+  stats.js           Statistik & Fortschritt, localStorage-Cache, Charts
   tools.js           Interaktive Werkzeuge (Subnetting-Rechner, OSI-Modell u. a.)
+  firebase.js        Firebase-Initialisierung (Auth + Realtime Database)
+  auth.js            Registrieren, Login, Logout, Passwort-Reset
+  cloud.js           Synchronisation des Lernstands mit der Realtime Database
+/firebase-rules.json Sicherheitsregeln der Realtime Database
 /data/
   content.js         Alle Lerninhalte (Themen, Texte, Beispiele) als Datenobjekte
   questions.js       Alle Fragen, Karteikarten und Aufgaben als Datenobjekte
