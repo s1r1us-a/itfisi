@@ -1536,6 +1536,215 @@ done</code></pre>` },
     questionIds: ["q-bbig-1","q-sv-1","q-sv-match-1","q-bbig-tf-1","fc-bbig-1"],
   },
 
+  /* ===================== 9. CLIENTS, CPS & BETRIEB (IHK-Ergänzungen) ===================== */
+
+  {
+    id: "clients-einbinden",
+    title: "Clients in Netzwerke einbinden",
+    lernfeld: "LF3", examArea: "AP1", bereich: "os", icon: "🔌",
+    summary: "Installation, Treiber, Inbetriebnahme und Netzwerkkonfiguration von Client-Systemen – von der OS-Installation bis zur Domänenaufnahme.",
+    visual: null,
+    sections: [
+      { heading: "Betriebssystem installieren & bereitstellen",
+        html: `<p>Clients werden per <strong>Installationsmedium</strong> (USB/ISO), <strong>Image</strong> (z. B. via Klonen) oder <strong>netzwerkbasiert</strong> per <strong>PXE</strong> (Preboot eXecution Environment) installiert. Für viele gleichartige Geräte spart unbeaufsichtigte Installation (Unattended/Answer-File) Zeit.</p>
+        <ul>
+          <li><strong>Treiber:</strong> Hardware-Komponenten benötigen passende Treiber (Chipsatz, GPU, NIC). Fehlt der NIC-Treiber, ist kein Netzwerk möglich.</li>
+          <li><strong>Updates:</strong> Direkt nach der Installation Patches einspielen (Sicherheit).</li>
+        </ul>` },
+      { heading: "Netzwerkkonfiguration des Clients",
+        html: `<p>Ein Client benötigt vier Kernangaben, meist automatisch per <strong>DHCP</strong>:</p>
+        <ul>
+          <li><strong>IP-Adresse &amp; Subnetzmaske</strong> – Identität und Netzzugehörigkeit</li>
+          <li><strong>Standardgateway</strong> – Weg in andere Netze/Internet</li>
+          <li><strong>DNS-Server</strong> – Namensauflösung</li>
+        </ul>
+        <p>Statische Konfiguration eignet sich für Server/Drucker; Clients erhalten ihre Adressen i. d. R. dynamisch. Prüfen unter Windows mit <code>ipconfig /all</code>, unter Linux mit <code>ip a</code>.</p>` },
+      { heading: "In die Domäne aufnehmen",
+        html: `<p>In Unternehmensumgebungen treten Clients einer <strong>Active-Directory-Domäne</strong> bei. Vorteile: zentrale Anmeldung, Gruppenrichtlinien (GPO), zentrale Verwaltung. Voraussetzung: korrekte DNS-Konfiguration (der Client muss den Domänencontroller per DNS finden).</p>` },
+    ],
+    examples: [
+      { title: "Massen-Rollout", html: `<p>Für 30 neue Notebooks wird ein <strong>Referenz-Image</strong> erstellt, per PXE verteilt und anschließend automatisiert in die Domäne aufgenommen. GPOs setzen Drucker, Laufwerke und Sicherheitsrichtlinien.</p>` },
+    ],
+    merksaetze: [
+      "Ohne NIC-Treiber kein Netzwerk – Treiber zuerst.",
+      "Client-Pflichtangaben: IP, Maske, Gateway, DNS.",
+      "Domänenbeitritt braucht funktionierendes DNS.",
+    ],
+    cheatsheet: [
+      "Installation: Medium · Image · PXE/Unattended",
+      "Prüfen: ipconfig /all (Win) · ip a (Linux)",
+      "Domäne: zentrale Anmeldung + GPO, DNS nötig",
+    ],
+    questionIds: ["q-clients-1","q-clients-2","q-clients-tf-1","fc-clients-1"],
+  },
+
+  {
+    id: "iot-cps",
+    title: "Cyber-physische Systeme & IoT",
+    lernfeld: "LF7", examArea: "AP2-KA", bereich: "hardware", icon: "⚙️",
+    summary: "Vernetzung physischer Geräte mit IT: Sensorik/Aktorik, eingebettete Systeme, Bussysteme und IoT-Protokolle wie MQTT.",
+    visual: null,
+    sections: [
+      { heading: "Was sind cyber-physische Systeme (CPS)?",
+        html: `<p>Ein <strong>cyber-physisches System</strong> verbindet physische Prozesse mit Rechen- und Netzwerktechnik. <strong>Sensoren</strong> erfassen Zustände (Temperatur, Bewegung), <strong>Aktoren</strong> wirken auf die Umwelt (Motor, Ventil, Relais). Ein <strong>eingebettetes System</strong> (Mikrocontroller) steuert die Logik.</p>
+        <p><strong>IoT (Internet of Things)</strong> bezeichnet die Vernetzung solcher Geräte über das Internet zur Datenerfassung und Fernsteuerung.</p>` },
+      { heading: "Kommunikation: Bussysteme & Protokolle",
+        html: `<ul>
+          <li><strong>Bussysteme:</strong> I²C, SPI (geräteintern), CAN-Bus (Fahrzeuge/Industrie), Modbus (Automatisierung).</li>
+          <li><strong>MQTT:</strong> leichtgewichtiges Publish/Subscribe-Protokoll über TCP – ideal für viele Sensoren mit wenig Bandbreite; ein <em>Broker</em> verteilt Nachrichten an Abonnenten von „Topics".</li>
+          <li><strong>Funk:</strong> WLAN, Bluetooth/BLE, Zigbee, LoRaWAN (große Reichweite, wenig Energie).</li>
+        </ul>` },
+      { heading: "Sicherheit & Herausforderungen",
+        html: `<p>IoT-Geräte sind oft schwach abgesichert (Standardpasswörter, fehlende Updates) und damit attraktive Angriffsziele (z. B. Botnetze). Maßnahmen: Netzsegmentierung (eigenes VLAN), Updates, starke Zugangsdaten, Verschlüsselung (TLS).</p>` },
+    ],
+    examples: [
+      { title: "Smarte Gebäudetechnik", html: `<p>Temperatursensoren melden per <strong>MQTT</strong> an einen Broker. Eine Steuerung abonniert das Topic <code>haus/heizung/temp</code> und schaltet bei Unterschreitung über einen <strong>Aktor</strong> das Heizventil. Die IoT-Geräte liegen in einem eigenen <strong>VLAN</strong>.</p>` },
+    ],
+    merksaetze: [
+      "Sensor misst, Aktor wirkt, Controller steuert.",
+      "MQTT = Publish/Subscribe über Broker, sparsam.",
+      "IoT ins eigene VLAN – Sicherheit zuerst.",
+    ],
+    cheatsheet: [
+      "CPS = physisch + IT; IoT = vernetzt über Internet",
+      "Busse: I²C/SPI/CAN/Modbus · Funk: BLE/Zigbee/LoRaWAN",
+      "MQTT: Broker + Topics, Publish/Subscribe",
+    ],
+    questionIds: ["q-iot-1","q-iot-2","q-iot-tf-1","fc-iot-1"],
+  },
+
+  {
+    id: "monitoring",
+    title: "Monitoring & Logging",
+    lernfeld: "LF9", examArea: "AP2-KA", bereich: "os", icon: "📟",
+    summary: "Überwachung von Systemen und Diensten: Metriken, Schwellwerte, Alarmierung, SNMP und zentrale Protokollierung mit Syslog.",
+    visual: null,
+    sections: [
+      { heading: "Warum überwachen?",
+        html: `<p>Monitoring erkennt Störungen <strong>proaktiv</strong>, bevor Nutzende sie melden. Es überwacht <strong>Verfügbarkeit</strong> (läuft der Dienst?), <strong>Auslastung</strong> (CPU, RAM, Speicher, Netz) und definiert <strong>Schwellwerte</strong> (Thresholds), bei deren Überschreitung eine <strong>Alarmierung</strong> (E-Mail, Ticket) erfolgt.</p>` },
+      { heading: "SNMP & Werkzeuge",
+        html: `<p><strong>SNMP</strong> (Simple Network Management Protocol, UDP 161/162) fragt Geräte (Switches, Server, Drucker) nach Statuswerten ab; Geräte senden Ereignisse aktiv als <strong>Traps</strong>. Bekannte Monitoring-Systeme: <strong>Nagios</strong>, <strong>Zabbix</strong>, <strong>Checkmk</strong>, <strong>PRTG</strong>, <strong>Grafana/Prometheus</strong>.</p>` },
+      { heading: "Logging & Syslog",
+        html: `<p><strong>Logdateien</strong> protokollieren Ereignisse. Bei vielen Systemen werden Logs zentral gesammelt (<strong>Syslog</strong>, UDP/TCP 514, oder ein <em>SIEM</em>). Vorteile: Korrelation, revisionssichere Aufbewahrung, schnellere Fehlersuche. Logs nach <strong>Schweregrad</strong> (z. B. info, warning, error, critical) klassifizieren.</p>` },
+    ],
+    examples: [
+      { title: "Plattenplatz-Alarm", html: `<p>Ein Monitoring prüft alle 5 Minuten den Füllstand von <code>/var</code>. Bei &gt; 85 % wird eine <strong>Warnung</strong>, bei &gt; 95 % ein <strong>kritischer Alarm</strong> per E-Mail ausgelöst – so wird ein Ausfall durch volle Platte verhindert.</p>` },
+    ],
+    merksaetze: [
+      "Proaktiv überwachen schlägt reaktiv reparieren.",
+      "SNMP: Abfrage (poll) + Traps; UDP 161/162.",
+      "Syslog zentralisiert Logs (Port 514).",
+    ],
+    cheatsheet: [
+      "Metriken: Verfügbarkeit, CPU/RAM/Disk/Netz",
+      "Schwellwert → Alarm (Mail/Ticket)",
+      "Tools: Nagios/Zabbix/Checkmk/Prometheus",
+    ],
+    questionIds: ["q-mon-1","q-mon-2","q-mon-tf-1","fc-mon-1"],
+  },
+
+  {
+    id: "troubleshooting",
+    title: "Systematische Fehleranalyse",
+    lernfeld: "LF9", examArea: "AP2-NE", bereich: "netzwerk", icon: "🩺",
+    summary: "Strukturiertes Vorgehen bei Netzwerk- und Systemstörungen – vom Symptom zur Ursache, mit den passenden Diagnosewerkzeugen.",
+    visual: null,
+    sections: [
+      { heading: "Strukturiertes Vorgehen",
+        html: `<p>Effektive Fehlersuche folgt einem Modell, z. B. <strong>bottom-up</strong> entlang der OSI-Schichten (Kabel → IP → Anwendung) oder <strong>top-down</strong>. Schritte: <strong>1.</strong> Problem eingrenzen (Wer? Was? Seit wann? Wie reproduzierbar?), <strong>2.</strong> Hypothese bilden, <strong>3.</strong> testen, <strong>4.</strong> Ursache beheben, <strong>5.</strong> dokumentieren.</p>` },
+      { heading: "Diagnosewerkzeuge",
+        html: `<ul>
+          <li><code>ping</code> – Erreichbarkeit/Latenz (ICMP)</li>
+          <li><code>tracert</code>/<code>traceroute</code> – Weg &amp; Hops zum Ziel</li>
+          <li><code>nslookup</code>/<code>dig</code> – DNS-Auflösung prüfen</li>
+          <li><code>ipconfig</code>/<code>ip a</code> – lokale Konfiguration</li>
+          <li><code>netstat</code>/<code>ss</code> – Verbindungen &amp; Ports</li>
+        </ul>` },
+      { heading: "Typische Fälle abgrenzen",
+        html: `<p>„Keine Webseite erreichbar": Lässt sich die <strong>IP</strong> pingen, aber nicht der <strong>Name</strong> → DNS-Problem. Kein Ping zum Gateway → lokales Netz/Kabel/IP. Kein Ping ins Internet, Gateway aber erreichbar → Routing/Provider.</p>` },
+    ],
+    examples: [
+      { title: "DNS oder Routing?", html: `<p><code>ping 8.8.8.8</code> funktioniert, <code>ping google.de</code> nicht → die <strong>Namensauflösung (DNS)</strong> ist defekt, nicht die Verbindung. Prüfen mit <code>nslookup google.de</code>.</p>` },
+    ],
+    merksaetze: [
+      "Erst eingrenzen, dann ändern – eine Variable zur Zeit.",
+      "IP geht, Name nicht → DNS.",
+      "Immer dokumentieren (Lösung wiederverwendbar machen).",
+    ],
+    cheatsheet: [
+      "ping · tracert · nslookup · ipconfig/ip a · netstat/ss",
+      "OSI bottom-up: Kabel→IP→DNS→Anwendung",
+      "Symptom → Hypothese → Test → Fix → Doku",
+    ],
+    questionIds: ["q-ts-1","q-ts-2","q-ts-tf-1","fc-ts-1"],
+  },
+
+  {
+    id: "arbeitsschutz",
+    title: "Arbeitsschutz, Ergonomie & Green-IT",
+    lernfeld: "LF2", examArea: "AP1", bereich: "hardware", icon: "🦺",
+    summary: "Sicheres und gesundes Arbeiten am IT-Arbeitsplatz sowie umweltgerechter Umgang mit Geräten und Elektroschrott.",
+    visual: null,
+    sections: [
+      { heading: "Ergonomie am Arbeitsplatz",
+        html: `<p>Ein ergonomischer Arbeitsplatz beugt gesundheitlichen Schäden vor: <strong>Bildschirm</strong> in Augenhöhe und blendfrei, <strong>Sitzhöhe</strong> so, dass Unter-/Oberarme und Ober-/Unterschenkel je etwa 90° bilden, regelmäßige <strong>Pausen</strong> und ausreichend Bewegung. Geregelt u. a. in der <strong>Arbeitsstättenverordnung (ArbStättV)</strong>.</p>` },
+      { heading: "Arbeitssicherheit & ESD",
+        html: `<p>Beim Arbeiten an Hardware: Gerät spannungsfrei schalten, gegen <strong>elektrostatische Entladung (ESD)</strong> schützen (ESD-Armband, Erdung), Vorsicht bei Netzteilen/USV (Kondensatoren). Elektrische Anlagen dürfen nur befugte Personen öffnen.</p>` },
+      { heading: "Green-IT & Entsorgung",
+        html: `<p><strong>Green-IT</strong> senkt Energieverbrauch und Ressourceneinsatz (effiziente Netzteile/80 PLUS, Virtualisierung, Stromsparmodi). Altgeräte sind <strong>Elektroschrott (WEEE)</strong> und müssen nach <strong>ElektroG</strong> fachgerecht entsorgt/recycelt werden – nicht über den Hausmüll. Datenträger vorher sicher löschen.</p>` },
+    ],
+    examples: [
+      { title: "Altgeräte ausmustern", html: `<p>Beim Austausch von 20 PCs werden die Datenträger sicher gelöscht (oder geschreddert), die Geräte als <strong>WEEE</strong> über einen zertifizierten Entsorger recycelt und die Entsorgung dokumentiert.</p>` },
+    ],
+    merksaetze: [
+      "ArbStättV regelt den Bildschirmarbeitsplatz.",
+      "Vor dem Hardware-Eingriff: ESD-Schutz & spannungsfrei.",
+      "Elektroschrott = ElektroG/WEEE, nie in den Hausmüll.",
+    ],
+    cheatsheet: [
+      "Ergonomie: 90°-Regel, blendfrei, Pausen",
+      "ESD-Armband & Erdung bei Hardware",
+      "Green-IT: Energieeffizienz · WEEE-Recycling",
+    ],
+    questionIds: ["q-as-1","q-as-2","q-as-tf-1","fc-as-1"],
+  },
+
+  {
+    id: "git-qs",
+    title: "Versionsverwaltung & Qualitätssicherung",
+    lernfeld: "LF10", examArea: "AP2-KA", bereich: "programmierung", icon: "🔀",
+    summary: "Code mit Git versionieren und Software durch Tests und Qualitätssicherung absichern.",
+    visual: null,
+    sections: [
+      { heading: "Versionsverwaltung mit Git",
+        html: `<p><strong>Git</strong> ist ein verteiltes Versionskontrollsystem: jede Änderung wird als <strong>Commit</strong> gespeichert, parallele Arbeit erfolgt in <strong>Branches</strong>, die per <strong>Merge</strong> zusammengeführt werden. <strong>Remotes</strong> (z. B. GitHub/GitLab) ermöglichen Zusammenarbeit (<code>push</code>/<code>pull</code>).</p>
+        <ul>
+          <li><code>git clone</code> – Repository kopieren</li>
+          <li><code>git add</code> + <code>git commit</code> – Änderungen festschreiben</li>
+          <li><code>git push</code>/<code>git pull</code> – mit Remote abgleichen</li>
+          <li><code>git branch</code>/<code>git merge</code> – parallele Entwicklung</li>
+        </ul>` },
+      { heading: "Testen & Qualitätssicherung",
+        html: `<p>Tests sichern die Funktion ab: <strong>Unittests</strong> (einzelne Funktionen), <strong>Integrationstests</strong> (Zusammenspiel), <strong>Systemtests</strong> und <strong>Abnahmetests</strong> (durch Kunden). Weitere QS-Mittel: <strong>Code-Reviews</strong>, statische Analyse (Linter) und automatisierte <strong>CI/CD</strong>-Pipelines.</p>` },
+      { heading: "Black-Box vs. White-Box",
+        html: `<p><strong>Black-Box-Test:</strong> prüft nur Ein-/Ausgabe ohne Kenntnis des Codes (z. B. Äquivalenzklassen, Grenzwerte). <strong>White-Box-Test:</strong> nutzt die innere Struktur (Pfad-/Zweigüberdeckung).</p>` },
+    ],
+    examples: [
+      { title: "Feature im Branch", html: `<p>Eine neue Funktion wird im Branch <code>feature/login</code> entwickelt, per <strong>Unittests</strong> abgesichert und nach einem <strong>Code-Review</strong> via <strong>Merge</strong> in den Hauptzweig übernommen. Die CI führt die Tests automatisch aus.</p>` },
+    ],
+    merksaetze: [
+      "Commit = Änderungsstand; Branch = parallele Linie; Merge = Zusammenführen.",
+      "Testarten: Unit → Integration → System → Abnahme.",
+      "Black-Box prüft Verhalten, White-Box prüft Struktur.",
+    ],
+    cheatsheet: [
+      "Git: clone · add · commit · push/pull · branch/merge",
+      "Tests: Unit/Integration/System/Abnahme",
+      "QS: Reviews · Linter · CI/CD",
+    ],
+    questionIds: ["q-git-1","q-git-2","q-git-tf-1","fc-git-1"],
+  },
+
 ];
 
 /* ------------------------------------------------------------------ *
