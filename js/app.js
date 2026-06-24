@@ -8,6 +8,8 @@
 
 import * as content from "../data/content.js";
 import { glossary, getGlossaryTerm } from "../data/glossary.js";
+import { paths, getPath } from "../data/paths.js";
+import { scenarios } from "../data/scenarios.js";
 import { getQuestion, questions as ALL_QUESTIONS } from "../data/questions.js";
 import * as stats from "./stats.js";
 import * as quiz from "./quiz.js";
@@ -70,6 +72,8 @@ function buildSidebar() {
   quick.append(
     navLink("🏠 Dashboard", "#/dashboard"),
     navLink("📈 Statistik", "#/stats"),
+    navLink("🗓️ Lernplan", "#/plan"),
+    navLink("🧭 Lernpfade", "#/paths"),
     navLink("📝 Prüfungssimulation", "#/exam"),
     navLink("🎯 Üben & Wiederholen", "#/practice"),
     navLink("🛠️ Werkzeuge", "#/tools"),
@@ -106,7 +110,7 @@ function navGroup(title, list) {
   wrap.append(head);
   list.forEach((t) => {
     const a = el("a", { class: "nav-link nav-topic", href: `#/topic/${t.id}`, "data-topic": t.id });
-    a.innerHTML = `<span class="nav-topic-icon">${t.icon || "•"}</span><span>${t.title}</span>`;
+    a.innerHTML = `<span class="nav-topic-icon">${escapeHtml(t.icon || "•")}</span><span>${escapeHtml(t.title)}</span>`;
     wrap.append(a);
   });
   return wrap;
@@ -144,18 +148,28 @@ function initSearch() {
     const hits = SEARCH_INDEX.filter((e) => e.text.includes(q)).slice(0, 12);
     results.hidden = false;
     results.innerHTML = hits.length
-      ? hits.map((h) => `<a class="search-hit" href="${h.href}"><span class="hit-icon">${h.icon}</span><span class="hit-body"><span class="hit-type">${h.type}</span><span class="hit-title">${h.title}</span></span></a>`).join("")
+      ? hits.map((h) => `<a class="search-hit" href="${escapeHtml(h.href)}"><span class="hit-icon">${escapeHtml(h.icon)}</span><span class="hit-body"><span class="hit-type">${escapeHtml(h.type)}</span><span class="hit-title">${escapeHtml(h.title)}</span></span></a>`).join("")
       : `<p class="search-empty">Keine Treffer für „${escapeHtml(q)}“.</p>`;
   };
   input.addEventListener("input", run);
   input.addEventListener("focus", run);
-  $$(".search-hit", results); // noop
   results.addEventListener("click", () => { results.hidden = true; input.value = ""; });
   document.addEventListener("click", (e) => { if (!e.target.closest(".search-box")) results.hidden = true; });
 }
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+/** Packt breite Tabellen in einen horizontal scrollbaren Wrapper (Mobile). */
+function wrapTables(root) {
+  if (!root) return;
+  root.querySelectorAll("table").forEach((tbl) => {
+    if (tbl.parentElement && tbl.parentElement.classList.contains("table-wrap")) return;
+    const wrap = el("div", { class: "table-wrap" });
+    tbl.parentNode.insertBefore(wrap, tbl);
+    wrap.append(tbl);
+  });
 }
 
 /* ------------------------------------------------------------------ *
@@ -166,7 +180,15 @@ const GLOSSARY_RE = (() => {
   const terms = glossary.map((g) => g.term).filter((t) => t.length > 2)
     .sort((a, b) => b.length - a.length)
     .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-  return new RegExp(`\\b(${terms.join("|")})\\b`, "g");
+  // Ohne Terme würde `\b()\b` entstehen → leere Gruppe matcht überall. Lieber ein
+  // Muster, das nie trifft, plus try/catch gegen evtl. ungültige Term-Kombinationen.
+  if (!terms.length) return /$^/;
+  try {
+    return new RegExp(`\\b(${terms.join("|")})\\b`, "g");
+  } catch (e) {
+    console.warn("Glossar-Regex konnte nicht erstellt werden.", e);
+    return /$^/;
+  }
 })();
 
 /** Verlinkt bekannte Glossarbegriffe in einem Container (nur einmal je Begriff). */
@@ -209,18 +231,31 @@ function linkifyGlossary(root) {
   });
 }
 
+let glossPopoverCleanup = null;
+function closeGlossaryPopover() {
+  if (glossPopoverCleanup) { glossPopoverCleanup(); glossPopoverCleanup = null; }
+}
+
 function showGlossaryPopover(anchor) {
-  $$(".gloss-popover").forEach((p) => p.remove());
+  // Vorhandenes Popover samt Listener sauber entfernen (kein Listener-Leak).
+  closeGlossaryPopover();
   const term = anchor.dataset.term;
   const g = getGlossaryTerm(term);
   if (!g) return;
   const pop = el("div", { class: "gloss-popover" });
-  pop.innerHTML = `<strong>${g.term}</strong><p>${g.definition}</p>${g.related && g.related.length ? `<a href="#/topic/${g.related[0]}">Zum Thema →</a>` : ""}`;
+  pop.innerHTML = `<strong>${escapeHtml(g.term)}</strong><p>${escapeHtml(g.definition)}</p>${g.related && g.related.length ? `<a href="#/topic/${encodeURIComponent(g.related[0])}">Zum Thema →</a>` : ""}`;
   document.body.append(pop);
+
+  // Breite mobil-sicher begrenzen und Position an den Viewport clampen.
+  const popW = pop.getBoundingClientRect().width || Math.min(320, window.innerWidth - 16);
   const r = anchor.getBoundingClientRect();
+  const maxLeft = window.scrollX + window.innerWidth - popW - 8;
   pop.style.top = (window.scrollY + r.bottom + 6) + "px";
-  pop.style.left = Math.min(window.scrollX + r.left, window.innerWidth - 320) + "px";
-  const close = (e) => { if (!e.target.closest(".gloss-popover") && e.target !== anchor) { pop.remove(); document.removeEventListener("click", close); } };
+  pop.style.left = Math.max(window.scrollX + 8, Math.min(window.scrollX + r.left, maxLeft)) + "px";
+
+  const close = (e) => { if (!e.target.closest(".gloss-popover") && e.target !== anchor) closeGlossaryPopover(); };
+  // Cleanup kapselt Entfernen von DOM + Listener, damit auch Navigation aufräumt.
+  glossPopoverCleanup = () => { pop.remove(); document.removeEventListener("click", close); };
   setTimeout(() => document.addEventListener("click", close), 0);
 }
 
@@ -230,6 +265,7 @@ function showGlossaryPopover(anchor) {
 
 function router() {
   clearPomodoro();
+  closeGlossaryPopover();
   stats.destroyAllCharts();
   const hash = location.hash.replace(/^#/, "") || "/dashboard";
   const [path, queryStr] = hash.split("?");
@@ -244,6 +280,9 @@ function router() {
     case "quiz": renderQuizView(parts[1]); break;
     case "exam": renderExamSetup(); break;
     case "practice": renderPractice(); break;
+    case "plan": renderPlan(); break;
+    case "paths": renderPaths(); break;
+    case "path": renderPath(parts[1]); break;
     case "stats": renderStats(); break;
     case "glossary": renderGlossary(query.term); break;
     case "favorites": renderFavorites(); break;
@@ -287,6 +326,8 @@ function renderDashboard() {
       <div class="stat-pill"><span class="pill-num">${stats.getState().totals.answered}</span><span class="pill-label">Fragen</span></div>
       <div class="stat-pill"><span class="pill-num">${stats.overallAccuracy()}%</span><span class="pill-label">Trefferquote</span></div>
     </section>
+
+    ${(() => { const d = stats.daysUntilExam(); return d != null ? `<a class="card countdown-banner" href="#/plan"><span class="countdown-num">${d}</span><span class="countdown-label">Tag${d === 1 ? "" : "e"} bis zur Prüfung – zum Lernplan →</span></a>` : ""; })()}
 
     <section class="card daily-card">
       <div class="daily-head"><h2>🎯 Tagesziel</h2><span>${today} / ${goal} Fragen</span></div>
@@ -388,6 +429,8 @@ function renderTopic(id) {
   if (t.visual) tools.renderVisual(t.visual, $("#topic-visual", v));
   // Code-Blöcke aufwerten
   tools.enhanceCodeBlocks(v);
+  // Breite Tabellen mobil scrollbar machen
+  wrapTables($(".topic-body", v));
   // Glossar verlinken
   linkifyGlossary($(".topic-body", v));
 
@@ -450,15 +493,21 @@ function renderPractice() {
       <a class="mode-card ${weak ? "" : "disabled"}" href="${weak ? "#/practice?mode=weak" : "#"}"><span class="mode-icon">🩹</span><h3>Schwachstellen</h3><p>${weak ? `${weak} zuletzt falsch beantwortete Fragen gezielt wiederholen.` : "Noch keine Schwachstellen erfasst."}</p></a>
       <a class="mode-card" href="#/practice?mode=leitner"><span class="mode-icon">🗂️</span><h3>Karteikarten (Leitner)</h3><p>${due} fällige Karten nach dem Spaced-Repetition-Prinzip.</p></a>
       <a class="mode-card" href="#/practice?mode=flashall"><span class="mode-icon">🃏</span><h3>Alle Karteikarten</h3><p>Alle Karteikarten gemischt durchgehen.</p></a>
+      <a class="mode-card" href="#/practice?mode=scenario"><span class="mode-icon">🧩</span><h3>Ganzheitliche Aufgaben</h3><p>${scenarios.length} handlungsorientierte Fallaufgaben mit mehreren Teilfragen – wie in der echten IHK-Prüfung.</p></a>
       <a class="mode-card" href="#/exam"><span class="mode-icon">📝</span><h3>Prüfungssimulation</h3><p>Realistischer Test mit Timer und Auswertung (AP1/AP2).</p></a>
     </section>`;
 }
 
 function runPracticeMode(mode) {
   const v = main();
-  let list = [], title = "", isFlash = false;
+  let list = [], title = "", isFlash = false, noShuffle = false;
 
   switch (mode) {
+    case "scenario": {
+      // Szenarien in der Reihenfolge belassen; nur die Reihenfolge der Fälle mischen.
+      list = quiz.expandScenarios(quiz.shuffle(scenarios));
+      title = "Ganzheitliche Aufgaben"; noShuffle = true; break;
+    }
     case "daily": {
       list = [quiz.questionOfTheDay()]; title = "Frage des Tages"; break;
     }
@@ -492,7 +541,7 @@ function runPracticeMode(mode) {
   if (isFlash) {
     new quiz.FlashcardSession(list, { onAnswered: showAchievementToasts, onFinish: () => (location.hash = "#/practice") }).mount(host);
   } else {
-    new quiz.QuizSession(quiz.shuffle(list), { title, onAnswered: showAchievementToasts, onFinish: () => (location.hash = "#/practice") }).mount(host);
+    new quiz.QuizSession(noShuffle ? list : quiz.shuffle(list), { title, onAnswered: showAchievementToasts, onFinish: () => (location.hash = "#/practice") }).mount(host);
   }
 }
 
@@ -539,6 +588,142 @@ function startExam(kind) {
 }
 
 /* ------------------------------------------------------------------ *
+ *  Ansicht: Geführte Lernpfade
+ * ------------------------------------------------------------------ */
+
+function pathProgress(p) {
+  const ts = p.topicIds.map(getTopic).filter(Boolean);
+  if (!ts.length) return 0;
+  return Math.round(ts.reduce((a, t) => a + stats.topicProgressPct(t), 0) / ts.length);
+}
+
+function renderPaths() {
+  const v = main();
+  v.innerHTML = `
+    <header class="page-head"><div>
+      <h1>🧭 Geführte Lernpfade</h1>
+      <p class="lead">Strukturierte Wege durch die Themen – Schritt für Schritt von den Grundlagen zur Prüfungsreife.</p>
+    </div></header>
+    <section class="tiles">
+      ${paths.map((p) => { const pct = pathProgress(p); return `
+        <a class="tile tile-link" href="#/path/${p.id}">
+          <div class="tile-icon">${p.icon}</div>
+          <h3>${escapeHtml(p.title)}</h3>
+          <p class="tile-count">${p.topicIds.length} Themen</p>
+          <div class="progress sm"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <span class="tile-pct">${pct}% abgeschlossen</span>
+          <p class="muted" style="font-size:.82rem;margin:.6rem 0 0">${escapeHtml(p.description)}</p>
+        </a>`; }).join("")}
+    </section>`;
+}
+
+function renderPath(id) {
+  const p = getPath(id);
+  if (!p) { main().innerHTML = `<p class="notice">Lernpfad nicht gefunden.</p>`; return; }
+  const v = main();
+  const steps = p.topicIds.map(getTopic).filter(Boolean).map((t) => ({ t, pct: stats.topicProgressPct(t) }));
+  const next = steps.find((s) => s.pct < 100);
+  const pct = pathProgress(p);
+
+  v.innerHTML = `
+    <header class="page-head"><div>
+      <span class="crumb"><a href="#/paths">Lernpfade</a></span>
+      <h1>${p.icon} ${escapeHtml(p.title)}</h1>
+      <p class="lead">${escapeHtml(p.description)}</p>
+    </div></header>
+
+    <section class="card">
+      <div class="daily-head"><h2>Fortschritt</h2><span>${pct}%</span></div>
+      <div class="progress"><div class="progress-fill" style="width:${pct}%"></div></div>
+      ${next ? `<div class="topic-cta"><a class="btn btn-primary btn-lg" href="#/topic/${next.t.id}">▶ Weiter: ${escapeHtml(next.t.title)}</a></div>`
+        : `<p class="notice" style="margin-top:1rem">🎉 Pfad abgeschlossen! Teste dich in der Prüfungssimulation.</p>`}
+    </section>
+
+    <ol class="path-steps">
+      ${steps.map((s, i) => `
+        <li class="path-step ${s.pct >= 100 ? "done" : s === next ? "current" : ""}">
+          <span class="path-num">${s.pct >= 100 ? "✓" : i + 1}</span>
+          <a class="path-link" href="#/topic/${s.t.id}">
+            <span class="path-title">${s.t.icon || ""} ${escapeHtml(s.t.title)}</span>
+            <span class="path-bar"><span class="progress sm"><span class="progress-fill" style="width:${s.pct}%"></span></span></span>
+          </a>
+          <a class="btn btn-small" href="#/quiz/${s.t.id}">Quiz</a>
+        </li>`).join("")}
+    </ol>`;
+}
+
+/* ------------------------------------------------------------------ *
+ *  Ansicht: Lernplan & Prüfungs-Countdown
+ * ------------------------------------------------------------------ */
+
+function renderPlan() {
+  const v = main();
+  const examTs = stats.getExamDate();
+  const days = stats.daysUntilExam();
+  const examInput = examTs ? stats.todayKey(new Date(examTs)) : "";
+
+  // Offene Themen (noch nicht vollständig gelernt), nach Fortschritt sortiert
+  const openTopics = topics
+    .map((t) => ({ t, pct: stats.topicProgressPct(t) }))
+    .filter((x) => x.pct < 100)
+    .sort((a, b) => a.pct - b.pct);
+  const due = stats.dueQuestionIds().length;
+  const weak = stats.weakQuestionIds().length;
+
+  // Plan: offene Themen gleichmäßig auf die verbleibenden (max. 14 angezeigten) Tage verteilen
+  const planDays = days && days > 0 ? Math.min(days, 14) : 7;
+  const perDay = Math.max(1, Math.ceil(openTopics.length / planDays));
+  const schedule = [];
+  for (let d = 0; d < planDays && openTopics.length; d++) {
+    const date = new Date(); date.setDate(date.getDate() + d);
+    schedule.push({ date, items: openTopics.splice(0, perDay).map((x) => x.t) });
+  }
+
+  v.innerHTML = `
+    <header class="page-head"><h1>🗓️ Lernplan & Prüfungs-Countdown</h1></header>
+
+    <section class="card">
+      <h2>Prüfungstermin</h2>
+      <label class="goal-edit">Datum deiner Prüfung:
+        <input type="date" id="exam-date" value="${examInput}" min="${stats.todayKey()}">
+      </label>
+      ${examTs ? `<button class="btn btn-small btn-danger" id="exam-clear" style="margin-left:.6rem">Termin entfernen</button>` : ""}
+      ${days != null ? `<div class="countdown"><span class="countdown-num">${days}</span><span class="countdown-label">Tag${days === 1 ? "" : "e"} bis zur Prüfung</span></div>`
+        : `<p class="muted" style="margin-top:.8rem">Setze einen Termin, um Countdown und Lernplan zu erhalten.</p>`}
+    </section>
+
+    <section class="stat-strip">
+      <div class="stat-pill"><span class="pill-num">${openTopics.length + schedule.reduce((a, s) => a + s.items.length, 0)}</span><span class="pill-label">offene Themen</span></div>
+      <div class="stat-pill"><span class="pill-num">${due}</span><span class="pill-label">fällige Wiederholungen</span></div>
+      <div class="stat-pill"><span class="pill-num">${weak}</span><span class="pill-label">Schwachstellen</span></div>
+    </section>
+
+    <section class="card">
+      <h2>📋 Dein Lernplan</h2>
+      ${due || weak ? `<div class="daily-actions" style="margin-bottom:1rem">
+        ${due ? `<a class="btn btn-primary" href="#/practice?mode=leitner">🔁 ${due} Wiederholungen fällig</a>` : ""}
+        ${weak ? `<a class="btn" href="#/practice?mode=weak">🩹 ${weak} Schwachstellen üben</a>` : ""}
+      </div>` : ""}
+      ${schedule.length ? `<ol class="plan-list">${schedule.map((s) => `
+        <li class="plan-day">
+          <div class="plan-date">${s.date.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" })}</div>
+          <div class="plan-items">${s.items.map((t) => `<a class="plan-topic" href="#/topic/${t.id}">${t.icon || "•"} ${escapeHtml(t.title)}</a>`).join("")}</div>
+        </li>`).join("")}</ol>`
+        : `<p class="notice">🎉 Alle Themen sind durchgearbeitet! Konzentriere dich auf Wiederholungen und Prüfungssimulationen.</p>`}
+    </section>`;
+
+  const dateInput = $("#exam-date", v);
+  dateInput.addEventListener("change", () => {
+    if (dateInput.value) {
+      const ts = new Date(dateInput.value + "T00:00:00").getTime();
+      stats.setExamDate(ts);
+    }
+    renderPlan();
+  });
+  $("#exam-clear", v)?.addEventListener("click", () => { stats.setExamDate(null); renderPlan(); });
+}
+
+/* ------------------------------------------------------------------ *
  *  Ansicht: Statistik-Dashboard
  * ------------------------------------------------------------------ */
 
@@ -578,6 +763,21 @@ function renderStats() {
       <div class="bereich-bars">${bereiche.map((b) => { const r = acc[b.id]; const pct = r && r.pct != null ? r.pct : 0; return `<div class="bb-row"><span class="bb-label">${b.icon} ${b.title}</span><div class="progress sm"><div class="progress-fill" style="width:${pct}%"></div></div><span class="bb-pct">${r && r.pct != null ? pct + "%" : "—"}</span></div>`; }).join("")}</div>
     </section>
 
+    <section class="card">
+      <h2>🧭 Wissensradar</h2>
+      <p class="muted">Vergleicht deine Quiz-Leistung mit deiner Selbsteinschätzung (1–5) je Bereich.</p>
+      <div class="stat-cols radar-cols">
+        <div class="chart-wrap tall"><canvas id="chart-radar"></canvas></div>
+        <div class="self-grid">${bereiche.map((b) => `
+          <div class="self-row">
+            <span class="self-label">${b.icon} ${b.title.replace(/ \(.*\)/, "")}</span>
+            <span class="self-stars" data-bereich="${b.id}" role="radiogroup" aria-label="Selbsteinschätzung ${escapeHtml(b.title)}">
+              ${[1, 2, 3, 4, 5].map((n) => `<button class="self-star ${stats.getSelfAssessment(b.id) >= n ? "on" : ""}" data-val="${n}" title="${n}/5" aria-label="${n} von 5">★</button>`).join("")}
+            </span>
+          </div>`).join("")}</div>
+      </div>
+    </section>
+
     <section class="card weak-card">
       <h2>🩹 Schwachstellen-Empfehlung</h2>
       ${weakest.length ? `<p>Diese Bereiche solltest du als Nächstes üben:</p><ul class="weak-list">${weakest.map((w) => `<li><span>${w.title}</span><span class="bb-pct">${w.pct}%</span></li>`).join("")}</ul><a class="btn btn-primary" href="#/practice?mode=weak">Schwachstellen jetzt üben</a>` : `<p>Noch zu wenig Daten – beantworte ein paar Quizze, dann erhältst du hier gezielte Empfehlungen.</p>`}
@@ -597,9 +797,24 @@ function renderStats() {
   stats.renderHistoryChart($("#chart-history", v), 14);
   stats.renderAccuracyDoughnut($("#chart-acc", v));
   stats.renderBereichChart($("#chart-bereich", v), topics, bereiche);
+  stats.renderRadarChart($("#chart-radar", v), topics, bereiche);
 
   renderHeatmap($("#heatmap", v));
   renderBadges($("#badges", v));
+
+  // Selbsteinschätzung (Sterne) → Radar live aktualisieren
+  $$(".self-stars", v).forEach((group) => {
+    const id = group.dataset.bereich;
+    group.addEventListener("click", (e) => {
+      const btn = e.target.closest(".self-star");
+      if (!btn) return;
+      let val = Number(btn.dataset.val);
+      if (stats.getSelfAssessment(id) === val) val = 0; // erneuter Klick = zurücksetzen
+      stats.setSelfAssessment(id, val);
+      $$(".self-star", group).forEach((s) => s.classList.toggle("on", Number(s.dataset.val) <= val));
+      stats.renderRadarChart($("#chart-radar", v), topics, bereiche);
+    });
+  });
 
   // Tagesziel
   $("#goal-input", v).addEventListener("change", (e) => stats.setDailyGoal(e.target.value));
@@ -645,10 +860,26 @@ function exportData() {
 function importData(e) {
   const file = e.target.files[0];
   if (!file) return;
+  // Grobe Plausibilitätsprüfung vor dem Einlesen (Typ/Größe).
+  const looksJson = /\.json$/i.test(file.name) || file.type === "application/json" || file.type === "";
+  if (!looksJson) { showToast("⚠️", "Import abgebrochen", "Bitte eine JSON-Datei wählen.", "bad"); e.target.value = ""; return; }
+  if (file.size > 5 * 1024 * 1024) { showToast("⚠️", "Datei zu groß", "Die Sicherung sollte unter 5 MB liegen.", "bad"); e.target.value = ""; return; }
+
   const reader = new FileReader();
   reader.onload = () => {
-    try { stats.importJSON(reader.result); alert("Lernstand erfolgreich importiert."); router(); }
-    catch (err) { alert("Import fehlgeschlagen: " + err.message); }
+    try {
+      stats.importJSON(reader.result);
+      showToast("✅", "Import erfolgreich", "Dein Lernstand wurde übernommen.", "good");
+      router();
+    } catch (err) {
+      showToast("⚠️", "Import fehlgeschlagen", "Die Datei ist keine gültige Lernstand-Sicherung.", "bad");
+    } finally {
+      e.target.value = ""; // erlaubt erneutes Wählen derselben Datei
+    }
+  };
+  reader.onerror = () => {
+    showToast("⚠️", "Lesefehler", "Die Datei konnte nicht gelesen werden.", "bad");
+    e.target.value = "";
   };
   reader.readAsText(file);
 }
@@ -703,7 +934,13 @@ function renderTools() {
     <header class="page-head"><h1>🛠️ Interaktive Werkzeuge</h1></header>
     <div class="tools-tabs" role="tablist">
       <button class="tools-tab active" data-tool="subnet" role="tab">🧮 Subnetting</button>
+      <button class="tools-tab" data-tool="ipv6" role="tab">🆕 IPv6</button>
+      <button class="tools-tab" data-tool="number" role="tab">🔢 Zahlensysteme</button>
+      <button class="tools-tab" data-tool="logic" role="tab">🔌 Logik</button>
+      <button class="tools-tab" data-tool="netzplan" role="tab">📈 Netzplan</button>
+      <button class="tools-tab" data-tool="sql" role="tab">🧾 SQL</button>
       <button class="tools-tab" data-tool="command" role="tab">⌨️ Befehle</button>
+      <button class="tools-tab" data-tool="cli" role="tab">🖥️ Terminal</button>
       <button class="tools-tab" data-tool="osi" role="tab">🗂️ OSI-Modell</button>
       <button class="tools-tab" data-tool="pomodoro" role="tab">⏱️ Pomodoro</button>
     </div>
@@ -713,7 +950,13 @@ function renderTools() {
     clearPomodoro();
     $$(".tools-tab", v).forEach((b) => b.classList.toggle("active", b.dataset.tool === tool));
     if (tool === "subnet") tools.renderSubnettingTrainer(host);
+    else if (tool === "ipv6") tools.renderIpv6Trainer(host);
+    else if (tool === "number") tools.renderNumberConverter(host);
+    else if (tool === "logic") tools.renderLogicTrainer(host);
+    else if (tool === "netzplan") tools.renderNetzplan(host);
+    else if (tool === "sql") tools.renderSqlSandbox(host);
     else if (tool === "command") tools.renderCommandTrainer(host);
+    else if (tool === "cli") tools.renderCliSimulator(host);
     else if (tool === "osi") { host.innerHTML = `<div class="tool-card"><h3>🗂️ Interaktives OSI-Modell</h3><div id="osi-host"></div></div>`; tools.renderVisual("osi", $("#osi-host", host)); }
     else if (tool === "pomodoro") { host.innerHTML = `<div class="tool-card"><h3>⏱️ Pomodoro-Lerntimer</h3><div id="pomo-host"></div></div>`; pomodoroCleanup = tools.renderPomodoro($("#pomo-host", host)); }
   };
@@ -731,18 +974,33 @@ function renderCheatsheet(id) {
   const v = main();
   v.innerHTML = `
     <header class="page-head no-print"><div><span class="crumb">Spickzettel</span><h1>${t.title}</h1></div>
-      <div class="topic-actions"><button class="btn btn-small" onclick="window.print()">🖨️ Drucken</button><a class="btn btn-small" href="#/topic/${id}">← Thema</a></div></header>
+      <div class="topic-actions"><button class="btn btn-small" id="cheat-print">🖨️ Drucken</button><a class="btn btn-small" href="#/topic/${id}">← Thema</a></div></header>
     <article class="cheatsheet">
       <h2 class="print-only">${t.title}</h2>
       <p class="cheat-summary">${t.summary}</p>
       ${t.cheatsheet && t.cheatsheet.length ? `<ul class="cheat-list">${t.cheatsheet.map((c) => `<li>${c}</li>`).join("")}</ul>` : ""}
       ${t.merksaetze && t.merksaetze.length ? `<h3>Merksätze</h3><ul class="cheat-list">${t.merksaetze.map((m) => `<li>${m}</li>`).join("")}</ul>` : ""}
     </article>`;
+  $("#cheat-print", v)?.addEventListener("click", () => window.print());
 }
 
 /* ------------------------------------------------------------------ *
  *  Achievement-Toasts
  * ------------------------------------------------------------------ */
+
+/**
+ * Zeigt einen Toast an. `kind` (good|bad|info) steuert die Akzentfarbe.
+ * Inhalt wird escaped, daher sicher auch für dynamische Texte.
+ */
+function showToast(icon, title, body = "", kind = "info", ms = 4200) {
+  const host = $("#toasts");
+  if (!host) return;
+  const toast = el("div", { class: `toast toast-${kind}` },
+    `<span class="toast-icon">${escapeHtml(icon)}</span><div><strong>${escapeHtml(title)}</strong>${body ? `<br>${escapeHtml(body)}` : ""}</div>`);
+  host.append(toast);
+  setTimeout(() => toast.classList.add("show"), 10);
+  setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 400); }, ms);
+}
 
 function showAchievementToasts() {
   const popped = stats.popAchievements();
@@ -750,7 +1008,7 @@ function showAchievementToasts() {
     const a = stats.ACHIEVEMENTS.find((x) => x.id === id);
     if (!a) return;
     setTimeout(() => {
-      const toast = el("div", { class: "toast achievement-toast" }, `<span class="toast-icon">${a.icon}</span><div><strong>Erfolg freigeschaltet!</strong><br>${a.title} – ${a.desc}</div>`);
+      const toast = el("div", { class: "toast achievement-toast" }, `<span class="toast-icon">${escapeHtml(a.icon)}</span><div><strong>Erfolg freigeschaltet!</strong><br>${escapeHtml(a.title)} – ${escapeHtml(a.desc)}</div>`);
       $("#toasts").append(toast);
       setTimeout(() => toast.classList.add("show"), 10);
       setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 400); }, 4200);
@@ -783,6 +1041,13 @@ function init() {
   stats.onChange(() => { /* Header wird bei Navigation neu gerendert; hier bewusst minimal */ });
 
   router();
+
+  // Hinweis, falls localStorage nicht verfügbar ist (z. B. privater Modus):
+  // Fortschritt wird dann nur temporär im Speicher gehalten.
+  if (stats.isUsingFallback()) {
+    setTimeout(() => showToast("ℹ️", "Speicher nicht verfügbar",
+      "Dein Fortschritt wird nur temporär gespeichert (z. B. privater Modus). Nutze Export für eine Sicherung.", "info", 7000), 800);
+  }
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
