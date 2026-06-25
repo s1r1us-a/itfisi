@@ -130,6 +130,215 @@ export const scenarios = [
       },
     ],
   },
+
+  {
+    id: "szenario-perimeter-dmz",
+    topicId: "firewall",
+    title: "Sicheres Netzkonzept mit DMZ",
+    difficulty: "schwer",
+    scenario: `<p>Die <strong>Bergmann GmbH</strong> betreibt künftig einen eigenen Web- und Mailserver,
+      die aus dem Internet erreichbar sein müssen. Das interne LAN mit Buchhaltung und Fileserver
+      soll dabei bestmöglich geschützt bleiben. Du planst das Firewall-/Zonenkonzept.</p>`,
+    parts: [
+      {
+        type: "mc-single",
+        question: "In welche Zone gehören der öffentlich erreichbare Web- und Mailserver?",
+        options: ["In die DMZ", "Direkt ins interne LAN", "Ins Gäste-WLAN", "Auf den Arbeitsplatz-PCs"],
+        answer: 0,
+        explanation: "Öffentlich erreichbare Dienste gehören in die DMZ, damit ein kompromittierter Server nicht direkt Zugriff auf das interne LAN eröffnet.",
+      },
+      {
+        type: "mc-single",
+        question: "Welche Grundregel sollte die Firewall verfolgen?",
+        options: [
+          "Default-Deny: alles sperren, nur Benötigtes gezielt erlauben",
+          "Default-Allow: alles erlauben, nur Bekanntes sperren",
+          "Nur ausgehenden Verkehr filtern",
+          "Gar nicht filtern, NAT genügt",
+        ],
+        answer: 0,
+        explanation: "Default-Deny ist das sichere Grundprinzip: erst alles verbieten, dann nur die notwendigen Dienste/Ports freigeben.",
+      },
+      {
+        type: "truefalse",
+        question: "Eine Stateful-Inspection-Firewall lässt Antwortpakete einer erlaubten Verbindung automatisch zu.",
+        answer: true,
+        explanation: "Sie führt eine Zustandstabelle; zu einer zugelassenen Session gehörende Antwortpakete werden ohne separate Regel durchgelassen.",
+      },
+      {
+        type: "mc-multi",
+        question: "Welche Maßnahmen erhöhen die Sicherheit zusätzlich? (Mehrfachauswahl)",
+        options: [
+          "Regelmäßige Updates/Patches der DMZ-Server",
+          "Protokollierung (Logging) und Monitoring",
+          "Den Fileserver ebenfalls in die DMZ stellen",
+          "Netztrennung per VLAN",
+        ],
+        answer: [0, 1, 3],
+        explanation: "Patches, Logging/Monitoring und VLAN-Segmentierung erhöhen die Sicherheit. Der interne Fileserver gehört NICHT in die DMZ.",
+      },
+    ],
+  },
+
+  {
+    id: "szenario-zugriffsschutz",
+    topicId: "auth-rbac",
+    title: "Zugriffsschutz & Authentifizierung",
+    difficulty: "mittel",
+    scenario: `<p>Nach einem Audit soll die <strong>Klein &amp; Partner KG</strong> ihren Zugriffsschutz
+      verbessern. Aktuell teilen sich mehrere Mitarbeitende Sammelkonten, Passwörter sind schwach
+      und Rechte werden einzeln pro Person vergeben.</p>`,
+    parts: [
+      {
+        type: "mc-single",
+        question: "Wie sollten Berechtigungen künftig sinnvoll verwaltet werden?",
+        options: ["Über Rollen (RBAC)", "Weiterhin einzeln je Person", "Über Sammelkonten", "Gar nicht einschränken"],
+        answer: 0,
+        explanation: "RBAC bündelt Rechte in Rollen; Mitarbeitende erhalten Rollen. Das ist übersichtlich, prüfbar und reduziert Fehler.",
+      },
+      {
+        type: "mc-single",
+        question: "Welches Prinzip besagt, dass jede Person nur die nötigsten Rechte erhält?",
+        options: ["Least Privilege", "Default-Allow", "Striping", "Zweckbindung"],
+        answer: 0,
+        explanation: "Least Privilege (geringste Rechte) minimiert Schaden bei Missbrauch oder Kontoübernahme.",
+      },
+      {
+        type: "truefalse",
+        question: "Passwort + Einmalcode aus einer Authenticator-App ist eine echte Multi-Faktor-Authentifizierung.",
+        answer: true,
+        explanation: "Es kombiniert Wissen (Passwort) und Besitz (App/Gerät) – zwei verschiedene Faktoren ⇒ MFA.",
+      },
+      {
+        type: "cloze",
+        question: "Sammelkonten sollten abgeschafft werden, damit Aktionen einer {{}} Person zuordenbar sind (Nachvollziehbarkeit).",
+        blanks: [["einzelnen", "individuellen", "bestimmten"]],
+        explanation: "Personalisierte Konten ermöglichen Nachvollziehbarkeit/Accountability – wichtig für Audits und Forensik.",
+      },
+    ],
+  },
+
+  {
+    id: "szenario-servervirtualisierung",
+    topicId: "virtualisierung",
+    title: "Konsolidierung per Server-Virtualisierung",
+    difficulty: "mittel",
+    scenario: `<p>Die <strong>Hofmann GmbH</strong> betreibt fünf alte physische Server mit geringer
+      Auslastung. Sie sollen auf einer neuen, leistungsstarken Hardware virtualisiert (konsolidiert)
+      werden. Active Directory und ein Fileserver gehören dazu.</p>`,
+    parts: [
+      {
+        type: "mc-single",
+        question: "Welcher Hypervisor-Typ ist für den produktiven Server-Betrieb am besten geeignet?",
+        options: ["Typ 1 (bare metal, z. B. ESXi/Hyper-V)", "Typ 2 (auf einem Desktop-OS)", "Ein Emulator", "Gar kein Hypervisor"],
+        answer: 0,
+        explanation: "Typ-1-Hypervisoren laufen direkt auf der Hardware und bieten beste Leistung und Stabilität für Server.",
+      },
+      {
+        type: "mc-multi",
+        question: "Welche Vorteile bringt die Virtualisierung hier? (Mehrfachauswahl)",
+        options: [
+          "Bessere Hardwareauslastung",
+          "Schnellere Bereitstellung neuer Server",
+          "Snapshots vor Updates",
+          "Backups werden überflüssig",
+        ],
+        answer: [0, 1, 2],
+        explanation: "Konsolidierung verbessert Auslastung, beschleunigt Bereitstellung und erlaubt Snapshots. Backups bleiben dennoch zwingend nötig.",
+      },
+      {
+        type: "truefalse",
+        question: "Ein Snapshot ersetzt eine reguläre Datensicherung.",
+        answer: false,
+        explanation: "Nein – ein Snapshot ist nur ein kurzfristiger Wiederherstellungspunkt auf demselben Speicher und kein vollwertiges Backup.",
+      },
+      {
+        type: "mc-single",
+        question: "Womit verteilt man im AD zentral Einstellungen an die virtualisierten Clients/Server?",
+        options: ["Gruppenrichtlinien (GPO)", "DHCP", "RAID", "VLAN"],
+        answer: 0,
+        explanation: "GPOs verteilen zentral Richtlinien und Konfigurationen an Benutzer und Computer der Domäne.",
+      },
+    ],
+  },
+
+  {
+    id: "szenario-sql-auswertung",
+    topicId: "sql",
+    title: "Umsatzauswertung per SQL",
+    difficulty: "schwer",
+    scenario: `<p>Im Shop der <strong>Yilmaz KG</strong> gibt es die Tabellen <code>kunde</code>,
+      <code>bestellung</code> (mit Fremdschlüssel <code>kunde_id</code>) und <code>position</code>.
+      Die Geschäftsführung möchte verschiedene Auswertungen.</p>`,
+    parts: [
+      {
+        type: "mc-single",
+        question: "Wie verbindet man Kunden mit ihren Bestellungen, sodass nur Kunden mit Bestellungen erscheinen?",
+        options: ["INNER JOIN über kunde_id", "CROSS JOIN", "LEFT JOIN", "UNION"],
+        answer: 0,
+        explanation: "Der INNER JOIN über den Fremdschlüssel kunde_id liefert nur Kunden, zu denen mindestens eine Bestellung existiert.",
+      },
+      {
+        type: "mc-single",
+        question: "Womit filtert man Gruppen, z. B. „nur Kunden mit mehr als 5 Bestellungen“?",
+        options: ["HAVING COUNT(*) > 5 nach GROUP BY", "WHERE COUNT(*) > 5", "ORDER BY COUNT(*)", "DISTINCT"],
+        answer: 0,
+        explanation: "Aggregatbedingungen gehören in HAVING (nach GROUP BY). WHERE filtert nur einzelne Zeilen vor der Gruppierung.",
+      },
+      {
+        type: "calc",
+        question: "Schreibe die Abfrage, die alle Spalten der Tabelle bestellung absteigend nach datum sortiert (Standardform, ohne Semikolon nötig).",
+        answer: "SELECT * FROM bestellung ORDER BY datum DESC",
+        accept: ["select * from bestellung order by datum desc", "SELECT * FROM bestellung ORDER BY datum DESC;"],
+        explanation: "ORDER BY <spalte> DESC sortiert absteigend; ASC (Standard) wäre aufsteigend.",
+      },
+      {
+        type: "truefalse",
+        question: "Ein Fremdschlüssel in bestellung.kunde_id verweist auf den Primärschlüssel der Tabelle kunde.",
+        answer: true,
+        explanation: "Richtig – der Fremdschlüssel stellt die referenzielle Integrität zur 1-Seite (kunde) her.",
+      },
+    ],
+  },
+
+  {
+    id: "szenario-beschaffung",
+    topicId: "nutzwertanalyse",
+    title: "Hardware-Beschaffung & Angebotsbewertung",
+    difficulty: "mittel",
+    scenario: `<p>Die <strong>Sommer GmbH</strong> beschafft 20 neue Notebooks. Drei Anbieter haben
+      Angebote abgegeben, die sich in Preis, Garantie und Lieferzeit unterscheiden. Du sollst eine
+      fundierte Entscheidung vorbereiten und die Kosten kalkulieren.</p>`,
+    parts: [
+      {
+        type: "mc-single",
+        question: "Welches Verfahren bewertet Angebote anhand mehrerer gewichteter Kriterien (nicht nur Preis)?",
+        options: ["Nutzwertanalyse", "Subnetting", "Normalisierung", "RAID-Berechnung"],
+        answer: 0,
+        explanation: "Die Nutzwertanalyse gewichtet Kriterien und bewertet je Alternative – die höchste gewichtete Summe gewinnt.",
+      },
+      {
+        type: "calc",
+        question: "Ein Notebook kostet 800 € netto. Wie hoch ist der Bruttopreis bei 19 % USt? (in €)",
+        answer: "952",
+        accept: ["952 €", "952,00"],
+        explanation: "800 € × 1,19 = 952 € brutto.",
+      },
+      {
+        type: "truefalse",
+        question: "Ein angebotener Skontoabzug von 2 % bei Zahlung binnen 10 Tagen senkt den tatsächlichen Einkaufspreis.",
+        answer: true,
+        explanation: "Skonto ist ein Preisnachlass für schnelle Zahlung und reduziert den Bareinkaufspreis.",
+      },
+      {
+        type: "mc-single",
+        question: "Welches Dokument hält die Anforderungen des Auftraggebers an die Beschaffung fest?",
+        options: ["Das Lastenheft", "Das Pflichtenheft", "Der Netzplan", "Die ACL"],
+        answer: 0,
+        explanation: "Das Lastenheft beschreibt das Was/die Anforderungen aus Sicht des Auftraggebers.",
+      },
+    ],
+  },
 ];
 
 export function getScenario(id) { return scenarios.find((s) => s.id === id) || null; }

@@ -16,7 +16,9 @@ Die Anwendung deckt die komplette Ausbildung ab – mit echten Lerninhalten, vie
   **Prüfungsbereichen (AP1 / AP2-Bereiche / WiSo)** – jederzeit umschaltbar.
 - **Dashboard** mit Kategorie-Kacheln und individuellem Fortschritt, Tagesziel,
   Level, Punkten und Streak.
-- **Lerninhalte** pro Thema: Erklärung → Visualisierung/Beispiel → Merksätze → Abfragen.
+- **Lerninhalte** pro Thema: Erklärung → Visualisierung/Beispiel → **einklappbarer Vertiefungs-/
+  Lesestoff-Block** → Merksätze → Abfragen. Themenseiten bieten zusätzlich **Lesefortschritts-
+  Balken**, ein **Inhaltsverzeichnis (Sprungnavigation)** und eine **geschätzte Lesezeit**.
 - **7 Aufgabentypen** mit sofortigem Feedback und Lösungserklärung:
   Multiple Choice (einfach/mehrfach), Wahr/Falsch, Lückentext, Zuordnung (Drag & Drop),
   Karteikarten (Flip), Rechenaufgaben, sowie die gemischte **Prüfungssimulation mit Timer**.
@@ -174,6 +176,7 @@ Ein Objekt zum Array `topics` hinzufügen:
   visual: null,                     // null | "osi" | "dora" | "tcp" | "raid" | "ad"
   sections: [{ heading: "Überschrift", html: "<p>Erklärung …</p>" }],
   examples: [{ title: "Beispiel", html: "<p>…</p>" }],
+  deepDive: [{ heading: "Vertiefung", html: "<p>Lesestoff …</p>" }], // optional, einklappbar
   merksaetze: ["Merksatz 1"],
   cheatsheet: ["Kompaktpunkt für die Spickzettel-Ansicht"],
   questionIds: ["meine-frage-1"],   // Verweise auf data/questions.js
@@ -244,7 +247,9 @@ Bekannte Glossarbegriffe werden im Fließtext der Themen automatisch verlinkt.
 
 ## 🛠️ Technik
 
-- Semantisches **HTML5**, modernes **CSS** (Flexbox/Grid, Custom Properties, `color-mix`).
+- Semantisches **HTML5**, modernes **CSS** (Flexbox/Grid, Custom Properties, `color-mix`),
+  **eigene schlanke Scrollbars**, gestaffelte Einblend-Animationen, Skeleton-Loader für Diagramme
+  und durchgängige Beachtung von `prefers-reduced-motion`.
 - **JavaScript (ES6+ Module)**, klare Trennung von Logik und Daten.
 - Keine Build-Tools, keine Pflicht-Abhängigkeiten – lauffähig über jeden statischen Webserver.
 - Optionale CDN-Bibliotheken: Chart.js (Diagramme), highlight.js (Code-Highlighting).

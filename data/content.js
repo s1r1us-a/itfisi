@@ -115,7 +115,29 @@ export const topics = [
       "TCP/IP: Anwendung · Transport · Internet · Netzzugang",
       "PDU: Schicht4=Segment, 3=Paket, 2=Frame, 1=Bit",
     ],
-    questionIds: ["q-osi-1","q-osi-2","q-osi-3","q-osi-match-1","q-osi-cloze-1","fc-osi-1","fc-osi-2"],
+    deepDive: [
+      { heading: "Kapselung & PDUs Schritt für Schritt",
+        html: `<p>Beim Senden wandert jedes Datenpaket von Schicht 7 nach unten. Jede Schicht ergänzt eigene Steuerinformationen (Header) – das nennt man <strong>Encapsulation</strong>. Die Dateneinheit heißt auf jeder Schicht anders (<strong>PDU</strong> = Protocol Data Unit):</p>
+        <table>
+          <thead><tr><th>Schicht</th><th>PDU</th><th>typische Adresse</th></tr></thead>
+          <tbody>
+            <tr><td>4 Transport</td><td>Segment (TCP) / Datagramm (UDP)</td><td>Portnummer</td></tr>
+            <tr><td>3 Vermittlung</td><td>Paket</td><td>IP-Adresse</td></tr>
+            <tr><td>2 Sicherung</td><td>Frame</td><td>MAC-Adresse</td></tr>
+            <tr><td>1 Bitübertragung</td><td>Bit</td><td>–</td></tr>
+          </tbody>
+        </table>
+        <p>Beim Empfänger läuft alles umgekehrt (Decapsulation): Jede Schicht entfernt „ihren“ Header und reicht den Rest nach oben.</p>` },
+      { heading: "OSI vs. TCP/IP – warum zwei Modelle?",
+        html: `<p>Das <strong>OSI-Modell</strong> ist ein didaktisches Referenzmodell (7 Schichten). Das <strong>TCP/IP-Modell</strong> bildet die reale Internet-Praxis ab und fasst Schichten zusammen. In der Prüfung wird häufig die Zuordnung <em>Gerät/Protokoll → Schicht</em> abgefragt – diese sicher zu beherrschen ist Pflicht.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Encapsulation = Header anhängen beim Senden, Decapsulation = entfernen beim Empfangen.</li>
+          <li>Schicht 4 trennt mit Ports, Schicht 3 adressiert mit IP, Schicht 2 mit MAC.</li>
+          <li>Datenflussrichtung beim Senden: 7 → 1, beim Empfangen: 1 → 7.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-osi-1","q-osi-2","q-osi-3","q-osi-match-1","q-osi-cloze-1","fc-osi-1","fc-osi-2","q-osi-4","q-osi-tf-2","q-osi-5"],
   },
 
   {
@@ -157,7 +179,27 @@ export const topics = [
       "Loopback 127.0.0.1 · APIPA 169.254.0.0/16",
       "32 Bit = 4 Oktette à 0–255",
     ],
-    questionIds: ["q-ipv4-1","q-ipv4-2","q-ipv4-tf-1","fc-ipv4-1"],
+    deepDive: [
+      { heading: "Netz-, Broadcast- und Hostadresse",
+        html: `<p>In jedem IPv4-Subnetz sind zwei Adressen reserviert und <strong>nicht</strong> an Hosts vergebbar:</p>
+        <ul>
+          <li><strong>Netzadresse</strong> (alle Hostbits = 0): identifiziert das Netz selbst, z. B. <code>192.168.10.0</code>.</li>
+          <li><strong>Broadcastadresse</strong> (alle Hostbits = 1): erreicht alle Hosts im Netz, z. B. <code>192.168.10.255</code>.</li>
+        </ul>
+        <p>Bei einem /24 bleiben somit <code>.1</code> bis <code>.254</code> als nutzbare Hostadressen (254 Stück).</p>` },
+      { heading: "Besondere Adressbereiche",
+        html: `<table>
+          <thead><tr><th>Bereich</th><th>Bedeutung</th></tr></thead>
+          <tbody>
+            <tr><td>10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16</td><td>private Netze (RFC 1918), nicht im Internet routbar</td></tr>
+            <tr><td>127.0.0.0/8</td><td>Loopback (eigener Host)</td></tr>
+            <tr><td>169.254.0.0/16</td><td>APIPA – Selbstvergabe ohne DHCP</td></tr>
+            <tr><td>0.0.0.0/0</td><td>Default-Route / „beliebig“</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> Sieht ein Client eine 169.254.x.y-Adresse, hat er <em>keinen</em> DHCP-Server erreicht – ein klassischer Fehlerhinweis im Support.</p>` },
+    ],
+    questionIds: ["q-ipv4-1","q-ipv4-2","q-ipv4-tf-1","fc-ipv4-1","q-ipv4-3","q-ipv4-multi-1","q-ipv4-cloze-1"],
   },
 
   {
@@ -194,7 +236,24 @@ export const topics = [
       "Maskenwerte: 128·192·224·240·248·252·254·255",
       "Übe interaktiv im Subnetting-Trainer!",
     ],
-    questionIds: ["q-sub-1","q-sub-2","q-sub-calc-1","q-sub-calc-2","q-sub-cloze-1","fc-sub-1"],
+    deepDive: [
+      { heading: "Subnetting in 4 Schritten (Klausur-Rezept)",
+        html: `<ol>
+          <li><strong>Hostbits bestimmen:</strong> 32 − Präfix. Beispiel /26 ⇒ 6 Hostbits.</li>
+          <li><strong>Adressen/Hosts berechnen:</strong> 2^Hostbits Adressen, davon −2 nutzbar. /26 ⇒ 2^6 = 64, also 62 Hosts.</li>
+          <li><strong>Blockgröße:</strong> 256 − Maskenwert im relevanten Oktett. /26 ⇒ Maske 192 ⇒ 256−192 = 64.</li>
+          <li><strong>Subnetze ablesen:</strong> in Schritten der Blockgröße: .0, .64, .128, .192. Broadcast = nächste Netzadresse − 1.</li>
+        </ol>` },
+      { heading: "VLSM & CIDR",
+        html: `<p><strong>CIDR</strong> (Classless Inter-Domain Routing) löst sich von den alten Klassen A/B/C und nutzt frei wählbare Präfixe (z. B. /22). <strong>VLSM</strong> (Variable Length Subnet Mask) erlaubt <em>unterschiedlich große</em> Subnetze im selben Netz – große Subnetze zuerst zuteilen, dann die kleinen. So spart man Adressen.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Maskenwerte je Oktett: 128 · 192 · 224 · 240 · 248 · 252 · 254 · 255.</li>
+          <li>Nutzbare Hosts = 2^Hostbits − 2 (Ausnahme /31 für Punkt-zu-Punkt).</li>
+          <li>Bei VLSM immer den größten Bedarf zuerst zuweisen.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-sub-1","q-sub-2","q-sub-calc-1","q-sub-calc-2","q-sub-cloze-1","fc-sub-1","q-sub-3","q-sub-calc-3","q-sub-match-1"],
   },
 
   {
@@ -230,7 +289,27 @@ export const topics = [
       "Loopback ::1 · unspecified ::",
       "SLAAC nutzt Router Advertisements (ICMPv6)",
     ],
-    questionIds: ["q-ipv6-1","q-ipv6-2","q-ipv6-tf-1","fc-ipv6-1"],
+    deepDive: [
+      { heading: "Verkürzungsregeln (RFC 5952)",
+        html: `<p>IPv6-Adressen lassen sich kürzen:</p>
+        <ul>
+          <li>Führende Nullen je Block weglassen: <code>2001:0db8:0000:0000:0000:0000:0000:0001</code> → <code>2001:db8:0:0:0:0:0:1</code>.</li>
+          <li>Eine zusammenhängende Folge von Null-Blöcken durch <code>::</code> ersetzen – aber <strong>nur einmal</strong> pro Adresse: → <code>2001:db8::1</code>.</li>
+          <li>Hex-Buchstaben klein schreiben (Kanonisierung).</li>
+        </ul>` },
+      { heading: "Adresstypen & Aufbau",
+        html: `<table>
+          <thead><tr><th>Präfix</th><th>Typ</th></tr></thead>
+          <tbody>
+            <tr><td>2000::/3</td><td>Global Unicast (öffentlich routbar)</td></tr>
+            <tr><td>fc00::/7</td><td>Unique Local (privat, vgl. RFC 1918)</td></tr>
+            <tr><td>fe80::/10</td><td>Link-Local (nur im Segment)</td></tr>
+            <tr><td>ff00::/8</td><td>Multicast (kein Broadcast in IPv6!)</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> 128 Bit, 8 Blöcke à 16 Bit. Statt Broadcast nur Multicast. SLAAC erlaubt die zustandslose Autokonfiguration über Router-Advertisements.</p>` },
+    ],
+    questionIds: ["q-ipv6-1","q-ipv6-2","q-ipv6-tf-1","fc-ipv6-1","q-ipv6-3","q-ipv6-cloze-1","q-ipv6-tf-2"],
   },
 
   {
@@ -260,7 +339,23 @@ export const topics = [
       "ARP: IPv4→MAC · IPv6 nutzt Neighbor Discovery",
       "Hub=L1, Switch=L2, Router=L3",
     ],
-    questionIds: ["q-eth-1","q-eth-2","q-arp-tf-1","fc-mac-1"],
+    deepDive: [
+      { heading: "Wie ein Switch lernt (MAC-/CAM-Tabelle)",
+        html: `<p>Ein Switch betrachtet die <strong>Quell-MAC</strong> ankommender Frames und merkt sich, an welchem Port welche MAC hängt (MAC-/CAM-Tabelle). Für das Ziel gilt:</p>
+        <ul>
+          <li><strong>Ziel bekannt:</strong> Frame nur an den passenden Port weiterleiten (forwarding).</li>
+          <li><strong>Ziel unbekannt / Broadcast:</strong> an alle Ports außer dem Eingang fluten (flooding).</li>
+        </ul>
+        <p>Das ARP-Protokoll löst dabei IP- in MAC-Adressen auf (Schicht 3 → 2).</p>` },
+      { heading: "Kollisions- vs. Broadcast-Domäne",
+        html: `<p>Ein <strong>Hub</strong> bildet eine einzige große Kollisionsdomäne (Halbduplex, alle teilen sich das Medium). Ein <strong>Switch</strong> gibt jedem Port eine eigene Kollisionsdomäne (Vollduplex), trennt aber <em>keine</em> Broadcast-Domänen – das macht erst ein <strong>Router</strong> (oder VLANs).</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>MAC = 48 Bit, erste 24 Bit = Hersteller-OUI.</li>
+          <li>Switch trennt Kollisions-, Router/VLAN trennt Broadcast-Domänen.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-eth-1","q-eth-2","q-arp-tf-1","fc-mac-1","q-eth-3","q-eth-tf-2","q-eth-match-1"],
   },
 
   {
@@ -290,7 +385,23 @@ export const topics = [
       "Native VLAN = untagged auf dem Trunk",
       "Router-on-a-Stick = Sub-Interfaces",
     ],
-    questionIds: ["q-vlan-1","q-vlan-2","q-vlan-tf-1","fc-vlan-1"],
+    deepDive: [
+      { heading: "Access- vs. Trunk-Port",
+        html: `<ul>
+          <li><strong>Access-Port:</strong> gehört zu genau einem VLAN, hier hängen Endgeräte (PC, Drucker). Frames sind ungetaggt.</li>
+          <li><strong>Trunk-Port:</strong> überträgt mehrere VLANs zwischen Switches/zum Router. Frames werden per <strong>802.1Q</strong>-Tag (4 Byte, 12-Bit-VLAN-ID) markiert.</li>
+        </ul>
+        <p>Inter-VLAN-Routing (Kommunikation zwischen VLANs) erfordert einen Router oder Layer-3-Switch („Router-on-a-Stick“).</p>` },
+      { heading: "Nutzen & Sicherheit",
+        html: `<p>VLANs segmentieren ein physisches Netz logisch – das verbessert Sicherheit (Trennung von z. B. Gäste-, Büro-, VoIP-Netz), Performance (kleinere Broadcast-Domänen) und Flexibilität (standortunabhängige Gruppen).</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Ein VLAN = eine Broadcast-Domäne.</li>
+          <li>Native VLAN läuft untagged – aus Sicherheitsgründen separat halten.</li>
+          <li>VLAN-IDs 1–4094 nutzbar (12 Bit).</li>
+        </ul>` },
+    ],
+    questionIds: ["q-vlan-1","q-vlan-2","q-vlan-tf-1","fc-vlan-1","q-vlan-3","q-vlan-tf-2","q-vlan-cloze-1"],
   },
 
   {
@@ -322,7 +433,19 @@ export const topics = [
       "Zustände: Blocking→Listening→Learning→Forwarding",
       "Bridge-ID = Priorität(4096er-Schritte)+MAC",
     ],
-    questionIds: ["q-stp-1","q-stp-2","q-stp-match-1","fc-stp-1"],
+    deepDive: [
+      { heading: "Warum STP? Das Broadcast-Storm-Problem",
+        html: `<p>Redundante Switch-Verbindungen erhöhen die Ausfallsicherheit – ohne Schutz entstehen aber <strong>Layer-2-Schleifen</strong>: Broadcasts kreisen endlos (Broadcast-Storm), MAC-Tabellen werden instabil, das Netz bricht zusammen. <strong>STP</strong> (802.1D) baut daher logisch einen schleifenfreien Baum, indem es überschüssige Pfade blockiert (Standby).</p>` },
+      { heading: "Root-Bridge-Wahl & Konvergenz",
+        html: `<p>Zuerst wird die <strong>Root-Bridge</strong> bestimmt: die Bridge mit der niedrigsten Bridge-ID (Priorität, bei Gleichstand niedrigste MAC). Jeder andere Switch wählt seinen kostengünstigsten <strong>Root-Port</strong>; je Segment gibt es einen <strong>Designated Port</strong>, der Rest wird blockiert.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Klassisches STP konvergiert langsam (~30–50 s), <strong>RSTP</strong> (802.1w) in unter 1 s.</li>
+          <li>Portrollen: Root, Designated, Blocking/Alternate.</li>
+          <li>Niedrigste Bridge-ID gewinnt die Root-Wahl.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-stp-1","q-stp-2","q-stp-match-1","fc-stp-1","q-stp-3","q-stp-tf-2"],
   },
 
   {
@@ -360,7 +483,27 @@ export const topics = [
       "RIP=Distanzvektor/Hops · OSPF=Link-State/Cost",
       "Administrative Distanz entscheidet zwischen Protokollen",
     ],
-    questionIds: ["q-route-1","q-route-2","q-route-tf-1","fc-route-1"],
+    deepDive: [
+      { heading: "Distanzvektor vs. Link-State",
+        html: `<table>
+          <thead><tr><th></th><th>RIP (Distanzvektor)</th><th>OSPF (Link-State)</th></tr></thead>
+          <tbody>
+            <tr><td>Metrik</td><td>Hop-Count (max. 15)</td><td>Kosten (abh. von Bandbreite)</td></tr>
+            <tr><td>Updates</td><td>periodisch ganze Tabelle</td><td>nur bei Änderungen (LSA)</td></tr>
+            <tr><td>Skalierung</td><td>kleine Netze</td><td>große Netze, Areas</td></tr>
+          </tbody>
+        </table>
+        <p>RIP „erzählt seinen Nachbarn, was es kennt“; OSPF „kennt die ganze Topologie“ und berechnet kürzeste Pfade (Dijkstra).</p>` },
+      { heading: "Routing-Entscheidung & Default-Route",
+        html: `<p>Ein Router wählt stets die <strong>spezifischste</strong> passende Route (längstes Präfix, „Longest Prefix Match“). Findet sich kein Eintrag, greift die <strong>Default-Route 0.0.0.0/0</strong> (Richtung Internet/Gateway).</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Statische Routen: manuell, stabil, kein Overhead – aber wartungsintensiv.</li>
+          <li>Dynamische Routen: passen sich an, kosten Ressourcen/Bandbreite.</li>
+          <li>Longest Prefix Match schlägt jede unspezifischere Route.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-route-1","q-route-2","q-route-tf-1","fc-route-1","q-route-3","q-route-tf-2","q-route-match-1"],
   },
 
   {
@@ -389,7 +532,18 @@ export const topics = [
       "PAT = NAT Overload (portbasiert)",
       "DMZ/Port-Forwarding für eingehende Dienste",
     ],
-    questionIds: ["q-nat-1","q-nat-tf-1","fc-nat-1"],
+    deepDive: [
+      { heading: "NAT, PAT & Port-Forwarding",
+        html: `<ul>
+          <li><strong>NAT (1:1):</strong> tauscht eine private gegen eine öffentliche IP.</li>
+          <li><strong>PAT / NAT-Overload (n:1):</strong> viele interne Hosts teilen eine öffentliche IP – unterschieden über die <strong>Quell-Portnummer</strong>. Das ist der Normalfall im Heim-/Firmenrouter.</li>
+          <li><strong>Port-Forwarding (DNAT):</strong> leitet von außen eingehende Verbindungen auf einen bestimmten internen Host/Port (z. B. Webserver) weiter.</li>
+        </ul>` },
+      { heading: "Grenzen von NAT",
+        html: `<p>NAT verbirgt interne Adressen, ist aber <strong>kein vollständiger Sicherheitsmechanismus</strong> – eine Firewall bleibt nötig. Zudem erschwert NAT Ende-zu-Ende-Verbindungen (z. B. VoIP, P2P) und macht Techniken wie STUN nötig. IPv6 mit globalem Adressraum macht NAT weitgehend überflüssig.</p>
+        <p><strong>Kurz gemerkt:</strong> PAT multiplext über Ports; Port-Forwarding öffnet gezielt einen Dienst nach außen.</p>` },
+    ],
+    questionIds: ["q-nat-1","q-nat-tf-1","fc-nat-1","q-nat-2","q-nat-tf-2"],
   },
 
   {
@@ -434,7 +588,30 @@ export const topics = [
       "DNS-Port: 53 (UDP/TCP)",
       "DORA = Discover·Offer·Request·Acknowledge",
     ],
-    questionIds: ["q-dhcp-1","q-dns-1","q-dns-match-1","q-dhcp-tf-1","q-dhcp-cloze-1","fc-dns-1","fc-dhcp-1"],
+    deepDive: [
+      { heading: "DHCP-Ablauf (DORA)",
+        html: `<ol>
+          <li><strong>Discover:</strong> Client sucht per Broadcast einen DHCP-Server.</li>
+          <li><strong>Offer:</strong> Server bietet eine IP-Konfiguration an.</li>
+          <li><strong>Request:</strong> Client fordert das Angebot an (Broadcast, falls mehrere Server).</li>
+          <li><strong>Acknowledge:</strong> Server bestätigt und vergibt die Lease.</li>
+        </ol>
+        <p>Server nutzt UDP-Port 67, Client UDP-Port 68. Über die <strong>Lease-Time</strong> wird die Adresse befristet vergeben und vorzeitig erneuert (Renew bei 50 %).</p>` },
+      { heading: "DNS – Namen statt Zahlen",
+        html: `<p>DNS löst Namen in IP-Adressen auf (UDP/TCP-Port 53). Wichtige Record-Typen:</p>
+        <table>
+          <thead><tr><th>Record</th><th>Funktion</th></tr></thead>
+          <tbody>
+            <tr><td>A / AAAA</td><td>Name → IPv4 / IPv6</td></tr>
+            <tr><td>CNAME</td><td>Alias auf einen anderen Namen</td></tr>
+            <tr><td>MX</td><td>zuständiger Mailserver</td></tr>
+            <tr><td>PTR</td><td>Reverse-Lookup (IP → Name)</td></tr>
+            <tr><td>TXT</td><td>frei (z. B. SPF/DKIM)</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> Auflösung läuft rekursiv über Resolver und autoritative Server; die <strong>TTL</strong> steuert das Caching.</p>` },
+    ],
+    questionIds: ["q-dhcp-1","q-dns-1","q-dns-match-1","q-dhcp-tf-1","q-dhcp-cloze-1","fc-dns-1","fc-dhcp-1","q-dhcp-2","q-dns-2","q-dns-tf-2"],
   },
 
   {
@@ -474,7 +651,29 @@ export const topics = [
       "POP3 110 · IMAP 143 · LDAP 389 · RDP 3389 · NTP 123 · SNMP 161",
       "Übe Zuordnungen im Quiz!",
     ],
-    questionIds: ["q-port-1","q-port-2","q-port-match-1","fc-port-1"],
+    deepDive: [
+      { heading: "Port-Bereiche & wichtige Standard-Ports",
+        html: `<p>Ports adressieren Anwendungen auf Schicht 4. Drei Bereiche:</p>
+        <ul>
+          <li><strong>0–1023</strong> Well-Known (Systemdienste)</li>
+          <li><strong>1024–49151</strong> Registered (registrierte Anwendungen)</li>
+          <li><strong>49152–65535</strong> dynamische/private Ports (z. B. Quellports von Clients)</li>
+        </ul>
+        <table>
+          <thead><tr><th>Dienst</th><th>Port</th><th>Protokoll</th></tr></thead>
+          <tbody>
+            <tr><td>FTP (Steuer/Daten)</td><td>21 / 20</td><td>TCP</td></tr>
+            <tr><td>SSH</td><td>22</td><td>TCP</td></tr>
+            <tr><td>SMTP</td><td>25</td><td>TCP</td></tr>
+            <tr><td>DNS</td><td>53</td><td>UDP/TCP</td></tr>
+            <tr><td>HTTP / HTTPS</td><td>80 / 443</td><td>TCP</td></tr>
+            <tr><td>DHCP</td><td>67/68</td><td>UDP</td></tr>
+            <tr><td>RDP</td><td>3389</td><td>TCP</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> HTTPS 443, SSH 22, RDP 3389, DNS 53 – diese werden in Prüfungen oft direkt abgefragt.</p>` },
+    ],
+    questionIds: ["q-port-1","q-port-2","q-port-match-1","fc-port-1","q-port-3","q-port-tf-1","q-port-cloze-1"],
   },
 
   {
@@ -508,7 +707,24 @@ export const topics = [
       "WPA3-SAE schützt vor Offline-Bruteforce",
       "5 GHz schneller, 2,4 GHz weiter",
     ],
-    questionIds: ["q-wlan-1","q-wlan-tf-1","fc-wlan-1"],
+    deepDive: [
+      { heading: "WLAN-Sicherheit im Zeitverlauf",
+        html: `<ul>
+          <li><strong>WEP:</strong> veraltet und in Minuten knackbar – nie einsetzen.</li>
+          <li><strong>WPA/TKIP:</strong> Übergangslösung, gilt heute als unsicher.</li>
+          <li><strong>WPA2 (AES/CCMP):</strong> langjähriger Standard, weiterhin akzeptabel.</li>
+          <li><strong>WPA3:</strong> aktueller Standard, nutzt SAE (Schutz gegen Offline-Wörterbuchangriffe) und erzwungene Verschlüsselung.</li>
+        </ul>` },
+      { heading: "Frequenzbänder & Reichweite",
+        html: `<p>Das <strong>2,4-GHz-Band</strong> hat höhere Reichweite, aber wenige überlappungsfreie Kanäle (in Europa 1/6/11) und viele Störquellen. Das <strong>5-GHz-Band</strong> bietet mehr Kanäle und Datenrate, jedoch geringere Reichweite/Wanddurchdringung. Wi-Fi 6E/7 ergänzt 6 GHz.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>WPA3 > WPA2 > WPA > WEP (Sicherheit).</li>
+          <li>SSID = Netzname; getrennte Gäste-SSID/VLAN für Besucher.</li>
+          <li>Höhere Frequenz = mehr Tempo, weniger Reichweite.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-wlan-1","q-wlan-tf-1","fc-wlan-1","q-wlan-2","q-wlan-tf-2"],
   },
 
   {
@@ -544,7 +760,26 @@ export const topics = [
       "TLS-VPN nutzt 443",
       "Tunnel vs. Transport Mode",
     ],
-    questionIds: ["q-vpn-1","q-vpn-2","q-vpn-tf-1","fc-vpn-1"],
+    deepDive: [
+      { heading: "VPN-Typen",
+        html: `<ul>
+          <li><strong>Site-to-Site:</strong> koppelt dauerhaft zwei Standortnetze (Gateway zu Gateway).</li>
+          <li><strong>Remote-Access (End-to-Site):</strong> einzelne Clients (Home-Office) wählen sich ins Firmennetz ein.</li>
+        </ul>
+        <p>Ziel ist stets ein verschlüsselter „Tunnel“ über ein unsicheres Netz (Internet), der Vertraulichkeit, Integrität und Authentizität sichert.</p>` },
+      { heading: "IPsec-Bausteine",
+        html: `<table>
+          <thead><tr><th>Komponente</th><th>Funktion</th></tr></thead>
+          <tbody>
+            <tr><td>IKE</td><td>handelt Schlüssel & Sicherheitsparameter aus</td></tr>
+            <tr><td>AH</td><td>Integrität/Authentizität – <em>keine</em> Verschlüsselung</td></tr>
+            <tr><td>ESP</td><td>Verschlüsselung + Integrität der Nutzdaten</td></tr>
+          </tbody>
+        </table>
+        <p>Im <strong>Tunnelmodus</strong> wird das gesamte IP-Paket gekapselt (Site-to-Site), im <strong>Transportmodus</strong> nur die Nutzlast.</p>
+        <p><strong>Kurz gemerkt:</strong> ESP verschlüsselt, AH nicht. Tunnelmodus für VPN zwischen Netzen.</p>` },
+    ],
+    questionIds: ["q-vpn-1","q-vpn-2","q-vpn-tf-1","fc-vpn-1","q-vpn-3","q-vpn-tf-2"],
   },
 
   {
@@ -581,7 +816,27 @@ export const topics = [
       "Glasfaser: OS=Singlemode, OM=Multimode",
       "Verkabelung: Primär/Sekundär/Tertiär",
     ],
-    questionIds: ["q-kabel-1","q-kabel-tf-1","fc-kabel-1"],
+    deepDive: [
+      { heading: "Kupfer (Twisted Pair) vs. Lichtwellenleiter",
+        html: `<table>
+          <thead><tr><th></th><th>Twisted Pair (Cu)</th><th>LWL (Glasfaser)</th></tr></thead>
+          <tbody>
+            <tr><td>Reichweite</td><td>bis 100 m</td><td>mehrere km (Singlemode)</td></tr>
+            <tr><td>Störanfälligkeit</td><td>EMV-empfindlich</td><td>unempfindlich gegen EMV</td></tr>
+            <tr><td>Einsatz</td><td>Etage/Arbeitsplatz</td><td>Backbone/Gebäude</td></tr>
+          </tbody>
+        </table>
+        <p>Twisted-Pair-Kategorien: Cat 5e (1 GbE), Cat 6/6A (10 GbE über kürzere/volle Distanz), Cat 7. LWL als Singlemode (lange Strecken) oder Multimode (kürzere Strecken).</p>` },
+      { heading: "Topologien",
+        html: `<p>Die <strong>Stern-Topologie</strong> dominiert moderne LANs: jedes Gerät hängt am zentralen Switch; ein Kabelausfall betrifft nur einen Teilnehmer. Bus und Ring sind historisch. Logisch entstehen oft <strong>Baum-/Hierarchie</strong>-Strukturen (Core/Distribution/Access).</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Kupfer max. 100 m (90 m fest + 10 m Patch).</li>
+          <li>LWL für lange/EMV-belastete Strecken & Backbone.</li>
+          <li>Stern = heutiger Standard, zentraler Switch.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-kabel-1","q-kabel-tf-1","fc-kabel-1","q-kabel-2","q-kabel-tf-2"],
   },
 
   /* ===================== 2. IT-SICHERHEIT ===================== */
@@ -618,7 +873,22 @@ export const topics = [
       "ISO 27001 → ISMS",
       "Maximumprinzip bei Schutzbedarf",
     ],
-    questionIds: ["q-cia-1","q-cia-2","q-cia-match-1","fc-cia-1"],
+    deepDive: [
+      { heading: "Die CIA-Triade im Detail",
+        html: `<table>
+          <thead><tr><th>Schutzziel</th><th>Bedeutung</th><th>Bedrohung / Schutz</th></tr></thead>
+          <tbody>
+            <tr><td>Vertraulichkeit</td><td>nur Befugte sehen Daten</td><td>Abhören → Verschlüsselung, Rechtekonzept</td></tr>
+            <tr><td>Integrität</td><td>Daten unverändert/korrekt</td><td>Manipulation → Hashes, Signaturen</td></tr>
+            <tr><td>Verfügbarkeit</td><td>nutzbar bei Bedarf</td><td>DoS/Ausfall → Redundanz, USV, Backup</td></tr>
+          </tbody>
+        </table>
+        <p>Ergänzend werden oft <strong>Authentizität</strong> (Echtheit), <strong>Nichtabstreitbarkeit</strong> und <strong>Verbindlichkeit</strong> genannt.</p>` },
+      { heading: "Schutzbedarf & Maßnahmen",
+        html: `<p>Der <strong>Schutzbedarf</strong> (normal/hoch/sehr hoch) richtet sich nach dem möglichen Schaden. Maßnahmen gliedern sich in <em>technische</em> (Firewall, Verschlüsselung) und <em>organisatorische</em> (Richtlinien, Schulungen). Das BSI-Grundschutz-Kompendium ist hierfür der deutsche Standard.</p>
+        <p><strong>Kurz gemerkt:</strong> Vertraulichkeit ≠ Integrität ≠ Verfügbarkeit – jede Maßnahme einem Ziel zuordnen können.</p>` },
+    ],
+    questionIds: ["q-cia-1","q-cia-2","q-cia-match-1","fc-cia-1","q-cia-3","q-cia-tf-1","q-cia-cloze-1"],
   },
 
   {
@@ -651,7 +921,28 @@ export const topics = [
       "Hybrid: asym. Schlüsseltausch + sym. Daten",
       "PKI: CA signiert X.509-Zertifikate",
     ],
-    questionIds: ["q-krypto-1","q-krypto-2","q-krypto-tf-1","q-krypto-match-1","q-krypto-cloze-1","fc-krypto-1"],
+    deepDive: [
+      { heading: "Symmetrisch, asymmetrisch & hybrid",
+        html: `<table>
+          <thead><tr><th></th><th>Symmetrisch</th><th>Asymmetrisch</th></tr></thead>
+          <tbody>
+            <tr><td>Schlüssel</td><td>ein gemeinsamer Schlüssel</td><td>Schlüsselpaar (public/private)</td></tr>
+            <tr><td>Tempo</td><td>sehr schnell</td><td>langsam</td></tr>
+            <tr><td>Problem</td><td>sicherer Schlüsselaustausch</td><td>Rechenaufwand</td></tr>
+            <tr><td>Beispiel</td><td>AES</td><td>RSA, ECC</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Hybrid</strong> (z. B. TLS) kombiniert beides: asymmetrisch wird ein symmetrischer Sitzungsschlüssel ausgetauscht, danach läuft die schnelle symmetrische Verschlüsselung.</p>` },
+      { heading: "Hash vs. Signatur vs. Verschlüsselung",
+        html: `<ul>
+          <li><strong>Hash</strong> (SHA-256): Einwegfunktion, prüft Integrität – nicht umkehrbar, kein Schlüssel.</li>
+          <li><strong>Verschlüsselung für Vertraulichkeit:</strong> mit dem <em>öffentlichen</em> Schlüssel des Empfängers verschlüsseln.</li>
+          <li><strong>Digitale Signatur:</strong> mit dem <em>privaten</em> Schlüssel des Absenders signieren ⇒ Integrität + Authentizität + Nichtabstreitbarkeit.</li>
+        </ul>
+        <p>Eine <strong>PKI</strong> mit Zertifikaten (CA) bindet öffentliche Schlüssel verlässlich an Identitäten.</p>
+        <p><strong>Kurz gemerkt:</strong> Verschlüsseln = Public Key des Empfängers; Signieren = Private Key des Absenders.</p>` },
+    ],
+    questionIds: ["q-krypto-1","q-krypto-2","q-krypto-tf-1","q-krypto-match-1","q-krypto-cloze-1","fc-krypto-1","q-krypto-3","q-krypto-tf-2","q-krypto-4"],
   },
 
   {
@@ -685,7 +976,19 @@ export const topics = [
       "DMZ trennt öffentliche Dienste vom LAN",
       "Whitelisting > Blacklisting",
     ],
-    questionIds: ["q-fw-1","q-fw-2","q-fw-tf-1","fc-fw-1"],
+    deepDive: [
+      { heading: "Paketfilter vs. Stateful Inspection",
+        html: `<p>Ein einfacher <strong>Paketfilter</strong> entscheidet je Paket anhand von IP-Adresse, Port und Protokoll. Eine <strong>Stateful-Inspection-Firewall</strong> führt zusätzlich eine Zustandstabelle: Antwortpakete zu einer erlaubten, bestehenden Verbindung werden automatisch durchgelassen – sicherer und einfacher zu konfigurieren. <strong>ACLs</strong> sind die zugrunde liegenden Regellisten (erlauben/verweigern).</p>` },
+      { heading: "DMZ & Zonenkonzept",
+        html: `<p>Öffentlich erreichbare Dienste (Web-, Mail-, Reverse-Proxy) gehören in eine <strong>DMZ</strong> – eine eigene Zone zwischen zwei Firewalls bzw. an einem separaten Interface. Wird ein DMZ-Server übernommen, ist das interne LAN dadurch nicht sofort offen.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Default-Deny: erst alles verbieten, dann gezielt erlauben.</li>
+          <li>DMZ trennt „außen erreichbar“ von „intern“.</li>
+          <li>Eine Firewall ersetzt keinen Endpunktschutz/Virenschutz.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-fw-1","q-fw-2","q-fw-tf-1","fc-fw-1","q-fw-3","q-fw-tf-2","q-fw-match-1"],
   },
 
   {
@@ -727,7 +1030,28 @@ export const topics = [
       "DDoS·MITM·Phishing·SQLi·XSS·BruteForce",
       "Gegenmaßnahme SQLi: Prepared Statements",
     ],
-    questionIds: ["q-mal-1","q-mal-2","q-mal-match-1","q-mal-tf-1","fc-mal-1"],
+    deepDive: [
+      { heading: "Schadsoftware-Typen",
+        html: `<table>
+          <thead><tr><th>Typ</th><th>Merkmal</th></tr></thead>
+          <tbody>
+            <tr><td>Virus</td><td>hängt sich an Dateien, braucht Ausführung</td></tr>
+            <tr><td>Wurm</td><td>verbreitet sich selbstständig über Netze</td></tr>
+            <tr><td>Trojaner</td><td>tarnt sich als nützliches Programm</td></tr>
+            <tr><td>Ransomware</td><td>verschlüsselt Daten, fordert Lösegeld</td></tr>
+            <tr><td>Spyware/Keylogger</td><td>spioniert Eingaben/Verhalten aus</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Angriffsarten & Social Engineering",
+        html: `<p>Viele Angriffe zielen auf den Menschen: <strong>Phishing</strong> (gefälschte Mails/Seiten), <strong>Spear-Phishing</strong> (gezielt), <strong>CEO-Fraud</strong>. Technische Angriffe sind u. a. <strong>(D)DoS</strong>, <strong>Man-in-the-Middle</strong>, <strong>SQL-Injection</strong> und <strong>Brute-Force</strong>.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Wurm = selbstverbreitend, Virus = braucht Wirt.</li>
+          <li>Bester Ransomware-Schutz: Offline-Backups + Patches + Awareness.</li>
+          <li>Phishing ist Social Engineering – Schulung wirkt.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-mal-1","q-mal-2","q-mal-match-1","q-mal-tf-1","fc-mal-1","q-mal-3","q-mal-tf-2","q-mal-4"],
   },
 
   {
@@ -755,7 +1079,24 @@ export const topics = [
       "RBAC + Least Privilege + Need-to-know",
       "Passwort: lang > komplex-kurz; besser Passphrasen",
     ],
-    questionIds: ["q-auth-1","q-auth-tf-1","fc-auth-1"],
+    deepDive: [
+      { heading: "Die drei Authentifizierungsfaktoren",
+        html: `<ul>
+          <li><strong>Wissen:</strong> Passwort, PIN, Antwort auf Sicherheitsfrage.</li>
+          <li><strong>Besitz:</strong> Smartcard, Hardware-Token, TAN-/Authenticator-App.</li>
+          <li><strong>Inhärenz (Biometrie):</strong> Fingerabdruck, Gesicht, Iris.</li>
+        </ul>
+        <p><strong>MFA</strong> kombiniert mindestens zwei <em>verschiedene</em> Kategorien. Zwei Passwörter sind keine MFA (beides „Wissen“).</p>` },
+      { heading: "Berechtigungsmodelle & Prinzipien",
+        html: `<p><strong>RBAC</strong> vergibt Rechte über Rollen statt einzeln – einfacher zu verwalten und zu auditieren. Leitprinzipien:</p>
+        <ul>
+          <li><strong>Least Privilege:</strong> nur so viele Rechte wie nötig.</li>
+          <li><strong>Need-to-know:</strong> Zugriff nur bei tatsächlichem Bedarf.</li>
+          <li><strong>Funktionstrennung (SoD):</strong> kritische Schritte auf mehrere Personen verteilen.</li>
+        </ul>
+        <p><strong>Kurz gemerkt:</strong> Authentifizierung (wer bist du?) ≠ Autorisierung (was darfst du?).</p>` },
+    ],
+    questionIds: ["q-auth-1","q-auth-tf-1","fc-auth-1","q-auth-2","q-auth-tf-2","q-auth-match-1"],
   },
 
   {
@@ -798,7 +1139,28 @@ export const topics = [
       "Inkrementell=schnell/lange Kette · Differenziell=Voll+letztes Diff",
       "RTO=Ausfallzeit · RPO=Datenverlust",
     ],
-    questionIds: ["q-raid-1","q-raid-2","q-raid-calc-1","q-backup-1","q-raid-match-1","fc-raid-1"],
+    deepDive: [
+      { heading: "RAID-Level im Vergleich",
+        html: `<table>
+          <thead><tr><th>Level</th><th>Prinzip</th><th>min. Platten</th><th>Nettokapazität</th><th>Ausfall</th></tr></thead>
+          <tbody>
+            <tr><td>RAID 0</td><td>Striping (Tempo)</td><td>2</td><td>n × Größe</td><td>0 (keine Redundanz!)</td></tr>
+            <tr><td>RAID 1</td><td>Spiegelung</td><td>2</td><td>1 × Größe</td><td>1</td></tr>
+            <tr><td>RAID 5</td><td>Striping + verteilte Parität</td><td>3</td><td>(n−1) × Größe</td><td>1</td></tr>
+            <tr><td>RAID 6</td><td>doppelte Parität</td><td>4</td><td>(n−2) × Größe</td><td>2</td></tr>
+            <tr><td>RAID 10</td><td>Spiegeln + Striping</td><td>4</td><td>n/2 × Größe</td><td>je Spiegel 1</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Backup-Strategien & USV",
+        html: `<ul>
+          <li><strong>Voll:</strong> alles, einfach wiederherstellbar, viel Speicher.</li>
+          <li><strong>Differenziell:</strong> alles seit dem letzten Vollbackup.</li>
+          <li><strong>Inkrementell:</strong> nur Änderungen seit dem letzten Backup – sparsam, aber Restore über Kette.</li>
+        </ul>
+        <p>Die <strong>3-2-1-Regel</strong>: 3 Kopien, 2 Medientypen, 1 extern/offline. Eine <strong>USV</strong> überbrückt Stromausfälle und erlaubt geordnetes Herunterfahren.</p>
+        <p><strong>Kurz gemerkt:</strong> RAID ≠ Backup! RAID schützt vor Plattenausfall, nicht vor Löschen/Ransomware.</p>` },
+    ],
+    questionIds: ["q-raid-1","q-raid-2","q-raid-calc-1","q-backup-1","q-raid-match-1","fc-raid-1","q-raid-3","q-raid-calc-2","q-raid-tf-2","q-backup-2"],
   },
 
   {
@@ -828,7 +1190,25 @@ export const topics = [
       "Betroffenenrechte: Auskunft·Löschung·Berichtigung…",
       "TOMs = technisch + organisatorisch",
     ],
-    questionIds: ["q-dsgvo-1","q-dsgvo-tf-1","fc-dsgvo-1"],
+    deepDive: [
+      { heading: "Grundprinzipien (Art. 5 DSGVO)",
+        html: `<ul>
+          <li><strong>Rechtmäßigkeit & Transparenz</strong> – nachvollziehbare, erlaubte Verarbeitung.</li>
+          <li><strong>Zweckbindung</strong> – Daten nur für den festgelegten Zweck.</li>
+          <li><strong>Datenminimierung</strong> – nur das Nötige erheben.</li>
+          <li><strong>Richtigkeit</strong>, <strong>Speicherbegrenzung</strong>, <strong>Integrität/Vertraulichkeit</strong>.</li>
+          <li><strong>Rechenschaftspflicht</strong> – Nachweisbarkeit der Einhaltung.</li>
+        </ul>` },
+      { heading: "Betroffenenrechte & Pflichten",
+        html: `<p>Betroffene haben u. a. Rechte auf <strong>Auskunft</strong>, <strong>Berichtigung</strong>, <strong>Löschung</strong> („Recht auf Vergessenwerden“) und <strong>Datenübertragbarkeit</strong>. Verantwortliche müssen ein <strong>Verarbeitungsverzeichnis</strong> führen und eine <strong>meldepflichtige Datenpanne binnen 72 Stunden</strong> melden.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Personenbezogene Daten = auf eine natürliche Person beziehbar.</li>
+          <li>Datenpanne: 72-Stunden-Meldefrist an die Aufsichtsbehörde.</li>
+          <li>Verstöße: Bußgeld bis 20 Mio. € oder 4 % des weltweiten Jahresumsatzes.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-dsgvo-1","q-dsgvo-tf-1","fc-dsgvo-1","q-dsgvo-2","q-dsgvo-3","q-dsgvo-tf-2"],
   },
 
   /* ===================== 3. BETRIEBSSYSTEME & VIRTUALISIERUNG ===================== */
@@ -860,7 +1240,25 @@ export const topics = [
       "GPO: LSDOU, Enforced schlägt Block",
       "AGDLP-Prinzip",
     ],
-    questionIds: ["q-ad-1","q-ad-2","q-ad-tf-1","fc-ad-1"],
+    deepDive: [
+      { heading: "AD-Bausteine",
+        html: `<ul>
+          <li><strong>Domäne:</strong> administrative Sicherheitsgrenze mit gemeinsamer Datenbank.</li>
+          <li><strong>Domänencontroller (DC):</strong> hält das Verzeichnis und authentifiziert (Kerberos).</li>
+          <li><strong>OU (Organisationseinheit):</strong> Container zur Strukturierung und für GPO-Zuweisung.</li>
+          <li><strong>Gruppen:</strong> bündeln Benutzer für Berechtigungen (AGDLP-Prinzip).</li>
+          <li><strong>GPO:</strong> verteilt zentral Richtlinien/Einstellungen.</li>
+        </ul>` },
+      { heading: "OU vs. Gruppe & GPO-Verarbeitung",
+        html: `<p>Häufige Verwechslung: <strong>OUs strukturieren</strong> und sind GPO-Ziel; <strong>Gruppen vergeben Rechte</strong>. GPOs werden in der Reihenfolge <em>Local → Site → Domain → OU</em> (LSDOU) angewendet – die später angewendete gewinnt bei Konflikten.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>DC + Kerberos = Anmeldung/Authentifizierung.</li>
+          <li>GPO-Reihenfolge LSDOU, OU „sticht“ Domain.</li>
+          <li>Berechtigungen über Gruppen, Struktur über OUs.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-ad-1","q-ad-2","q-ad-tf-1","fc-ad-1","q-ad-3","q-ad-tf-2","q-ad-4"],
   },
 
   {
@@ -890,7 +1288,28 @@ export const topics = [
       "apt (Debian) · dnf (RHEL)",
       "/etc Config · /var Logs · /home Nutzer",
     ],
-    questionIds: ["q-linux-1","q-linux-calc-1","q-linux-tf-1","fc-linux-1"],
+    deepDive: [
+      { heading: "Dateirechte verstehen (rwx)",
+        html: `<p>Jede Datei hat Rechte für <strong>Eigentümer (u)</strong>, <strong>Gruppe (g)</strong> und <strong>Andere (o)</strong>. Werte: <code>r=4</code>, <code>w=2</code>, <code>x=1</code> – pro Stelle addiert.</p>
+        <table>
+          <thead><tr><th>Symbolisch</th><th>Oktal</th><th>Bedeutung</th></tr></thead>
+          <tbody>
+            <tr><td>rwxr-xr-x</td><td>755</td><td>Eigentümer voll, andere lesen/ausführen</td></tr>
+            <tr><td>rw-r--r--</td><td>644</td><td>typische Datei</td></tr>
+            <tr><td>rwx------</td><td>700</td><td>nur Eigentümer</td></tr>
+          </tbody>
+        </table>
+        <p>Bei Verzeichnissen bedeutet <code>x</code> „hineinwechseln dürfen“.</p>` },
+      { heading: "Wichtige Befehle & Aufbau",
+        html: `<ul>
+          <li><code>chmod</code> Rechte, <code>chown</code> Eigentümer, <code>ls -l</code> anzeigen.</li>
+          <li><code>sudo</code> führt Befehle mit erhöhten Rechten aus (statt dauerhaft root).</li>
+          <li>Paketverwaltung: <code>apt</code> (Debian/Ubuntu), <code>dnf/yum</code> (RHEL/Fedora).</li>
+          <li>Alles ist eine Datei – auch Geräte unter <code>/dev</code>.</li>
+        </ul>
+        <p><strong>Kurz gemerkt:</strong> root = UID 0; r=4, w=2, x=1; 755 für Ausführbares, 644 für Dateien.</p>` },
+    ],
+    questionIds: ["q-linux-1","q-linux-calc-1","q-linux-tf-1","fc-linux-1","q-linux-2","q-linux-calc-2","q-linux-tf-2"],
   },
 
   {
@@ -920,7 +1339,25 @@ export const topics = [
       "Container leicht, VM stark isoliert",
       "vSwitch verbindet VMs & physisches Netz",
     ],
-    questionIds: ["q-virt-1","q-virt-2","q-virt-tf-1","fc-virt-1"],
+    deepDive: [
+      { heading: "Hypervisor Typ 1 vs. Typ 2",
+        html: `<ul>
+          <li><strong>Typ 1 (bare metal):</strong> läuft direkt auf der Hardware – z. B. VMware ESXi, Microsoft Hyper-V, KVM/Proxmox. Performant, für Rechenzentren.</li>
+          <li><strong>Typ 2 (hosted):</strong> läuft als Programm auf einem Host-OS – z. B. VirtualBox, VMware Workstation. Praktisch für Desktop/Test.</li>
+        </ul>` },
+      { heading: "VM vs. Container",
+        html: `<table>
+          <thead><tr><th></th><th>Virtuelle Maschine</th><th>Container</th></tr></thead>
+          <tbody>
+            <tr><td>Betriebssystem</td><td>eigenes Gast-OS</td><td>teilt Host-Kernel</td></tr>
+            <tr><td>Größe/Start</td><td>schwer, langsamer</td><td>schlank, sekundenschnell</td></tr>
+            <tr><td>Isolation</td><td>stark</td><td>schwächer</td></tr>
+            <tr><td>Beispiel</td><td>ESXi-VM</td><td>Docker, Kubernetes</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> Snapshots sichern VM-Zustände (≠ Backup). Container = ein Kernel, viele isolierte Prozesse.</p>` },
+    ],
+    questionIds: ["q-virt-1","q-virt-2","q-virt-tf-1","fc-virt-1","q-virt-3","q-virt-tf-2","q-virt-4"],
   },
 
   {
@@ -951,7 +1388,27 @@ export const topics = [
       "Public·Private·Hybrid·Community",
       "Shared-Responsibility-Modell",
     ],
-    questionIds: ["q-cloud-1","q-cloud-match-1","fc-cloud-1"],
+    deepDive: [
+      { heading: "Servicemodelle: Verantwortungsteilung",
+        html: `<table>
+          <thead><tr><th>Modell</th><th>Anbieter verantwortet</th><th>Kunde verantwortet</th></tr></thead>
+          <tbody>
+            <tr><td>IaaS</td><td>Hardware, Virtualisierung</td><td>OS, Patches, Middleware, App</td></tr>
+            <tr><td>PaaS</td><td>+ Betriebssystem, Laufzeit</td><td>App & Daten</td></tr>
+            <tr><td>SaaS</td><td>alles bis zur Anwendung</td><td>nur Nutzung/Konfiguration</td></tr>
+          </tbody>
+        </table>
+        <p>Merksatz: „Pizza as a Service“ – je weiter Richtung SaaS, desto weniger muss man selbst tun.</p>` },
+      { heading: "Bereitstellungsmodelle & Eigenschaften",
+        html: `<p><strong>Public</strong> (geteilte Anbieter-Infrastruktur), <strong>Private</strong> (exklusiv), <strong>Hybrid</strong> (Mischung) und <strong>Community Cloud</strong>. Typische Cloud-Eigenschaften: On-Demand-Self-Service, breiter Netzzugang, Ressourcen-Pooling, schnelle Elastizität und nutzungsabhängige Abrechnung.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>IaaS = am meisten Eigenverantwortung, SaaS = am wenigsten.</li>
+          <li>Shared Responsibility: Sicherheit ist immer geteilt.</li>
+          <li>Hybrid Cloud erlaubt Cloud-Bursting bei Lastspitzen.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-cloud-1","q-cloud-match-1","fc-cloud-1","q-cloud-2","q-cloud-tf-1","q-cloud-3"],
   },
 
   {
@@ -985,7 +1442,27 @@ export const topics = [
       "Share-Rechte nur im Netz, NTFS überall",
       "Restriktivste Regel gewinnt",
     ],
-    questionIds: ["q-fs-1","q-fs-tf-1","fc-fs-1"],
+    deepDive: [
+      { heading: "Dateisysteme im Vergleich",
+        html: `<table>
+          <thead><tr><th>FS</th><th>Plattform</th><th>Merkmale</th></tr></thead>
+          <tbody>
+            <tr><td>FAT32</td><td>universell</td><td>max. ~4 GB/Datei, keine Rechte, kein Journal</td></tr>
+            <tr><td>exFAT</td><td>universell</td><td>große Dateien, für USB/SD</td></tr>
+            <tr><td>NTFS</td><td>Windows</td><td>ACLs, Journaling, Komprimierung/Verschlüsselung</td></tr>
+            <tr><td>ext4</td><td>Linux</td><td>Journaling, große Volumes</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "NTFS-Berechtigungen & Vererbung",
+        html: `<p>NTFS-Rechte (Lesen, Schreiben, Ändern, Vollzugriff) gelten lokal <em>und</em> über Freigaben. Bei Konflikt aus Freigabe- und NTFS-Recht gilt das <strong>restriktivere</strong> Recht. Ein explizites <strong>Verweigern</strong> sticht ein Erlauben. Rechte werden i. d. R. von übergeordneten Ordnern <strong>vererbt</strong>.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>FAT32: 4-GB-Dateigrenze, keine Rechte.</li>
+          <li>NTFS: Verweigern &gt; Erlauben; restriktiveres Recht gewinnt.</li>
+          <li>ext4 = Linux-Standard mit Journal.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-fs-1","q-fs-tf-1","fc-fs-1","q-fs-2","q-fs-tf-2","q-fs-3"],
   },
 
   /* ===================== 4. DATENBANKEN ===================== */
@@ -1014,7 +1491,26 @@ export const topics = [
       "Kardinalitäten: 1:1 · 1:n · n:m",
       "n:m → Junction-Tabelle",
     ],
-    questionIds: ["q-er-1","q-er-tf-1","fc-er-1"],
+    deepDive: [
+      { heading: "Vom ER-Modell zur Tabelle",
+        html: `<ul>
+          <li><strong>Entität</strong> → Tabelle (Relation), z. B. Kunde.</li>
+          <li><strong>Attribut</strong> → Spalte, z. B. Name.</li>
+          <li><strong>Tupel/Datensatz</strong> → Zeile.</li>
+          <li><strong>Primärschlüssel</strong> identifiziert jede Zeile eindeutig; <strong>Fremdschlüssel</strong> verweist auf einen Primärschlüssel einer anderen Tabelle.</li>
+        </ul>` },
+      { heading: "Kardinalitäten umsetzen",
+        html: `<table>
+          <thead><tr><th>Beziehung</th><th>Umsetzung</th></tr></thead>
+          <tbody>
+            <tr><td>1:1</td><td>Fremdschlüssel auf einer Seite (oft zusammenfassbar)</td></tr>
+            <tr><td>1:n</td><td>Fremdschlüssel auf der n-Seite</td></tr>
+            <tr><td>n:m</td><td>eigene Zwischen-/Beziehungstabelle mit zwei Fremdschlüsseln</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> n:m gibt es relational nur über eine Zwischentabelle.</p>` },
+    ],
+    questionIds: ["q-er-1","q-er-tf-1","fc-er-1","q-er-2","q-er-3","q-er-tf-2"],
   },
 
   {
@@ -1044,7 +1540,22 @@ export const topics = [
       "2NF=keine partielle Abhängigkeit",
       "3NF=keine transitive Abhängigkeit",
     ],
-    questionIds: ["q-norm-1","q-norm-2","q-norm-tf-1","fc-norm-1"],
+    deepDive: [
+      { heading: "Die ersten drei Normalformen",
+        html: `<table>
+          <thead><tr><th>NF</th><th>Forderung</th><th>beseitigt</th></tr></thead>
+          <tbody>
+            <tr><td>1NF</td><td>nur atomare Werte, keine Wiederholgruppen</td><td>Mehrfachwerte je Feld</td></tr>
+            <tr><td>2NF</td><td>1NF + volle Abhängigkeit vom Gesamtschlüssel</td><td>partielle Abhängigkeiten</td></tr>
+            <tr><td>3NF</td><td>2NF + keine Nichtschlüssel→Nichtschlüssel-Abhängigkeit</td><td>transitive Abhängigkeiten</td></tr>
+          </tbody>
+        </table>
+        <p>Merksatz (BCNF-nah): „Der Schlüssel, der ganze Schlüssel und nichts als der Schlüssel.“</p>` },
+      { heading: "Warum normalisieren?",
+        html: `<p>Redundanz erzeugt <strong>Anomalien</strong>: Beim <em>Einfügen</em> fehlen Daten, beim <em>Ändern</em> bleiben Kopien inkonsistent, beim <em>Löschen</em> gehen ungewollt Informationen verloren. Normalisierung verteilt Daten redundanzfrei auf verknüpfte Tabellen. In der Praxis wird für Performance manchmal bewusst <strong>denormalisiert</strong>.</p>
+        <p><strong>Kurz gemerkt:</strong> 1NF atomar · 2NF keine partielle · 3NF keine transitive Abhängigkeit.</p>` },
+    ],
+    questionIds: ["q-norm-1","q-norm-2","q-norm-tf-1","fc-norm-1","q-norm-3","q-norm-cloze-1","q-norm-tf-2"],
   },
 
   {
@@ -1087,7 +1598,27 @@ INNER JOIN bestellung b ON b.kunden_id = k.id;</code></pre>` },
       "JOIN: INNER·LEFT·RIGHT·FULL",
       "Aggregat: COUNT·SUM·AVG·MIN·MAX",
     ],
-    questionIds: ["q-sql-1","q-sql-2","q-sql-match-1","q-sql-tf-1","fc-sql-1"],
+    deepDive: [
+      { heading: "SQL-Sprachfamilien & Grundabfrage",
+        html: `<ul>
+          <li><strong>DDL</strong> (Struktur): CREATE, ALTER, DROP.</li>
+          <li><strong>DML</strong> (Daten): INSERT, UPDATE, DELETE, SELECT.</li>
+          <li><strong>DCL</strong> (Rechte): GRANT, REVOKE.</li>
+        </ul>
+        <p>Grundabfrage: <code>SELECT spalten FROM tabelle WHERE bedingung GROUP BY … HAVING … ORDER BY …;</code></p>` },
+      { heading: "JOINs & Filter richtig einsetzen",
+        html: `<table>
+          <thead><tr><th>JOIN</th><th>Ergebnis</th></tr></thead>
+          <tbody>
+            <tr><td>INNER JOIN</td><td>nur Treffer in beiden Tabellen</td></tr>
+            <tr><td>LEFT JOIN</td><td>alle links + passende rechts (sonst NULL)</td></tr>
+            <tr><td>RIGHT JOIN</td><td>alle rechts + passende links</td></tr>
+          </tbody>
+        </table>
+        <p><strong>WHERE</strong> filtert vor der Gruppierung, <strong>HAVING</strong> nach <code>GROUP BY</code> (auf Aggregate wie COUNT/SUM).</p>
+        <p><strong>Kurz gemerkt:</strong> PRIMARY KEY = unique + NOT NULL; INNER JOIN = Schnittmenge.</p>` },
+    ],
+    questionIds: ["q-sql-1","q-sql-2","q-sql-match-1","q-sql-tf-1","fc-sql-1","q-sql-3","q-sql-4","q-sql-cloze-1","q-sql-tf-2"],
   },
 
   /* ===================== 5. PROGRAMMIERUNG ===================== */
@@ -1125,7 +1656,23 @@ print(summe)        # 15</code></pre>` },
       "while(Kopf) · do-while(Fuß) · for(zählend)",
       "Typen: int·float·bool·string",
     ],
-    questionIds: ["q-prog-1","q-prog-tf-1","fc-prog-1"],
+    deepDive: [
+      { heading: "Grundbausteine jedes Programms",
+        html: `<ul>
+          <li><strong>Variablen & Datentypen:</strong> benannte Speicher (int, float, string, bool).</li>
+          <li><strong>Operatoren:</strong> arithmetisch (+ − * /), Vergleich (== &lt; &gt;), logisch (AND/OR/NOT).</li>
+          <li><strong>Kontrollstrukturen:</strong> Sequenz, Verzweigung (if/else, switch), Schleifen (for/while).</li>
+          <li><strong>Funktionen:</strong> kapseln wiederverwendbare Teilaufgaben, nehmen Parameter, liefern Rückgaben.</li>
+        </ul>` },
+      { heading: "Schleifen & strukturierte Programmierung",
+        html: `<p>Die <strong>for-Schleife</strong> nutzt man bei bekannter Anzahl, die <strong>while-Schleife</strong> (kopfgesteuert) bzw. <strong>do-while</strong> (fußgesteuert, mind. 1 Durchlauf) bei bedingungsabhängiger Anzahl. Strukturierte Programmierung verzichtet auf GOTO und kommt mit Sequenz, Auswahl und Wiederholung aus.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>for = Anzahl bekannt; while = Bedingung entscheidet.</li>
+          <li>Funktionen reduzieren Codeverdopplung (DRY).</li>
+        </ul>` },
+    ],
+    questionIds: ["q-prog-1","q-prog-tf-1","fc-prog-1","q-prog-2","q-prog-3","q-prog-tf-2"],
   },
 
   {
@@ -1154,7 +1701,22 @@ print(summe)        # 15</code></pre>` },
       "PAP nach DIN 66001",
       "Pseudocode = sprachunabhängig",
     ],
-    questionIds: ["q-pap-1","q-pap-match-1","fc-pap-1"],
+    deepDive: [
+      { heading: "PAP-Symbole (DIN 66001)",
+        html: `<table>
+          <thead><tr><th>Symbol</th><th>Bedeutung</th></tr></thead>
+          <tbody>
+            <tr><td>Oval / abgerundet</td><td>Start / Ende</td></tr>
+            <tr><td>Rechteck</td><td>Operation / Anweisung</td></tr>
+            <tr><td>Raute (Rhombus)</td><td>Verzweigung / Entscheidung</td></tr>
+            <tr><td>Parallelogramm</td><td>Ein-/Ausgabe</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Struktogramm vs. PAP",
+        html: `<p>Das <strong>Struktogramm</strong> (Nassi-Shneiderman) bildet Strukturen als ineinander geschachtelte Blöcke ab und erzwingt strukturierte Programmierung (keine Sprünge). Der <strong>PAP</strong> nutzt Pfeile/Symbole und erlaubt prinzipiell auch Sprünge. Beide bilden die drei Grundstrukturen ab: <strong>Sequenz, Auswahl, Wiederholung</strong>.</p>
+        <p><strong>Kurz gemerkt:</strong> Raute = Entscheidung; Struktogramm = Nassi-Shneiderman, blockweise, ohne GOTO.</p>` },
+    ],
+    questionIds: ["q-pap-1","q-pap-match-1","fc-pap-1","q-pap-2","q-pap-tf-2","q-pap-cloze-1"],
   },
 
   {
@@ -1190,7 +1752,30 @@ done</code></pre>` },
       "Bash: for/if/grep/awk/sed/pipe",
       "De Morgan: ¬(A∧B)=¬A∨¬B",
     ],
-    questionIds: ["q-skript-1","q-skript-2","q-bool-tf-1","fc-skript-1"],
+    deepDive: [
+      { heading: "PowerShell vs. Bash",
+        html: `<table>
+          <thead><tr><th></th><th>PowerShell</th><th>Bash</th></tr></thead>
+          <tbody>
+            <tr><td>Plattform</td><td>v. a. Windows (auch Linux)</td><td>v. a. Linux/Unix</td></tr>
+            <tr><td>Befehle</td><td>Cmdlets: Verb-Nomen (Get-Process)</td><td>Programme: ls, grep, cat</td></tr>
+            <tr><td>Pipeline</td><td>Objekte</td><td>Text</td></tr>
+            <tr><td>Skriptstart</td><td>.ps1</td><td>Shebang #!/bin/bash</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Boolesche Algebra & Wahrheitstabelle",
+        html: `<table>
+          <thead><tr><th>A</th><th>B</th><th>A AND B</th><th>A OR B</th><th>NOT A</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+            <tr><td>0</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+            <tr><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+            <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> AND nur bei beidem wahr; OR bei mindestens einem; NOT invertiert. PowerShell = Verb-Nomen.</p>` },
+    ],
+    questionIds: ["q-skript-1","q-skript-2","q-bool-tf-1","fc-skript-1","q-skript-3","q-bool-tf-2","q-bool-cloze-1"],
   },
 
   /* ===================== 6. HARDWARE & IT-ARBEITSPLATZ (AP1) ===================== */
@@ -1226,7 +1811,24 @@ done</code></pre>` },
       "RAM flüchtig, ECC im Server",
       "NVMe>SATA-SSD>HDD (Tempo)",
     ],
-    questionIds: ["q-hw-1","q-hw-tf-1","fc-hw-1"],
+    deepDive: [
+      { heading: "Zentrale Komponenten",
+        html: `<table>
+          <thead><tr><th>Komponente</th><th>Aufgabe</th></tr></thead>
+          <tbody>
+            <tr><td>CPU</td><td>führt Befehle aus (Takt, Kerne, Cache)</td></tr>
+            <tr><td>RAM</td><td>schneller, flüchtiger Arbeitsspeicher</td></tr>
+            <tr><td>SSD/HDD</td><td>dauerhafter Massenspeicher (SSD = Flash, schnell)</td></tr>
+            <tr><td>Mainboard</td><td>verbindet alle Komponenten (Chipsatz, Bus)</td></tr>
+            <tr><td>Netzteil (PSU)</td><td>wandelt AC → DC (3,3/5/12 V)</td></tr>
+            <tr><td>GPU</td><td>Grafikberechnung</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Schnittstellen & Speicherhierarchie",
+        html: `<p>Gängige Schnittstellen: <strong>USB</strong>, <strong>HDMI/DisplayPort</strong>, <strong>SATA/NVMe</strong> (Laufwerke), <strong>RJ45</strong> (LAN). Die Speicherhierarchie reicht von schnell/teuer (Register, Cache, RAM) zu langsam/günstig (SSD, HDD, Band).</p>
+        <p><strong>Kurz gemerkt:</strong> RAM ist flüchtig; SSD hat keine beweglichen Teile; PSU liefert Gleichspannung.</p>` },
+    ],
+    questionIds: ["q-hw-1","q-hw-tf-1","fc-hw-1","q-hw-2","q-hw-3","q-hw-tf-2"],
   },
 
   {
@@ -1256,7 +1858,18 @@ done</code></pre>` },
       "Imaging/Klonen für viele gleiche Clients",
       "Ergonomie & Bildschirmarbeitsplatz beachten",
     ],
-    questionIds: ["q-arb-1","q-arb-tf-1","fc-arb-1"],
+    deepDive: [
+      { heading: "Arbeitsplatz einrichten & integrieren",
+        html: `<p>Typischer Ablauf: Hardware aufbauen, OS per <strong>Standard-Image/Klon</strong> oder <strong>PXE</strong> installieren, in die Domäne aufnehmen, Software/Treiber verteilen, Peripherie und Drucker einrichten, ins <strong>Inventar</strong> aufnehmen und dokumentieren. Standardisierung spart Zeit und vermeidet Fehler.</p>` },
+      { heading: "Ergonomie & Arbeitssicherheit",
+        html: `<ul>
+          <li>Blickabstand zum Monitor ca. 50–70 cm, Oberkante in/unter Augenhöhe.</li>
+          <li>Höhenverstellbarer Stuhl, Unterarme waagerecht, Füße auf dem Boden.</li>
+          <li>Blendfreies, ausreichendes Licht; regelmäßige Pausen.</li>
+        </ul>
+        <p><strong>Kurz gemerkt:</strong> Image/Klon für Massenrollout; Ergonomie ist gesetzlich gefordert (ArbStättV).</p>` },
+    ],
+    questionIds: ["q-arb-1","q-arb-tf-1","fc-arb-1","q-arb-2","q-arb-tf-2"],
   },
 
   /* ===================== 7. PROJEKTMANAGEMENT & SERVICE ===================== */
@@ -1287,7 +1900,21 @@ done</code></pre>` },
       "Pflichtenheft→Auftragnehmer(WIE)",
       "Magisches Dreieck: Zeit·Kosten·Qualität",
     ],
-    questionIds: ["q-pm-1","q-pm-2","q-pm-tf-1","fc-pm-1"],
+    deepDive: [
+      { heading: "Lastenheft vs. Pflichtenheft",
+        html: `<table>
+          <thead><tr><th></th><th>Lastenheft</th><th>Pflichtenheft</th></tr></thead>
+          <tbody>
+            <tr><td>Wer</td><td>Auftraggeber</td><td>Auftragnehmer</td></tr>
+            <tr><td>Inhalt</td><td>Anforderungen (Was?)</td><td>Umsetzung (Wie?)</td></tr>
+            <tr><td>Zeitpunkt</td><td>zuerst</td><td>als Antwort darauf</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Projektphasen & magisches Dreieck",
+        html: `<p>Klassische Phasen: <strong>Initiierung → Planung → Durchführung → Abschluss</strong> (mit Controlling über alle Phasen). Im <strong>magischen Dreieck</strong> stehen <strong>Zeit</strong>, <strong>Kosten</strong> und <strong>Qualität/Leistung</strong> in Wechselwirkung – ein Faktor lässt sich nicht ohne Auswirkung auf die anderen ändern.</p>
+        <p><strong>Kurz gemerkt:</strong> Lastenheft = Was/Auftraggeber, Pflichtenheft = Wie/Auftragnehmer.</p>` },
+    ],
+    questionIds: ["q-pm-1","q-pm-2","q-pm-tf-1","fc-pm-1","q-pm-3","q-pm-tf-2","q-pm-cloze-1"],
   },
 
   {
@@ -1318,7 +1945,18 @@ done</code></pre>` },
       "Puffer=SAZ−FAZ",
       "Kritischer Pfad: Puffer=0",
     ],
-    questionIds: ["q-netzplan-1","q-netzplan-tf-1","q-netzplan-calc-1","fc-netzplan-1"],
+    deepDive: [
+      { heading: "Vorwärts- & Rückwärtsrechnung",
+        html: `<p>Je Vorgang werden ermittelt: <strong>FAZ</strong> (frühester Anfang), <strong>FEZ</strong> (frühestes Ende) per Vorwärtsrechnung; <strong>SAZ</strong> (spätester Anfang), <strong>SEZ</strong> (spätestes Ende) per Rückwärtsrechnung.</p>
+        <ul>
+          <li><strong>Gesamtpuffer (GP)</strong> = SAZ − FAZ (= SEZ − FEZ).</li>
+          <li><strong>Freier Puffer (FP)</strong> = FAZ(Nachfolger) − FEZ(Vorgang).</li>
+        </ul>` },
+      { heading: "Kritischer Pfad",
+        html: `<p>Der <strong>kritische Pfad</strong> ist die längste Vorgangskette vom Start zum Ende; seine Vorgänge haben <strong>Gesamtpuffer 0</strong>. Verzögert sich dort ein Vorgang, verschiebt sich das gesamte Projektende. Er bestimmt die minimale Projektdauer.</p>
+        <p><strong>Kurz gemerkt:</strong> GP = SAZ − FAZ; kritischer Pfad = längster Weg, Puffer 0.</p>` },
+    ],
+    questionIds: ["q-netzplan-1","q-netzplan-tf-1","q-netzplan-calc-1","fc-netzplan-1","q-netzplan-2","q-netzplan-calc-2","q-netzplan-tf-2"],
   },
 
   {
@@ -1345,7 +1983,20 @@ done</code></pre>` },
       "Nutzwert = Σ(Gewicht × Punkte)",
       "Make-or-Buy: Kosten + qualitative Faktoren",
     ],
-    questionIds: ["q-nwa-1","q-nwa-calc-1","fc-nwa-1"],
+    deepDive: [
+      { heading: "Nutzwertanalyse in 4 Schritten",
+        html: `<ol>
+          <li>Bewertungs<strong>kriterien</strong> festlegen (z. B. Preis, Service, Bedienbarkeit).</li>
+          <li><strong>Gewichtung</strong> vergeben (Summe meist 100 %).</li>
+          <li>Jede Alternative je Kriterium mit <strong>Punkten</strong> bewerten (z. B. 1–10).</li>
+          <li><strong>Gewichtete Summe</strong> bilden – höchster Nutzwert gewinnt.</li>
+        </ol>
+        <p>Beispiel: Kriterium Preis (Gewicht 40 %, 8 Punkte) → Teilnutzen 0,4 × 8 = 3,2.</p>` },
+      { heading: "Einordnung",
+        html: `<p>Die Nutzwertanalyse macht auch <strong>qualitative</strong> Kriterien vergleichbar – im Gegensatz zum reinen Angebotsvergleich (nur Preis). Schwäche: die Gewichtung ist subjektiv und sollte begründet/dokumentiert werden.</p>
+        <p><strong>Kurz gemerkt:</strong> Nutzwert = Σ (Gewicht × Punkte); höchster Wert gewinnt.</p>` },
+    ],
+    questionIds: ["q-nwa-1","q-nwa-calc-1","fc-nwa-1","q-nwa-2","q-nwa-tf-1"],
   },
 
   {
@@ -1375,7 +2026,18 @@ done</code></pre>` },
       "Incident·Problem·Change Management",
       "SLA: Verfügbarkeit & Reaktionszeiten",
     ],
-    questionIds: ["q-itil-1","q-itil-tf-1","fc-itil-1"],
+    deepDive: [
+      { heading: "Incident, Problem & Change",
+        html: `<ul>
+          <li><strong>Incident-Management:</strong> stellt den Betrieb nach einer Störung schnellstmöglich wieder her (auch per Workaround).</li>
+          <li><strong>Problem-Management:</strong> findet und beseitigt die zugrunde liegende Ursache (Known Error).</li>
+          <li><strong>Change-Management:</strong> plant und kontrolliert Änderungen, um Risiken zu minimieren.</li>
+        </ul>` },
+      { heading: "Service Level & Support-Stufen",
+        html: `<p>Ein <strong>SLA</strong> legt messbare Servicekennzahlen fest (Verfügbarkeit z. B. 99,9 %, Reaktions-/Lösungszeiten). Der Support ist gestuft: <strong>1st-Level</strong> (Erstannahme), <strong>2nd-Level</strong> (Fachspezialisten), <strong>3rd-Level</strong> (Hersteller/Entwicklung).</p>
+        <p><strong>Kurz gemerkt:</strong> Incident = schnelle Wiederherstellung, Problem = Ursache, SLA = vereinbarte, messbare Qualität.</p>` },
+    ],
+    questionIds: ["q-itil-1","q-itil-tf-1","fc-itil-1","q-itil-2","q-itil-tf-2","q-itil-match-1"],
   },
 
   /* ===================== 8. WISO ===================== */
@@ -1411,7 +2073,22 @@ done</code></pre>` },
       "Vertrag = 2 übereinst. Willenserklärungen",
       "Mängelrechte: Nacherfüllung·Minderung·Rücktritt·SE",
     ],
-    questionIds: ["q-vertrag-1","q-vertrag-2","q-vertrag-tf-1","fc-vertrag-1"],
+    deepDive: [
+      { heading: "Wichtige Vertragsarten",
+        html: `<table>
+          <thead><tr><th>Vertrag</th><th>geschuldet</th><th>Beispiel IT</th></tr></thead>
+          <tbody>
+            <tr><td>Kaufvertrag</td><td>Übereignung einer Ware</td><td>Hardware kaufen</td></tr>
+            <tr><td>Werkvertrag</td><td>konkreter Erfolg</td><td>fertige Individualsoftware</td></tr>
+            <tr><td>Dienstvertrag</td><td>Tätigkeit (kein Erfolg)</td><td>Beratung, Support</td></tr>
+            <tr><td>Mietvertrag</td><td>Nutzungsüberlassung</td><td>Cloud/SaaS auf Zeit</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Vertragsschluss & Gewährleistung",
+        html: `<p>Ein Vertrag entsteht durch zwei übereinstimmende Willenserklärungen (<strong>Angebot</strong> + <strong>Annahme</strong>). Bei Mängeln greift die <strong>Gewährleistung</strong> (Sachmängelhaftung, Neuware i. d. R. 2 Jahre) – gesetzlich. Eine <strong>Garantie</strong> ist freiwillig und geht ggf. darüber hinaus.</p>
+        <p><strong>Kurz gemerkt:</strong> Werkvertrag = Erfolg, Dienstvertrag = Tätigkeit; Gewährleistung ≠ Garantie.</p>` },
+    ],
+    questionIds: ["q-vertrag-1","q-vertrag-2","q-vertrag-tf-1","fc-vertrag-1","q-vertrag-3","q-vertrag-tf-2"],
   },
 
   {
@@ -1443,7 +2120,18 @@ done</code></pre>` },
       "GPL=Copyleft, MIT/BSD/Apache=permissiv",
       "AGB: überraschende Klauseln unwirksam",
     ],
-    questionIds: ["q-lizenz-1","q-lizenz-tf-1","fc-lizenz-1"],
+    deepDive: [
+      { heading: "Urheberrecht & Nutzungsrechte",
+        html: `<p>Das <strong>Urheberrecht</strong> entsteht in Deutschland automatisch mit der Schöpfung eines Werks (kein Eintrag nötig) und ist <strong>nicht übertragbar</strong>. Übertragen werden nur <strong>Nutzungs-/Verwertungsrechte</strong> (einfach oder ausschließlich). Es erlischt 70 Jahre nach dem Tod des Urhebers.</p>` },
+      { heading: "Software-Lizenzmodelle",
+        html: `<ul>
+          <li><strong>Proprietär:</strong> Quellcode geschlossen, Nutzung per Lizenz (z. B. EULA).</li>
+          <li><strong>Open Source:</strong> Quellcode offen; <strong>Copyleft</strong> (GPL) verpflichtet, Ableitungen wieder offen weiterzugeben; <strong>permissiv</strong> (MIT, BSD, Apache) erlaubt mehr Freiheiten.</li>
+          <li><strong>Freeware/Shareware:</strong> kostenlos nutzbar bzw. eingeschränkt zum Testen.</li>
+        </ul>
+        <p><strong>Kurz gemerkt:</strong> Urheberrecht entsteht automatisch; GPL = Copyleft; AGB regeln Vertragsbedingungen.</p>` },
+    ],
+    questionIds: ["q-lizenz-1","q-lizenz-tf-1","fc-lizenz-1","q-lizenz-2","q-lizenz-tf-2"],
   },
 
   {
@@ -1470,7 +2158,23 @@ done</code></pre>` },
       "GmbH Stammkapital 25.000 €",
       "Aufbau- vs. Ablauforganisation",
     ],
-    questionIds: ["q-unt-1","q-unt-tf-1","fc-unt-1"],
+    deepDive: [
+      { heading: "Personen- vs. Kapitalgesellschaften",
+        html: `<table>
+          <thead><tr><th>Form</th><th>Haftung</th><th>Kapital</th></tr></thead>
+          <tbody>
+            <tr><td>Einzelunternehmen</td><td>unbeschränkt (privat)</td><td>—</td></tr>
+            <tr><td>GbR / OHG</td><td>unbeschränkt, gesamtschuldnerisch</td><td>—</td></tr>
+            <tr><td>GmbH</td><td>beschränkt auf Gesellschaftsvermögen</td><td>min. 25.000 €</td></tr>
+            <tr><td>UG</td><td>beschränkt</td><td>ab 1 €</td></tr>
+            <tr><td>AG</td><td>beschränkt</td><td>min. 50.000 €</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Aufbau- & Ablauforganisation",
+        html: `<p>Die <strong>Aufbauorganisation</strong> regelt Stellen/Hierarchie (z. B. Linien-, Matrixorganisation, Organigramm). Die <strong>Ablauforganisation</strong> regelt Prozesse/Abläufe (wer macht was, wann, womit).</p>
+        <p><strong>Kurz gemerkt:</strong> GmbH = beschränkte Haftung, 25.000 € Stammkapital; Einzelunternehmer haftet privat.</p>` },
+    ],
+    questionIds: ["q-unt-1","q-unt-tf-1","fc-unt-1","q-unt-2","q-unt-tf-2"],
   },
 
   {
@@ -1503,7 +2207,20 @@ done</code></pre>` },
       "+Handlungskosten=Selbstkosten +Gewinn=BVP",
       "Wirtschaftlichkeit=Ertrag/Aufwand",
     ],
-    questionIds: ["q-kalk-1","q-kalk-calc-1","q-kalk-tf-1","q-kalk-cloze-1","fc-kalk-1"],
+    deepDive: [
+      { heading: "Bezugskalkulation (Einkauf)",
+        html: `<p>Reihenfolge vom Listenpreis zum Bezugspreis:</p>
+        <ul>
+          <li>Listeneinkaufspreis − <strong>Rabatt</strong> = Zieleinkaufspreis</li>
+          <li>− <strong>Skonto</strong> = Bareinkaufspreis</li>
+          <li>+ <strong>Bezugskosten</strong> (Fracht, Verpackung) = <strong>Bezugspreis</strong></li>
+        </ul>
+        <p>Wichtig: erst Rabatt, dann Skonto rechnen.</p>` },
+      { heading: "Umsatzsteuer & Dreisatz",
+        html: `<p><strong>Brutto = Netto × (1 + USt-Satz)</strong>. Beispiel: 200 € netto × 1,19 = 238 € brutto. Umgekehrt: Netto = Brutto / 1,19. Der <strong>Dreisatz</strong> hilft bei proportionalen Aufgaben (z. B. Stückpreise, Mengen).</p>
+        <p><strong>Kurz gemerkt:</strong> Rabatt vor Skonto; Brutto = Netto × 1,19 (bei 19 %).</p>` },
+    ],
+    questionIds: ["q-kalk-1","q-kalk-calc-1","q-kalk-tf-1","q-kalk-cloze-1","fc-kalk-1","q-kalk-2","q-kalk-calc-2","q-kalk-tf-2"],
   },
 
   {
@@ -1533,7 +2250,23 @@ done</code></pre>` },
       "UV: nur Arbeitgeber",
       "Mitbestimmung: Betriebsrat + JAV",
     ],
-    questionIds: ["q-bbig-1","q-sv-1","q-sv-match-1","q-bbig-tf-1","fc-bbig-1"],
+    deepDive: [
+      { heading: "Duale Ausbildung & BBiG",
+        html: `<p>Die duale Ausbildung verbindet <strong>Betrieb</strong> und <strong>Berufsschule</strong>. Das <strong>BBiG</strong> regelt u. a. Ausbildungsvertrag, Probezeit (1–4 Monate), Pflichten beider Seiten, Ausbildungsnachweis (Berichtsheft) und Prüfungen. Die <strong>IHK</strong> ist zuständige Stelle für die Abschlussprüfung.</p>` },
+      { heading: "Sozialversicherung – die 5 Zweige",
+        html: `<table>
+          <thead><tr><th>Zweig</th><th>Besonderheit</th></tr></thead>
+          <tbody>
+            <tr><td>Krankenversicherung</td><td>paritätisch (AN/AG)</td></tr>
+            <tr><td>Rentenversicherung</td><td>paritätisch</td></tr>
+            <tr><td>Arbeitslosenversicherung</td><td>paritätisch</td></tr>
+            <tr><td>Pflegeversicherung</td><td>paritätisch (Zuschlag für Kinderlose)</td></tr>
+            <tr><td>Unfallversicherung</td><td>allein vom Arbeitgeber getragen</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> 5 Zweige; nur die Unfallversicherung zahlt der Arbeitgeber allein.</p>` },
+    ],
+    questionIds: ["q-bbig-1","q-sv-1","q-sv-match-1","q-bbig-tf-1","fc-bbig-1","q-bbig-2","q-sv-2","q-sv-tf-1"],
   },
 
   /* ===================== 9. CLIENTS, CPS & BETRIEB (IHK-Ergänzungen) ===================== */
@@ -1575,7 +2308,19 @@ done</code></pre>` },
       "Prüfen: ipconfig /all (Win) · ip a (Linux)",
       "Domäne: zentrale Anmeldung + GPO, DNS nötig",
     ],
-    questionIds: ["q-clients-1","q-clients-2","q-clients-tf-1","fc-clients-1"],
+    deepDive: [
+      { heading: "Client-Integration Schritt für Schritt",
+        html: `<ol>
+          <li>OS bereitstellen – manuell, per Image/Klon oder <strong>PXE</strong> über das Netz.</li>
+          <li>Netzwerk konfigurieren (meist <strong>DHCP</strong>), Namensauflösung (<strong>DNS</strong>) sicherstellen.</li>
+          <li>In die <strong>AD-Domäne</strong> aufnehmen (Domänenbeitritt) – setzt funktionierendes DNS voraus.</li>
+          <li>Per <strong>GPO</strong> Richtlinien/Software verteilen, Drucker/Peripherie einrichten.</li>
+        </ol>` },
+      { heading: "Häufige Stolpersteine",
+        html: `<p>Falsche/fehlende DNS-Konfiguration verhindert den Domänenbeitritt. Zeitabweichungen (Kerberos toleriert nur kleine Differenzen) führen zu Anmeldeproblemen – daher ist eine korrekte <strong>Zeitsynchronisation (NTP)</strong> wichtig.</p>
+        <p><strong>Kurz gemerkt:</strong> PXE = Netzwerkinstallation; Domänenbeitritt braucht DNS + korrekte Uhrzeit.</p>` },
+    ],
+    questionIds: ["q-clients-1","q-clients-2","q-clients-tf-1","fc-clients-1","q-clients-3","q-clients-tf-2"],
   },
 
   {
@@ -1610,7 +2355,14 @@ done</code></pre>` },
       "Busse: I²C/SPI/CAN/Modbus · Funk: BLE/Zigbee/LoRaWAN",
       "MQTT: Broker + Topics, Publish/Subscribe",
     ],
-    questionIds: ["q-iot-1","q-iot-2","q-iot-tf-1","fc-iot-1"],
+    deepDive: [
+      { heading: "Sensoren, Aktoren & Protokolle",
+        html: `<p>Cyber-physische Systeme verbinden die physische mit der digitalen Welt: <strong>Sensoren</strong> erfassen Messwerte (Eingabe), <strong>Aktoren</strong> wirken auf die Umwelt (Ausgabe). Im IoT übertragen oft schlanke Protokolle die Daten: <strong>MQTT</strong> (Publish/Subscribe über Broker), <strong>CoAP</strong>, teils HTTP.</p>` },
+      { heading: "Architektur & Sicherheit",
+        html: `<p>Typisch ist eine Schichtung: Edge-/Feldgeräte → Gateway → Plattform/Cloud → Auswertung. <strong>Sicherheit</strong> ist kritisch (viele schwache Geräte): Netztrennung (eigenes VLAN), Updates, starke Authentifizierung und Transportverschlüsselung.</p>
+        <p><strong>Kurz gemerkt:</strong> Sensor = Eingabe, Aktor = Ausgabe; MQTT = leichtgewichtiges Pub/Sub fürs IoT.</p>` },
+    ],
+    questionIds: ["q-iot-1","q-iot-2","q-iot-tf-1","fc-iot-1","q-iot-3","q-iot-tf-2"],
   },
 
   {
@@ -1640,7 +2392,17 @@ done</code></pre>` },
       "Schwellwert → Alarm (Mail/Ticket)",
       "Tools: Nagios/Zabbix/Checkmk/Prometheus",
     ],
-    questionIds: ["q-mon-1","q-mon-2","q-mon-tf-1","fc-mon-1"],
+    deepDive: [
+      { heading: "Monitoring vs. Logging",
+        html: `<ul>
+          <li><strong>Monitoring</strong> überwacht Zustände/Metriken in Echtzeit (CPU, RAM, Erreichbarkeit) – oft per <strong>SNMP</strong>. Schwellwerte lösen Alarme aus (proaktiv).</li>
+          <li><strong>Logging</strong> protokolliert Ereignisse für spätere Analyse – zentral gesammelt per <strong>Syslog</strong>.</li>
+        </ul>` },
+      { heading: "Kennzahlen & Alarmierung",
+        html: `<p>Wichtige Größen: <strong>Verfügbarkeit</strong>, Auslastung, Antwortzeiten, Fehlerraten. Eine gute Alarmierung meldet früh (Threshold), vermeidet aber Alarmflut (Aggregation, Eskalationsstufen). Dashboards visualisieren Trends.</p>
+        <p><strong>Kurz gemerkt:</strong> SNMP = Geräte überwachen, Syslog = Logs sammeln; Schwellwerte ermöglichen proaktives Handeln.</p>` },
+    ],
+    questionIds: ["q-mon-1","q-mon-2","q-mon-tf-1","fc-mon-1","q-mon-3","q-mon-tf-2"],
   },
 
   {
@@ -1676,7 +2438,21 @@ done</code></pre>` },
       "OSI bottom-up: Kabel→IP→DNS→Anwendung",
       "Symptom → Hypothese → Test → Fix → Doku",
     ],
-    questionIds: ["q-ts-1","q-ts-2","q-ts-tf-1","fc-ts-1"],
+    deepDive: [
+      { heading: "Strukturierte Fehlersuche",
+        html: `<ol>
+          <li><strong>Symptom erfassen</strong> & eingrenzen (wer/was/seit wann?).</li>
+          <li><strong>Hypothese</strong> bilden (wahrscheinlichste Ursache).</li>
+          <li><strong>Eine</strong> Änderung testen, Ergebnis prüfen.</li>
+          <li>Bei Misserfolg zurücksetzen, nächste Hypothese.</li>
+          <li>Lösung umsetzen und <strong>dokumentieren</strong>.</li>
+        </ol>
+        <p>Bewährt ist das Vorgehen entlang des <strong>OSI-Modells</strong> (von unten nach oben oder umgekehrt): Kabel/Link → IP → Dienst.</p>` },
+      { heading: "Werkzeuge",
+        html: `<p>Nützliche Befehle: <code>ping</code> (Erreichbarkeit), <code>ipconfig/ifconfig</code> (Konfiguration), <code>tracert/traceroute</code> (Pfad), <code>nslookup/dig</code> (DNS), Blick in die <strong>Ereignis-/Logdateien</strong>.</p>
+        <p><strong>Kurz gemerkt:</strong> Immer nur eine Variable ändern; Lösung in der Wissensdatenbank festhalten.</p>` },
+    ],
+    questionIds: ["q-ts-1","q-ts-2","q-ts-tf-1","fc-ts-1","q-ts-3","q-ts-tf-2"],
   },
 
   {
@@ -1706,7 +2482,18 @@ done</code></pre>` },
       "ESD-Armband & Erdung bei Hardware",
       "Green-IT: Energieeffizienz · WEEE-Recycling",
     ],
-    questionIds: ["q-as-1","q-as-2","q-as-tf-1","fc-as-1"],
+    deepDive: [
+      { heading: "Arbeitsschutz & ESD",
+        html: `<p>Beim Arbeiten an Hardware schützt <strong>ESD-Equipment</strong> (Antistatik-Armband, ESD-Matte, Erdung) empfindliche Bauteile vor elektrostatischer Entladung. Allgemein gelten Arbeitsschutzregeln (Erste Hilfe, Unterweisung, Gefährdungsbeurteilung) und für Bildschirmarbeit die Ergonomie-Vorgaben.</p>` },
+      { heading: "Green-IT & Entsorgung",
+        html: `<ul>
+          <li><strong>Energieeffizienz:</strong> stromsparende Geräte, Virtualisierung/Konsolidierung, Energieverwaltung.</li>
+          <li><strong>Elektroaltgeräte:</strong> fachgerechte Entsorgung/Recycling nach <strong>WEEE/ElektroG</strong> (nicht in den Hausmüll).</li>
+          <li><strong>Datenträger:</strong> vor Entsorgung sicher löschen/vernichten (Datenschutz).</li>
+        </ul>
+        <p><strong>Kurz gemerkt:</strong> ESD-Schutz durch Erdung; E-Schrott nach WEEE entsorgen.</p>` },
+    ],
+    questionIds: ["q-as-1","q-as-2","q-as-tf-1","fc-as-1","q-as-3","q-as-tf-2"],
   },
 
   {
@@ -1742,7 +2529,20 @@ done</code></pre>` },
       "Tests: Unit/Integration/System/Abnahme",
       "QS: Reviews · Linter · CI/CD",
     ],
-    questionIds: ["q-git-1","q-git-2","q-git-tf-1","fc-git-1"],
+    deepDive: [
+      { heading: "Git-Grundworkflow",
+        html: `<ul>
+          <li><code>git clone</code>/<code>pull</code> – Repository holen/aktualisieren.</li>
+          <li><code>git add</code> + <code>git commit</code> – Änderungen als nachvollziehbaren Stand festhalten.</li>
+          <li><code>git branch</code>/<code>checkout</code> – parallel und isoliert entwickeln.</li>
+          <li><code>git merge</code> + <code>push</code> – zusammenführen und teilen.</li>
+        </ul>
+        <p>Bei gleichzeitig geänderten Stellen entsteht ein <strong>Merge-Konflikt</strong>, der manuell aufgelöst wird.</p>` },
+      { heading: "Qualitätssicherung",
+        html: `<p>QS-Bausteine: <strong>Code-Reviews</strong>, automatisierte <strong>Tests</strong> (Unit-, Integrations-, Systemtest), <strong>CI/CD</strong> (automatisches Bauen/Testen/Ausliefern) und statische Analyse (Linter). Ziel: Fehler früh finden, Wartbarkeit sichern.</p>
+        <p><strong>Kurz gemerkt:</strong> Branches isolieren Arbeit; Merge führt zusammen; Tests/Reviews sichern Qualität.</p>` },
+    ],
+    questionIds: ["q-git-1","q-git-2","q-git-tf-1","fc-git-1","q-git-3","q-git-tf-2"],
   },
 
 ];
