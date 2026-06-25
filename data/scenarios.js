@@ -300,6 +300,45 @@ export const scenarios = [
       },
     ],
   },
+
+  {
+    id: "szenario-beschaffung",
+    topicId: "nutzwertanalyse",
+    title: "Hardware-Beschaffung & Angebotsbewertung",
+    difficulty: "mittel",
+    scenario: `<p>Die <strong>Sommer GmbH</strong> beschafft 20 neue Notebooks. Drei Anbieter haben
+      Angebote abgegeben, die sich in Preis, Garantie und Lieferzeit unterscheiden. Du sollst eine
+      fundierte Entscheidung vorbereiten und die Kosten kalkulieren.</p>`,
+    parts: [
+      {
+        type: "mc-single",
+        question: "Welches Verfahren bewertet Angebote anhand mehrerer gewichteter Kriterien (nicht nur Preis)?",
+        options: ["Nutzwertanalyse", "Subnetting", "Normalisierung", "RAID-Berechnung"],
+        answer: 0,
+        explanation: "Die Nutzwertanalyse gewichtet Kriterien und bewertet je Alternative – die höchste gewichtete Summe gewinnt.",
+      },
+      {
+        type: "calc",
+        question: "Ein Notebook kostet 800 € netto. Wie hoch ist der Bruttopreis bei 19 % USt? (in €)",
+        answer: "952",
+        accept: ["952 €", "952,00"],
+        explanation: "800 € × 1,19 = 952 € brutto.",
+      },
+      {
+        type: "truefalse",
+        question: "Ein angebotener Skontoabzug von 2 % bei Zahlung binnen 10 Tagen senkt den tatsächlichen Einkaufspreis.",
+        answer: true,
+        explanation: "Skonto ist ein Preisnachlass für schnelle Zahlung und reduziert den Bareinkaufspreis.",
+      },
+      {
+        type: "mc-single",
+        question: "Welches Dokument hält die Anforderungen des Auftraggebers an die Beschaffung fest?",
+        options: ["Das Lastenheft", "Das Pflichtenheft", "Der Netzplan", "Die ACL"],
+        answer: 0,
+        explanation: "Das Lastenheft beschreibt das Was/die Anforderungen aus Sicht des Auftraggebers.",
+      },
+    ],
+  },
 ];
 
 export function getScenario(id) { return scenarios.find((s) => s.id === id) || null; }

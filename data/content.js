@@ -1811,7 +1811,24 @@ done</code></pre>` },
       "RAM flüchtig, ECC im Server",
       "NVMe>SATA-SSD>HDD (Tempo)",
     ],
-    questionIds: ["q-hw-1","q-hw-tf-1","fc-hw-1"],
+    deepDive: [
+      { heading: "Zentrale Komponenten",
+        html: `<table>
+          <thead><tr><th>Komponente</th><th>Aufgabe</th></tr></thead>
+          <tbody>
+            <tr><td>CPU</td><td>führt Befehle aus (Takt, Kerne, Cache)</td></tr>
+            <tr><td>RAM</td><td>schneller, flüchtiger Arbeitsspeicher</td></tr>
+            <tr><td>SSD/HDD</td><td>dauerhafter Massenspeicher (SSD = Flash, schnell)</td></tr>
+            <tr><td>Mainboard</td><td>verbindet alle Komponenten (Chipsatz, Bus)</td></tr>
+            <tr><td>Netzteil (PSU)</td><td>wandelt AC → DC (3,3/5/12 V)</td></tr>
+            <tr><td>GPU</td><td>Grafikberechnung</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Schnittstellen & Speicherhierarchie",
+        html: `<p>Gängige Schnittstellen: <strong>USB</strong>, <strong>HDMI/DisplayPort</strong>, <strong>SATA/NVMe</strong> (Laufwerke), <strong>RJ45</strong> (LAN). Die Speicherhierarchie reicht von schnell/teuer (Register, Cache, RAM) zu langsam/günstig (SSD, HDD, Band).</p>
+        <p><strong>Kurz gemerkt:</strong> RAM ist flüchtig; SSD hat keine beweglichen Teile; PSU liefert Gleichspannung.</p>` },
+    ],
+    questionIds: ["q-hw-1","q-hw-tf-1","fc-hw-1","q-hw-2","q-hw-3","q-hw-tf-2"],
   },
 
   {
@@ -1841,7 +1858,18 @@ done</code></pre>` },
       "Imaging/Klonen für viele gleiche Clients",
       "Ergonomie & Bildschirmarbeitsplatz beachten",
     ],
-    questionIds: ["q-arb-1","q-arb-tf-1","fc-arb-1"],
+    deepDive: [
+      { heading: "Arbeitsplatz einrichten & integrieren",
+        html: `<p>Typischer Ablauf: Hardware aufbauen, OS per <strong>Standard-Image/Klon</strong> oder <strong>PXE</strong> installieren, in die Domäne aufnehmen, Software/Treiber verteilen, Peripherie und Drucker einrichten, ins <strong>Inventar</strong> aufnehmen und dokumentieren. Standardisierung spart Zeit und vermeidet Fehler.</p>` },
+      { heading: "Ergonomie & Arbeitssicherheit",
+        html: `<ul>
+          <li>Blickabstand zum Monitor ca. 50–70 cm, Oberkante in/unter Augenhöhe.</li>
+          <li>Höhenverstellbarer Stuhl, Unterarme waagerecht, Füße auf dem Boden.</li>
+          <li>Blendfreies, ausreichendes Licht; regelmäßige Pausen.</li>
+        </ul>
+        <p><strong>Kurz gemerkt:</strong> Image/Klon für Massenrollout; Ergonomie ist gesetzlich gefordert (ArbStättV).</p>` },
+    ],
+    questionIds: ["q-arb-1","q-arb-tf-1","fc-arb-1","q-arb-2","q-arb-tf-2"],
   },
 
   /* ===================== 7. PROJEKTMANAGEMENT & SERVICE ===================== */
@@ -1872,7 +1900,21 @@ done</code></pre>` },
       "Pflichtenheft→Auftragnehmer(WIE)",
       "Magisches Dreieck: Zeit·Kosten·Qualität",
     ],
-    questionIds: ["q-pm-1","q-pm-2","q-pm-tf-1","fc-pm-1"],
+    deepDive: [
+      { heading: "Lastenheft vs. Pflichtenheft",
+        html: `<table>
+          <thead><tr><th></th><th>Lastenheft</th><th>Pflichtenheft</th></tr></thead>
+          <tbody>
+            <tr><td>Wer</td><td>Auftraggeber</td><td>Auftragnehmer</td></tr>
+            <tr><td>Inhalt</td><td>Anforderungen (Was?)</td><td>Umsetzung (Wie?)</td></tr>
+            <tr><td>Zeitpunkt</td><td>zuerst</td><td>als Antwort darauf</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Projektphasen & magisches Dreieck",
+        html: `<p>Klassische Phasen: <strong>Initiierung → Planung → Durchführung → Abschluss</strong> (mit Controlling über alle Phasen). Im <strong>magischen Dreieck</strong> stehen <strong>Zeit</strong>, <strong>Kosten</strong> und <strong>Qualität/Leistung</strong> in Wechselwirkung – ein Faktor lässt sich nicht ohne Auswirkung auf die anderen ändern.</p>
+        <p><strong>Kurz gemerkt:</strong> Lastenheft = Was/Auftraggeber, Pflichtenheft = Wie/Auftragnehmer.</p>` },
+    ],
+    questionIds: ["q-pm-1","q-pm-2","q-pm-tf-1","fc-pm-1","q-pm-3","q-pm-tf-2","q-pm-cloze-1"],
   },
 
   {
@@ -1903,7 +1945,18 @@ done</code></pre>` },
       "Puffer=SAZ−FAZ",
       "Kritischer Pfad: Puffer=0",
     ],
-    questionIds: ["q-netzplan-1","q-netzplan-tf-1","q-netzplan-calc-1","fc-netzplan-1"],
+    deepDive: [
+      { heading: "Vorwärts- & Rückwärtsrechnung",
+        html: `<p>Je Vorgang werden ermittelt: <strong>FAZ</strong> (frühester Anfang), <strong>FEZ</strong> (frühestes Ende) per Vorwärtsrechnung; <strong>SAZ</strong> (spätester Anfang), <strong>SEZ</strong> (spätestes Ende) per Rückwärtsrechnung.</p>
+        <ul>
+          <li><strong>Gesamtpuffer (GP)</strong> = SAZ − FAZ (= SEZ − FEZ).</li>
+          <li><strong>Freier Puffer (FP)</strong> = FAZ(Nachfolger) − FEZ(Vorgang).</li>
+        </ul>` },
+      { heading: "Kritischer Pfad",
+        html: `<p>Der <strong>kritische Pfad</strong> ist die längste Vorgangskette vom Start zum Ende; seine Vorgänge haben <strong>Gesamtpuffer 0</strong>. Verzögert sich dort ein Vorgang, verschiebt sich das gesamte Projektende. Er bestimmt die minimale Projektdauer.</p>
+        <p><strong>Kurz gemerkt:</strong> GP = SAZ − FAZ; kritischer Pfad = längster Weg, Puffer 0.</p>` },
+    ],
+    questionIds: ["q-netzplan-1","q-netzplan-tf-1","q-netzplan-calc-1","fc-netzplan-1","q-netzplan-2","q-netzplan-calc-2","q-netzplan-tf-2"],
   },
 
   {
@@ -1930,7 +1983,20 @@ done</code></pre>` },
       "Nutzwert = Σ(Gewicht × Punkte)",
       "Make-or-Buy: Kosten + qualitative Faktoren",
     ],
-    questionIds: ["q-nwa-1","q-nwa-calc-1","fc-nwa-1"],
+    deepDive: [
+      { heading: "Nutzwertanalyse in 4 Schritten",
+        html: `<ol>
+          <li>Bewertungs<strong>kriterien</strong> festlegen (z. B. Preis, Service, Bedienbarkeit).</li>
+          <li><strong>Gewichtung</strong> vergeben (Summe meist 100 %).</li>
+          <li>Jede Alternative je Kriterium mit <strong>Punkten</strong> bewerten (z. B. 1–10).</li>
+          <li><strong>Gewichtete Summe</strong> bilden – höchster Nutzwert gewinnt.</li>
+        </ol>
+        <p>Beispiel: Kriterium Preis (Gewicht 40 %, 8 Punkte) → Teilnutzen 0,4 × 8 = 3,2.</p>` },
+      { heading: "Einordnung",
+        html: `<p>Die Nutzwertanalyse macht auch <strong>qualitative</strong> Kriterien vergleichbar – im Gegensatz zum reinen Angebotsvergleich (nur Preis). Schwäche: die Gewichtung ist subjektiv und sollte begründet/dokumentiert werden.</p>
+        <p><strong>Kurz gemerkt:</strong> Nutzwert = Σ (Gewicht × Punkte); höchster Wert gewinnt.</p>` },
+    ],
+    questionIds: ["q-nwa-1","q-nwa-calc-1","fc-nwa-1","q-nwa-2","q-nwa-tf-1"],
   },
 
   {
@@ -1960,7 +2026,18 @@ done</code></pre>` },
       "Incident·Problem·Change Management",
       "SLA: Verfügbarkeit & Reaktionszeiten",
     ],
-    questionIds: ["q-itil-1","q-itil-tf-1","fc-itil-1"],
+    deepDive: [
+      { heading: "Incident, Problem & Change",
+        html: `<ul>
+          <li><strong>Incident-Management:</strong> stellt den Betrieb nach einer Störung schnellstmöglich wieder her (auch per Workaround).</li>
+          <li><strong>Problem-Management:</strong> findet und beseitigt die zugrunde liegende Ursache (Known Error).</li>
+          <li><strong>Change-Management:</strong> plant und kontrolliert Änderungen, um Risiken zu minimieren.</li>
+        </ul>` },
+      { heading: "Service Level & Support-Stufen",
+        html: `<p>Ein <strong>SLA</strong> legt messbare Servicekennzahlen fest (Verfügbarkeit z. B. 99,9 %, Reaktions-/Lösungszeiten). Der Support ist gestuft: <strong>1st-Level</strong> (Erstannahme), <strong>2nd-Level</strong> (Fachspezialisten), <strong>3rd-Level</strong> (Hersteller/Entwicklung).</p>
+        <p><strong>Kurz gemerkt:</strong> Incident = schnelle Wiederherstellung, Problem = Ursache, SLA = vereinbarte, messbare Qualität.</p>` },
+    ],
+    questionIds: ["q-itil-1","q-itil-tf-1","fc-itil-1","q-itil-2","q-itil-tf-2","q-itil-match-1"],
   },
 
   /* ===================== 8. WISO ===================== */
@@ -1996,7 +2073,22 @@ done</code></pre>` },
       "Vertrag = 2 übereinst. Willenserklärungen",
       "Mängelrechte: Nacherfüllung·Minderung·Rücktritt·SE",
     ],
-    questionIds: ["q-vertrag-1","q-vertrag-2","q-vertrag-tf-1","fc-vertrag-1"],
+    deepDive: [
+      { heading: "Wichtige Vertragsarten",
+        html: `<table>
+          <thead><tr><th>Vertrag</th><th>geschuldet</th><th>Beispiel IT</th></tr></thead>
+          <tbody>
+            <tr><td>Kaufvertrag</td><td>Übereignung einer Ware</td><td>Hardware kaufen</td></tr>
+            <tr><td>Werkvertrag</td><td>konkreter Erfolg</td><td>fertige Individualsoftware</td></tr>
+            <tr><td>Dienstvertrag</td><td>Tätigkeit (kein Erfolg)</td><td>Beratung, Support</td></tr>
+            <tr><td>Mietvertrag</td><td>Nutzungsüberlassung</td><td>Cloud/SaaS auf Zeit</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Vertragsschluss & Gewährleistung",
+        html: `<p>Ein Vertrag entsteht durch zwei übereinstimmende Willenserklärungen (<strong>Angebot</strong> + <strong>Annahme</strong>). Bei Mängeln greift die <strong>Gewährleistung</strong> (Sachmängelhaftung, Neuware i. d. R. 2 Jahre) – gesetzlich. Eine <strong>Garantie</strong> ist freiwillig und geht ggf. darüber hinaus.</p>
+        <p><strong>Kurz gemerkt:</strong> Werkvertrag = Erfolg, Dienstvertrag = Tätigkeit; Gewährleistung ≠ Garantie.</p>` },
+    ],
+    questionIds: ["q-vertrag-1","q-vertrag-2","q-vertrag-tf-1","fc-vertrag-1","q-vertrag-3","q-vertrag-tf-2"],
   },
 
   {
@@ -2028,7 +2120,18 @@ done</code></pre>` },
       "GPL=Copyleft, MIT/BSD/Apache=permissiv",
       "AGB: überraschende Klauseln unwirksam",
     ],
-    questionIds: ["q-lizenz-1","q-lizenz-tf-1","fc-lizenz-1"],
+    deepDive: [
+      { heading: "Urheberrecht & Nutzungsrechte",
+        html: `<p>Das <strong>Urheberrecht</strong> entsteht in Deutschland automatisch mit der Schöpfung eines Werks (kein Eintrag nötig) und ist <strong>nicht übertragbar</strong>. Übertragen werden nur <strong>Nutzungs-/Verwertungsrechte</strong> (einfach oder ausschließlich). Es erlischt 70 Jahre nach dem Tod des Urhebers.</p>` },
+      { heading: "Software-Lizenzmodelle",
+        html: `<ul>
+          <li><strong>Proprietär:</strong> Quellcode geschlossen, Nutzung per Lizenz (z. B. EULA).</li>
+          <li><strong>Open Source:</strong> Quellcode offen; <strong>Copyleft</strong> (GPL) verpflichtet, Ableitungen wieder offen weiterzugeben; <strong>permissiv</strong> (MIT, BSD, Apache) erlaubt mehr Freiheiten.</li>
+          <li><strong>Freeware/Shareware:</strong> kostenlos nutzbar bzw. eingeschränkt zum Testen.</li>
+        </ul>
+        <p><strong>Kurz gemerkt:</strong> Urheberrecht entsteht automatisch; GPL = Copyleft; AGB regeln Vertragsbedingungen.</p>` },
+    ],
+    questionIds: ["q-lizenz-1","q-lizenz-tf-1","fc-lizenz-1","q-lizenz-2","q-lizenz-tf-2"],
   },
 
   {
@@ -2055,7 +2158,23 @@ done</code></pre>` },
       "GmbH Stammkapital 25.000 €",
       "Aufbau- vs. Ablauforganisation",
     ],
-    questionIds: ["q-unt-1","q-unt-tf-1","fc-unt-1"],
+    deepDive: [
+      { heading: "Personen- vs. Kapitalgesellschaften",
+        html: `<table>
+          <thead><tr><th>Form</th><th>Haftung</th><th>Kapital</th></tr></thead>
+          <tbody>
+            <tr><td>Einzelunternehmen</td><td>unbeschränkt (privat)</td><td>—</td></tr>
+            <tr><td>GbR / OHG</td><td>unbeschränkt, gesamtschuldnerisch</td><td>—</td></tr>
+            <tr><td>GmbH</td><td>beschränkt auf Gesellschaftsvermögen</td><td>min. 25.000 €</td></tr>
+            <tr><td>UG</td><td>beschränkt</td><td>ab 1 €</td></tr>
+            <tr><td>AG</td><td>beschränkt</td><td>min. 50.000 €</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Aufbau- & Ablauforganisation",
+        html: `<p>Die <strong>Aufbauorganisation</strong> regelt Stellen/Hierarchie (z. B. Linien-, Matrixorganisation, Organigramm). Die <strong>Ablauforganisation</strong> regelt Prozesse/Abläufe (wer macht was, wann, womit).</p>
+        <p><strong>Kurz gemerkt:</strong> GmbH = beschränkte Haftung, 25.000 € Stammkapital; Einzelunternehmer haftet privat.</p>` },
+    ],
+    questionIds: ["q-unt-1","q-unt-tf-1","fc-unt-1","q-unt-2","q-unt-tf-2"],
   },
 
   {
@@ -2088,7 +2207,20 @@ done</code></pre>` },
       "+Handlungskosten=Selbstkosten +Gewinn=BVP",
       "Wirtschaftlichkeit=Ertrag/Aufwand",
     ],
-    questionIds: ["q-kalk-1","q-kalk-calc-1","q-kalk-tf-1","q-kalk-cloze-1","fc-kalk-1"],
+    deepDive: [
+      { heading: "Bezugskalkulation (Einkauf)",
+        html: `<p>Reihenfolge vom Listenpreis zum Bezugspreis:</p>
+        <ul>
+          <li>Listeneinkaufspreis − <strong>Rabatt</strong> = Zieleinkaufspreis</li>
+          <li>− <strong>Skonto</strong> = Bareinkaufspreis</li>
+          <li>+ <strong>Bezugskosten</strong> (Fracht, Verpackung) = <strong>Bezugspreis</strong></li>
+        </ul>
+        <p>Wichtig: erst Rabatt, dann Skonto rechnen.</p>` },
+      { heading: "Umsatzsteuer & Dreisatz",
+        html: `<p><strong>Brutto = Netto × (1 + USt-Satz)</strong>. Beispiel: 200 € netto × 1,19 = 238 € brutto. Umgekehrt: Netto = Brutto / 1,19. Der <strong>Dreisatz</strong> hilft bei proportionalen Aufgaben (z. B. Stückpreise, Mengen).</p>
+        <p><strong>Kurz gemerkt:</strong> Rabatt vor Skonto; Brutto = Netto × 1,19 (bei 19 %).</p>` },
+    ],
+    questionIds: ["q-kalk-1","q-kalk-calc-1","q-kalk-tf-1","q-kalk-cloze-1","fc-kalk-1","q-kalk-2","q-kalk-calc-2","q-kalk-tf-2"],
   },
 
   {
@@ -2118,7 +2250,23 @@ done</code></pre>` },
       "UV: nur Arbeitgeber",
       "Mitbestimmung: Betriebsrat + JAV",
     ],
-    questionIds: ["q-bbig-1","q-sv-1","q-sv-match-1","q-bbig-tf-1","fc-bbig-1"],
+    deepDive: [
+      { heading: "Duale Ausbildung & BBiG",
+        html: `<p>Die duale Ausbildung verbindet <strong>Betrieb</strong> und <strong>Berufsschule</strong>. Das <strong>BBiG</strong> regelt u. a. Ausbildungsvertrag, Probezeit (1–4 Monate), Pflichten beider Seiten, Ausbildungsnachweis (Berichtsheft) und Prüfungen. Die <strong>IHK</strong> ist zuständige Stelle für die Abschlussprüfung.</p>` },
+      { heading: "Sozialversicherung – die 5 Zweige",
+        html: `<table>
+          <thead><tr><th>Zweig</th><th>Besonderheit</th></tr></thead>
+          <tbody>
+            <tr><td>Krankenversicherung</td><td>paritätisch (AN/AG)</td></tr>
+            <tr><td>Rentenversicherung</td><td>paritätisch</td></tr>
+            <tr><td>Arbeitslosenversicherung</td><td>paritätisch</td></tr>
+            <tr><td>Pflegeversicherung</td><td>paritätisch (Zuschlag für Kinderlose)</td></tr>
+            <tr><td>Unfallversicherung</td><td>allein vom Arbeitgeber getragen</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> 5 Zweige; nur die Unfallversicherung zahlt der Arbeitgeber allein.</p>` },
+    ],
+    questionIds: ["q-bbig-1","q-sv-1","q-sv-match-1","q-bbig-tf-1","fc-bbig-1","q-bbig-2","q-sv-2","q-sv-tf-1"],
   },
 
   /* ===================== 9. CLIENTS, CPS & BETRIEB (IHK-Ergänzungen) ===================== */
@@ -2160,7 +2308,19 @@ done</code></pre>` },
       "Prüfen: ipconfig /all (Win) · ip a (Linux)",
       "Domäne: zentrale Anmeldung + GPO, DNS nötig",
     ],
-    questionIds: ["q-clients-1","q-clients-2","q-clients-tf-1","fc-clients-1"],
+    deepDive: [
+      { heading: "Client-Integration Schritt für Schritt",
+        html: `<ol>
+          <li>OS bereitstellen – manuell, per Image/Klon oder <strong>PXE</strong> über das Netz.</li>
+          <li>Netzwerk konfigurieren (meist <strong>DHCP</strong>), Namensauflösung (<strong>DNS</strong>) sicherstellen.</li>
+          <li>In die <strong>AD-Domäne</strong> aufnehmen (Domänenbeitritt) – setzt funktionierendes DNS voraus.</li>
+          <li>Per <strong>GPO</strong> Richtlinien/Software verteilen, Drucker/Peripherie einrichten.</li>
+        </ol>` },
+      { heading: "Häufige Stolpersteine",
+        html: `<p>Falsche/fehlende DNS-Konfiguration verhindert den Domänenbeitritt. Zeitabweichungen (Kerberos toleriert nur kleine Differenzen) führen zu Anmeldeproblemen – daher ist eine korrekte <strong>Zeitsynchronisation (NTP)</strong> wichtig.</p>
+        <p><strong>Kurz gemerkt:</strong> PXE = Netzwerkinstallation; Domänenbeitritt braucht DNS + korrekte Uhrzeit.</p>` },
+    ],
+    questionIds: ["q-clients-1","q-clients-2","q-clients-tf-1","fc-clients-1","q-clients-3","q-clients-tf-2"],
   },
 
   {
@@ -2195,7 +2355,14 @@ done</code></pre>` },
       "Busse: I²C/SPI/CAN/Modbus · Funk: BLE/Zigbee/LoRaWAN",
       "MQTT: Broker + Topics, Publish/Subscribe",
     ],
-    questionIds: ["q-iot-1","q-iot-2","q-iot-tf-1","fc-iot-1"],
+    deepDive: [
+      { heading: "Sensoren, Aktoren & Protokolle",
+        html: `<p>Cyber-physische Systeme verbinden die physische mit der digitalen Welt: <strong>Sensoren</strong> erfassen Messwerte (Eingabe), <strong>Aktoren</strong> wirken auf die Umwelt (Ausgabe). Im IoT übertragen oft schlanke Protokolle die Daten: <strong>MQTT</strong> (Publish/Subscribe über Broker), <strong>CoAP</strong>, teils HTTP.</p>` },
+      { heading: "Architektur & Sicherheit",
+        html: `<p>Typisch ist eine Schichtung: Edge-/Feldgeräte → Gateway → Plattform/Cloud → Auswertung. <strong>Sicherheit</strong> ist kritisch (viele schwache Geräte): Netztrennung (eigenes VLAN), Updates, starke Authentifizierung und Transportverschlüsselung.</p>
+        <p><strong>Kurz gemerkt:</strong> Sensor = Eingabe, Aktor = Ausgabe; MQTT = leichtgewichtiges Pub/Sub fürs IoT.</p>` },
+    ],
+    questionIds: ["q-iot-1","q-iot-2","q-iot-tf-1","fc-iot-1","q-iot-3","q-iot-tf-2"],
   },
 
   {
@@ -2225,7 +2392,17 @@ done</code></pre>` },
       "Schwellwert → Alarm (Mail/Ticket)",
       "Tools: Nagios/Zabbix/Checkmk/Prometheus",
     ],
-    questionIds: ["q-mon-1","q-mon-2","q-mon-tf-1","fc-mon-1"],
+    deepDive: [
+      { heading: "Monitoring vs. Logging",
+        html: `<ul>
+          <li><strong>Monitoring</strong> überwacht Zustände/Metriken in Echtzeit (CPU, RAM, Erreichbarkeit) – oft per <strong>SNMP</strong>. Schwellwerte lösen Alarme aus (proaktiv).</li>
+          <li><strong>Logging</strong> protokolliert Ereignisse für spätere Analyse – zentral gesammelt per <strong>Syslog</strong>.</li>
+        </ul>` },
+      { heading: "Kennzahlen & Alarmierung",
+        html: `<p>Wichtige Größen: <strong>Verfügbarkeit</strong>, Auslastung, Antwortzeiten, Fehlerraten. Eine gute Alarmierung meldet früh (Threshold), vermeidet aber Alarmflut (Aggregation, Eskalationsstufen). Dashboards visualisieren Trends.</p>
+        <p><strong>Kurz gemerkt:</strong> SNMP = Geräte überwachen, Syslog = Logs sammeln; Schwellwerte ermöglichen proaktives Handeln.</p>` },
+    ],
+    questionIds: ["q-mon-1","q-mon-2","q-mon-tf-1","fc-mon-1","q-mon-3","q-mon-tf-2"],
   },
 
   {
@@ -2261,7 +2438,21 @@ done</code></pre>` },
       "OSI bottom-up: Kabel→IP→DNS→Anwendung",
       "Symptom → Hypothese → Test → Fix → Doku",
     ],
-    questionIds: ["q-ts-1","q-ts-2","q-ts-tf-1","fc-ts-1"],
+    deepDive: [
+      { heading: "Strukturierte Fehlersuche",
+        html: `<ol>
+          <li><strong>Symptom erfassen</strong> & eingrenzen (wer/was/seit wann?).</li>
+          <li><strong>Hypothese</strong> bilden (wahrscheinlichste Ursache).</li>
+          <li><strong>Eine</strong> Änderung testen, Ergebnis prüfen.</li>
+          <li>Bei Misserfolg zurücksetzen, nächste Hypothese.</li>
+          <li>Lösung umsetzen und <strong>dokumentieren</strong>.</li>
+        </ol>
+        <p>Bewährt ist das Vorgehen entlang des <strong>OSI-Modells</strong> (von unten nach oben oder umgekehrt): Kabel/Link → IP → Dienst.</p>` },
+      { heading: "Werkzeuge",
+        html: `<p>Nützliche Befehle: <code>ping</code> (Erreichbarkeit), <code>ipconfig/ifconfig</code> (Konfiguration), <code>tracert/traceroute</code> (Pfad), <code>nslookup/dig</code> (DNS), Blick in die <strong>Ereignis-/Logdateien</strong>.</p>
+        <p><strong>Kurz gemerkt:</strong> Immer nur eine Variable ändern; Lösung in der Wissensdatenbank festhalten.</p>` },
+    ],
+    questionIds: ["q-ts-1","q-ts-2","q-ts-tf-1","fc-ts-1","q-ts-3","q-ts-tf-2"],
   },
 
   {
@@ -2291,7 +2482,18 @@ done</code></pre>` },
       "ESD-Armband & Erdung bei Hardware",
       "Green-IT: Energieeffizienz · WEEE-Recycling",
     ],
-    questionIds: ["q-as-1","q-as-2","q-as-tf-1","fc-as-1"],
+    deepDive: [
+      { heading: "Arbeitsschutz & ESD",
+        html: `<p>Beim Arbeiten an Hardware schützt <strong>ESD-Equipment</strong> (Antistatik-Armband, ESD-Matte, Erdung) empfindliche Bauteile vor elektrostatischer Entladung. Allgemein gelten Arbeitsschutzregeln (Erste Hilfe, Unterweisung, Gefährdungsbeurteilung) und für Bildschirmarbeit die Ergonomie-Vorgaben.</p>` },
+      { heading: "Green-IT & Entsorgung",
+        html: `<ul>
+          <li><strong>Energieeffizienz:</strong> stromsparende Geräte, Virtualisierung/Konsolidierung, Energieverwaltung.</li>
+          <li><strong>Elektroaltgeräte:</strong> fachgerechte Entsorgung/Recycling nach <strong>WEEE/ElektroG</strong> (nicht in den Hausmüll).</li>
+          <li><strong>Datenträger:</strong> vor Entsorgung sicher löschen/vernichten (Datenschutz).</li>
+        </ul>
+        <p><strong>Kurz gemerkt:</strong> ESD-Schutz durch Erdung; E-Schrott nach WEEE entsorgen.</p>` },
+    ],
+    questionIds: ["q-as-1","q-as-2","q-as-tf-1","fc-as-1","q-as-3","q-as-tf-2"],
   },
 
   {
@@ -2327,7 +2529,20 @@ done</code></pre>` },
       "Tests: Unit/Integration/System/Abnahme",
       "QS: Reviews · Linter · CI/CD",
     ],
-    questionIds: ["q-git-1","q-git-2","q-git-tf-1","fc-git-1"],
+    deepDive: [
+      { heading: "Git-Grundworkflow",
+        html: `<ul>
+          <li><code>git clone</code>/<code>pull</code> – Repository holen/aktualisieren.</li>
+          <li><code>git add</code> + <code>git commit</code> – Änderungen als nachvollziehbaren Stand festhalten.</li>
+          <li><code>git branch</code>/<code>checkout</code> – parallel und isoliert entwickeln.</li>
+          <li><code>git merge</code> + <code>push</code> – zusammenführen und teilen.</li>
+        </ul>
+        <p>Bei gleichzeitig geänderten Stellen entsteht ein <strong>Merge-Konflikt</strong>, der manuell aufgelöst wird.</p>` },
+      { heading: "Qualitätssicherung",
+        html: `<p>QS-Bausteine: <strong>Code-Reviews</strong>, automatisierte <strong>Tests</strong> (Unit-, Integrations-, Systemtest), <strong>CI/CD</strong> (automatisches Bauen/Testen/Ausliefern) und statische Analyse (Linter). Ziel: Fehler früh finden, Wartbarkeit sichern.</p>
+        <p><strong>Kurz gemerkt:</strong> Branches isolieren Arbeit; Merge führt zusammen; Tests/Reviews sichern Qualität.</p>` },
+    ],
+    questionIds: ["q-git-1","q-git-2","q-git-tf-1","fc-git-1","q-git-3","q-git-tf-2"],
   },
 
 ];
