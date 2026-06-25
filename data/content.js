@@ -115,7 +115,29 @@ export const topics = [
       "TCP/IP: Anwendung · Transport · Internet · Netzzugang",
       "PDU: Schicht4=Segment, 3=Paket, 2=Frame, 1=Bit",
     ],
-    questionIds: ["q-osi-1","q-osi-2","q-osi-3","q-osi-match-1","q-osi-cloze-1","fc-osi-1","fc-osi-2"],
+    deepDive: [
+      { heading: "Kapselung & PDUs Schritt für Schritt",
+        html: `<p>Beim Senden wandert jedes Datenpaket von Schicht 7 nach unten. Jede Schicht ergänzt eigene Steuerinformationen (Header) – das nennt man <strong>Encapsulation</strong>. Die Dateneinheit heißt auf jeder Schicht anders (<strong>PDU</strong> = Protocol Data Unit):</p>
+        <table>
+          <thead><tr><th>Schicht</th><th>PDU</th><th>typische Adresse</th></tr></thead>
+          <tbody>
+            <tr><td>4 Transport</td><td>Segment (TCP) / Datagramm (UDP)</td><td>Portnummer</td></tr>
+            <tr><td>3 Vermittlung</td><td>Paket</td><td>IP-Adresse</td></tr>
+            <tr><td>2 Sicherung</td><td>Frame</td><td>MAC-Adresse</td></tr>
+            <tr><td>1 Bitübertragung</td><td>Bit</td><td>–</td></tr>
+          </tbody>
+        </table>
+        <p>Beim Empfänger läuft alles umgekehrt (Decapsulation): Jede Schicht entfernt „ihren“ Header und reicht den Rest nach oben.</p>` },
+      { heading: "OSI vs. TCP/IP – warum zwei Modelle?",
+        html: `<p>Das <strong>OSI-Modell</strong> ist ein didaktisches Referenzmodell (7 Schichten). Das <strong>TCP/IP-Modell</strong> bildet die reale Internet-Praxis ab und fasst Schichten zusammen. In der Prüfung wird häufig die Zuordnung <em>Gerät/Protokoll → Schicht</em> abgefragt – diese sicher zu beherrschen ist Pflicht.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Encapsulation = Header anhängen beim Senden, Decapsulation = entfernen beim Empfangen.</li>
+          <li>Schicht 4 trennt mit Ports, Schicht 3 adressiert mit IP, Schicht 2 mit MAC.</li>
+          <li>Datenflussrichtung beim Senden: 7 → 1, beim Empfangen: 1 → 7.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-osi-1","q-osi-2","q-osi-3","q-osi-match-1","q-osi-cloze-1","fc-osi-1","fc-osi-2","q-osi-4","q-osi-tf-2","q-osi-5"],
   },
 
   {
@@ -157,7 +179,27 @@ export const topics = [
       "Loopback 127.0.0.1 · APIPA 169.254.0.0/16",
       "32 Bit = 4 Oktette à 0–255",
     ],
-    questionIds: ["q-ipv4-1","q-ipv4-2","q-ipv4-tf-1","fc-ipv4-1"],
+    deepDive: [
+      { heading: "Netz-, Broadcast- und Hostadresse",
+        html: `<p>In jedem IPv4-Subnetz sind zwei Adressen reserviert und <strong>nicht</strong> an Hosts vergebbar:</p>
+        <ul>
+          <li><strong>Netzadresse</strong> (alle Hostbits = 0): identifiziert das Netz selbst, z. B. <code>192.168.10.0</code>.</li>
+          <li><strong>Broadcastadresse</strong> (alle Hostbits = 1): erreicht alle Hosts im Netz, z. B. <code>192.168.10.255</code>.</li>
+        </ul>
+        <p>Bei einem /24 bleiben somit <code>.1</code> bis <code>.254</code> als nutzbare Hostadressen (254 Stück).</p>` },
+      { heading: "Besondere Adressbereiche",
+        html: `<table>
+          <thead><tr><th>Bereich</th><th>Bedeutung</th></tr></thead>
+          <tbody>
+            <tr><td>10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16</td><td>private Netze (RFC 1918), nicht im Internet routbar</td></tr>
+            <tr><td>127.0.0.0/8</td><td>Loopback (eigener Host)</td></tr>
+            <tr><td>169.254.0.0/16</td><td>APIPA – Selbstvergabe ohne DHCP</td></tr>
+            <tr><td>0.0.0.0/0</td><td>Default-Route / „beliebig“</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> Sieht ein Client eine 169.254.x.y-Adresse, hat er <em>keinen</em> DHCP-Server erreicht – ein klassischer Fehlerhinweis im Support.</p>` },
+    ],
+    questionIds: ["q-ipv4-1","q-ipv4-2","q-ipv4-tf-1","fc-ipv4-1","q-ipv4-3","q-ipv4-multi-1","q-ipv4-cloze-1"],
   },
 
   {
@@ -194,7 +236,24 @@ export const topics = [
       "Maskenwerte: 128·192·224·240·248·252·254·255",
       "Übe interaktiv im Subnetting-Trainer!",
     ],
-    questionIds: ["q-sub-1","q-sub-2","q-sub-calc-1","q-sub-calc-2","q-sub-cloze-1","fc-sub-1"],
+    deepDive: [
+      { heading: "Subnetting in 4 Schritten (Klausur-Rezept)",
+        html: `<ol>
+          <li><strong>Hostbits bestimmen:</strong> 32 − Präfix. Beispiel /26 ⇒ 6 Hostbits.</li>
+          <li><strong>Adressen/Hosts berechnen:</strong> 2^Hostbits Adressen, davon −2 nutzbar. /26 ⇒ 2^6 = 64, also 62 Hosts.</li>
+          <li><strong>Blockgröße:</strong> 256 − Maskenwert im relevanten Oktett. /26 ⇒ Maske 192 ⇒ 256−192 = 64.</li>
+          <li><strong>Subnetze ablesen:</strong> in Schritten der Blockgröße: .0, .64, .128, .192. Broadcast = nächste Netzadresse − 1.</li>
+        </ol>` },
+      { heading: "VLSM & CIDR",
+        html: `<p><strong>CIDR</strong> (Classless Inter-Domain Routing) löst sich von den alten Klassen A/B/C und nutzt frei wählbare Präfixe (z. B. /22). <strong>VLSM</strong> (Variable Length Subnet Mask) erlaubt <em>unterschiedlich große</em> Subnetze im selben Netz – große Subnetze zuerst zuteilen, dann die kleinen. So spart man Adressen.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Maskenwerte je Oktett: 128 · 192 · 224 · 240 · 248 · 252 · 254 · 255.</li>
+          <li>Nutzbare Hosts = 2^Hostbits − 2 (Ausnahme /31 für Punkt-zu-Punkt).</li>
+          <li>Bei VLSM immer den größten Bedarf zuerst zuweisen.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-sub-1","q-sub-2","q-sub-calc-1","q-sub-calc-2","q-sub-cloze-1","fc-sub-1","q-sub-3","q-sub-calc-3","q-sub-match-1"],
   },
 
   {
@@ -230,7 +289,27 @@ export const topics = [
       "Loopback ::1 · unspecified ::",
       "SLAAC nutzt Router Advertisements (ICMPv6)",
     ],
-    questionIds: ["q-ipv6-1","q-ipv6-2","q-ipv6-tf-1","fc-ipv6-1"],
+    deepDive: [
+      { heading: "Verkürzungsregeln (RFC 5952)",
+        html: `<p>IPv6-Adressen lassen sich kürzen:</p>
+        <ul>
+          <li>Führende Nullen je Block weglassen: <code>2001:0db8:0000:0000:0000:0000:0000:0001</code> → <code>2001:db8:0:0:0:0:0:1</code>.</li>
+          <li>Eine zusammenhängende Folge von Null-Blöcken durch <code>::</code> ersetzen – aber <strong>nur einmal</strong> pro Adresse: → <code>2001:db8::1</code>.</li>
+          <li>Hex-Buchstaben klein schreiben (Kanonisierung).</li>
+        </ul>` },
+      { heading: "Adresstypen & Aufbau",
+        html: `<table>
+          <thead><tr><th>Präfix</th><th>Typ</th></tr></thead>
+          <tbody>
+            <tr><td>2000::/3</td><td>Global Unicast (öffentlich routbar)</td></tr>
+            <tr><td>fc00::/7</td><td>Unique Local (privat, vgl. RFC 1918)</td></tr>
+            <tr><td>fe80::/10</td><td>Link-Local (nur im Segment)</td></tr>
+            <tr><td>ff00::/8</td><td>Multicast (kein Broadcast in IPv6!)</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> 128 Bit, 8 Blöcke à 16 Bit. Statt Broadcast nur Multicast. SLAAC erlaubt die zustandslose Autokonfiguration über Router-Advertisements.</p>` },
+    ],
+    questionIds: ["q-ipv6-1","q-ipv6-2","q-ipv6-tf-1","fc-ipv6-1","q-ipv6-3","q-ipv6-cloze-1","q-ipv6-tf-2"],
   },
 
   {
@@ -260,7 +339,23 @@ export const topics = [
       "ARP: IPv4→MAC · IPv6 nutzt Neighbor Discovery",
       "Hub=L1, Switch=L2, Router=L3",
     ],
-    questionIds: ["q-eth-1","q-eth-2","q-arp-tf-1","fc-mac-1"],
+    deepDive: [
+      { heading: "Wie ein Switch lernt (MAC-/CAM-Tabelle)",
+        html: `<p>Ein Switch betrachtet die <strong>Quell-MAC</strong> ankommender Frames und merkt sich, an welchem Port welche MAC hängt (MAC-/CAM-Tabelle). Für das Ziel gilt:</p>
+        <ul>
+          <li><strong>Ziel bekannt:</strong> Frame nur an den passenden Port weiterleiten (forwarding).</li>
+          <li><strong>Ziel unbekannt / Broadcast:</strong> an alle Ports außer dem Eingang fluten (flooding).</li>
+        </ul>
+        <p>Das ARP-Protokoll löst dabei IP- in MAC-Adressen auf (Schicht 3 → 2).</p>` },
+      { heading: "Kollisions- vs. Broadcast-Domäne",
+        html: `<p>Ein <strong>Hub</strong> bildet eine einzige große Kollisionsdomäne (Halbduplex, alle teilen sich das Medium). Ein <strong>Switch</strong> gibt jedem Port eine eigene Kollisionsdomäne (Vollduplex), trennt aber <em>keine</em> Broadcast-Domänen – das macht erst ein <strong>Router</strong> (oder VLANs).</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>MAC = 48 Bit, erste 24 Bit = Hersteller-OUI.</li>
+          <li>Switch trennt Kollisions-, Router/VLAN trennt Broadcast-Domänen.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-eth-1","q-eth-2","q-arp-tf-1","fc-mac-1","q-eth-3","q-eth-tf-2","q-eth-match-1"],
   },
 
   {
@@ -290,7 +385,23 @@ export const topics = [
       "Native VLAN = untagged auf dem Trunk",
       "Router-on-a-Stick = Sub-Interfaces",
     ],
-    questionIds: ["q-vlan-1","q-vlan-2","q-vlan-tf-1","fc-vlan-1"],
+    deepDive: [
+      { heading: "Access- vs. Trunk-Port",
+        html: `<ul>
+          <li><strong>Access-Port:</strong> gehört zu genau einem VLAN, hier hängen Endgeräte (PC, Drucker). Frames sind ungetaggt.</li>
+          <li><strong>Trunk-Port:</strong> überträgt mehrere VLANs zwischen Switches/zum Router. Frames werden per <strong>802.1Q</strong>-Tag (4 Byte, 12-Bit-VLAN-ID) markiert.</li>
+        </ul>
+        <p>Inter-VLAN-Routing (Kommunikation zwischen VLANs) erfordert einen Router oder Layer-3-Switch („Router-on-a-Stick“).</p>` },
+      { heading: "Nutzen & Sicherheit",
+        html: `<p>VLANs segmentieren ein physisches Netz logisch – das verbessert Sicherheit (Trennung von z. B. Gäste-, Büro-, VoIP-Netz), Performance (kleinere Broadcast-Domänen) und Flexibilität (standortunabhängige Gruppen).</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Ein VLAN = eine Broadcast-Domäne.</li>
+          <li>Native VLAN läuft untagged – aus Sicherheitsgründen separat halten.</li>
+          <li>VLAN-IDs 1–4094 nutzbar (12 Bit).</li>
+        </ul>` },
+    ],
+    questionIds: ["q-vlan-1","q-vlan-2","q-vlan-tf-1","fc-vlan-1","q-vlan-3","q-vlan-tf-2","q-vlan-cloze-1"],
   },
 
   {
@@ -322,7 +433,19 @@ export const topics = [
       "Zustände: Blocking→Listening→Learning→Forwarding",
       "Bridge-ID = Priorität(4096er-Schritte)+MAC",
     ],
-    questionIds: ["q-stp-1","q-stp-2","q-stp-match-1","fc-stp-1"],
+    deepDive: [
+      { heading: "Warum STP? Das Broadcast-Storm-Problem",
+        html: `<p>Redundante Switch-Verbindungen erhöhen die Ausfallsicherheit – ohne Schutz entstehen aber <strong>Layer-2-Schleifen</strong>: Broadcasts kreisen endlos (Broadcast-Storm), MAC-Tabellen werden instabil, das Netz bricht zusammen. <strong>STP</strong> (802.1D) baut daher logisch einen schleifenfreien Baum, indem es überschüssige Pfade blockiert (Standby).</p>` },
+      { heading: "Root-Bridge-Wahl & Konvergenz",
+        html: `<p>Zuerst wird die <strong>Root-Bridge</strong> bestimmt: die Bridge mit der niedrigsten Bridge-ID (Priorität, bei Gleichstand niedrigste MAC). Jeder andere Switch wählt seinen kostengünstigsten <strong>Root-Port</strong>; je Segment gibt es einen <strong>Designated Port</strong>, der Rest wird blockiert.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Klassisches STP konvergiert langsam (~30–50 s), <strong>RSTP</strong> (802.1w) in unter 1 s.</li>
+          <li>Portrollen: Root, Designated, Blocking/Alternate.</li>
+          <li>Niedrigste Bridge-ID gewinnt die Root-Wahl.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-stp-1","q-stp-2","q-stp-match-1","fc-stp-1","q-stp-3","q-stp-tf-2"],
   },
 
   {
@@ -360,7 +483,27 @@ export const topics = [
       "RIP=Distanzvektor/Hops · OSPF=Link-State/Cost",
       "Administrative Distanz entscheidet zwischen Protokollen",
     ],
-    questionIds: ["q-route-1","q-route-2","q-route-tf-1","fc-route-1"],
+    deepDive: [
+      { heading: "Distanzvektor vs. Link-State",
+        html: `<table>
+          <thead><tr><th></th><th>RIP (Distanzvektor)</th><th>OSPF (Link-State)</th></tr></thead>
+          <tbody>
+            <tr><td>Metrik</td><td>Hop-Count (max. 15)</td><td>Kosten (abh. von Bandbreite)</td></tr>
+            <tr><td>Updates</td><td>periodisch ganze Tabelle</td><td>nur bei Änderungen (LSA)</td></tr>
+            <tr><td>Skalierung</td><td>kleine Netze</td><td>große Netze, Areas</td></tr>
+          </tbody>
+        </table>
+        <p>RIP „erzählt seinen Nachbarn, was es kennt“; OSPF „kennt die ganze Topologie“ und berechnet kürzeste Pfade (Dijkstra).</p>` },
+      { heading: "Routing-Entscheidung & Default-Route",
+        html: `<p>Ein Router wählt stets die <strong>spezifischste</strong> passende Route (längstes Präfix, „Longest Prefix Match“). Findet sich kein Eintrag, greift die <strong>Default-Route 0.0.0.0/0</strong> (Richtung Internet/Gateway).</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Statische Routen: manuell, stabil, kein Overhead – aber wartungsintensiv.</li>
+          <li>Dynamische Routen: passen sich an, kosten Ressourcen/Bandbreite.</li>
+          <li>Longest Prefix Match schlägt jede unspezifischere Route.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-route-1","q-route-2","q-route-tf-1","fc-route-1","q-route-3","q-route-tf-2","q-route-match-1"],
   },
 
   {
@@ -389,7 +532,18 @@ export const topics = [
       "PAT = NAT Overload (portbasiert)",
       "DMZ/Port-Forwarding für eingehende Dienste",
     ],
-    questionIds: ["q-nat-1","q-nat-tf-1","fc-nat-1"],
+    deepDive: [
+      { heading: "NAT, PAT & Port-Forwarding",
+        html: `<ul>
+          <li><strong>NAT (1:1):</strong> tauscht eine private gegen eine öffentliche IP.</li>
+          <li><strong>PAT / NAT-Overload (n:1):</strong> viele interne Hosts teilen eine öffentliche IP – unterschieden über die <strong>Quell-Portnummer</strong>. Das ist der Normalfall im Heim-/Firmenrouter.</li>
+          <li><strong>Port-Forwarding (DNAT):</strong> leitet von außen eingehende Verbindungen auf einen bestimmten internen Host/Port (z. B. Webserver) weiter.</li>
+        </ul>` },
+      { heading: "Grenzen von NAT",
+        html: `<p>NAT verbirgt interne Adressen, ist aber <strong>kein vollständiger Sicherheitsmechanismus</strong> – eine Firewall bleibt nötig. Zudem erschwert NAT Ende-zu-Ende-Verbindungen (z. B. VoIP, P2P) und macht Techniken wie STUN nötig. IPv6 mit globalem Adressraum macht NAT weitgehend überflüssig.</p>
+        <p><strong>Kurz gemerkt:</strong> PAT multiplext über Ports; Port-Forwarding öffnet gezielt einen Dienst nach außen.</p>` },
+    ],
+    questionIds: ["q-nat-1","q-nat-tf-1","fc-nat-1","q-nat-2","q-nat-tf-2"],
   },
 
   {
@@ -434,7 +588,30 @@ export const topics = [
       "DNS-Port: 53 (UDP/TCP)",
       "DORA = Discover·Offer·Request·Acknowledge",
     ],
-    questionIds: ["q-dhcp-1","q-dns-1","q-dns-match-1","q-dhcp-tf-1","q-dhcp-cloze-1","fc-dns-1","fc-dhcp-1"],
+    deepDive: [
+      { heading: "DHCP-Ablauf (DORA)",
+        html: `<ol>
+          <li><strong>Discover:</strong> Client sucht per Broadcast einen DHCP-Server.</li>
+          <li><strong>Offer:</strong> Server bietet eine IP-Konfiguration an.</li>
+          <li><strong>Request:</strong> Client fordert das Angebot an (Broadcast, falls mehrere Server).</li>
+          <li><strong>Acknowledge:</strong> Server bestätigt und vergibt die Lease.</li>
+        </ol>
+        <p>Server nutzt UDP-Port 67, Client UDP-Port 68. Über die <strong>Lease-Time</strong> wird die Adresse befristet vergeben und vorzeitig erneuert (Renew bei 50 %).</p>` },
+      { heading: "DNS – Namen statt Zahlen",
+        html: `<p>DNS löst Namen in IP-Adressen auf (UDP/TCP-Port 53). Wichtige Record-Typen:</p>
+        <table>
+          <thead><tr><th>Record</th><th>Funktion</th></tr></thead>
+          <tbody>
+            <tr><td>A / AAAA</td><td>Name → IPv4 / IPv6</td></tr>
+            <tr><td>CNAME</td><td>Alias auf einen anderen Namen</td></tr>
+            <tr><td>MX</td><td>zuständiger Mailserver</td></tr>
+            <tr><td>PTR</td><td>Reverse-Lookup (IP → Name)</td></tr>
+            <tr><td>TXT</td><td>frei (z. B. SPF/DKIM)</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> Auflösung läuft rekursiv über Resolver und autoritative Server; die <strong>TTL</strong> steuert das Caching.</p>` },
+    ],
+    questionIds: ["q-dhcp-1","q-dns-1","q-dns-match-1","q-dhcp-tf-1","q-dhcp-cloze-1","fc-dns-1","fc-dhcp-1","q-dhcp-2","q-dns-2","q-dns-tf-2"],
   },
 
   {
@@ -474,7 +651,29 @@ export const topics = [
       "POP3 110 · IMAP 143 · LDAP 389 · RDP 3389 · NTP 123 · SNMP 161",
       "Übe Zuordnungen im Quiz!",
     ],
-    questionIds: ["q-port-1","q-port-2","q-port-match-1","fc-port-1"],
+    deepDive: [
+      { heading: "Port-Bereiche & wichtige Standard-Ports",
+        html: `<p>Ports adressieren Anwendungen auf Schicht 4. Drei Bereiche:</p>
+        <ul>
+          <li><strong>0–1023</strong> Well-Known (Systemdienste)</li>
+          <li><strong>1024–49151</strong> Registered (registrierte Anwendungen)</li>
+          <li><strong>49152–65535</strong> dynamische/private Ports (z. B. Quellports von Clients)</li>
+        </ul>
+        <table>
+          <thead><tr><th>Dienst</th><th>Port</th><th>Protokoll</th></tr></thead>
+          <tbody>
+            <tr><td>FTP (Steuer/Daten)</td><td>21 / 20</td><td>TCP</td></tr>
+            <tr><td>SSH</td><td>22</td><td>TCP</td></tr>
+            <tr><td>SMTP</td><td>25</td><td>TCP</td></tr>
+            <tr><td>DNS</td><td>53</td><td>UDP/TCP</td></tr>
+            <tr><td>HTTP / HTTPS</td><td>80 / 443</td><td>TCP</td></tr>
+            <tr><td>DHCP</td><td>67/68</td><td>UDP</td></tr>
+            <tr><td>RDP</td><td>3389</td><td>TCP</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> HTTPS 443, SSH 22, RDP 3389, DNS 53 – diese werden in Prüfungen oft direkt abgefragt.</p>` },
+    ],
+    questionIds: ["q-port-1","q-port-2","q-port-match-1","fc-port-1","q-port-3","q-port-tf-1","q-port-cloze-1"],
   },
 
   {
@@ -508,7 +707,24 @@ export const topics = [
       "WPA3-SAE schützt vor Offline-Bruteforce",
       "5 GHz schneller, 2,4 GHz weiter",
     ],
-    questionIds: ["q-wlan-1","q-wlan-tf-1","fc-wlan-1"],
+    deepDive: [
+      { heading: "WLAN-Sicherheit im Zeitverlauf",
+        html: `<ul>
+          <li><strong>WEP:</strong> veraltet und in Minuten knackbar – nie einsetzen.</li>
+          <li><strong>WPA/TKIP:</strong> Übergangslösung, gilt heute als unsicher.</li>
+          <li><strong>WPA2 (AES/CCMP):</strong> langjähriger Standard, weiterhin akzeptabel.</li>
+          <li><strong>WPA3:</strong> aktueller Standard, nutzt SAE (Schutz gegen Offline-Wörterbuchangriffe) und erzwungene Verschlüsselung.</li>
+        </ul>` },
+      { heading: "Frequenzbänder & Reichweite",
+        html: `<p>Das <strong>2,4-GHz-Band</strong> hat höhere Reichweite, aber wenige überlappungsfreie Kanäle (in Europa 1/6/11) und viele Störquellen. Das <strong>5-GHz-Band</strong> bietet mehr Kanäle und Datenrate, jedoch geringere Reichweite/Wanddurchdringung. Wi-Fi 6E/7 ergänzt 6 GHz.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>WPA3 > WPA2 > WPA > WEP (Sicherheit).</li>
+          <li>SSID = Netzname; getrennte Gäste-SSID/VLAN für Besucher.</li>
+          <li>Höhere Frequenz = mehr Tempo, weniger Reichweite.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-wlan-1","q-wlan-tf-1","fc-wlan-1","q-wlan-2","q-wlan-tf-2"],
   },
 
   {
@@ -544,7 +760,26 @@ export const topics = [
       "TLS-VPN nutzt 443",
       "Tunnel vs. Transport Mode",
     ],
-    questionIds: ["q-vpn-1","q-vpn-2","q-vpn-tf-1","fc-vpn-1"],
+    deepDive: [
+      { heading: "VPN-Typen",
+        html: `<ul>
+          <li><strong>Site-to-Site:</strong> koppelt dauerhaft zwei Standortnetze (Gateway zu Gateway).</li>
+          <li><strong>Remote-Access (End-to-Site):</strong> einzelne Clients (Home-Office) wählen sich ins Firmennetz ein.</li>
+        </ul>
+        <p>Ziel ist stets ein verschlüsselter „Tunnel“ über ein unsicheres Netz (Internet), der Vertraulichkeit, Integrität und Authentizität sichert.</p>` },
+      { heading: "IPsec-Bausteine",
+        html: `<table>
+          <thead><tr><th>Komponente</th><th>Funktion</th></tr></thead>
+          <tbody>
+            <tr><td>IKE</td><td>handelt Schlüssel & Sicherheitsparameter aus</td></tr>
+            <tr><td>AH</td><td>Integrität/Authentizität – <em>keine</em> Verschlüsselung</td></tr>
+            <tr><td>ESP</td><td>Verschlüsselung + Integrität der Nutzdaten</td></tr>
+          </tbody>
+        </table>
+        <p>Im <strong>Tunnelmodus</strong> wird das gesamte IP-Paket gekapselt (Site-to-Site), im <strong>Transportmodus</strong> nur die Nutzlast.</p>
+        <p><strong>Kurz gemerkt:</strong> ESP verschlüsselt, AH nicht. Tunnelmodus für VPN zwischen Netzen.</p>` },
+    ],
+    questionIds: ["q-vpn-1","q-vpn-2","q-vpn-tf-1","fc-vpn-1","q-vpn-3","q-vpn-tf-2"],
   },
 
   {
@@ -581,7 +816,27 @@ export const topics = [
       "Glasfaser: OS=Singlemode, OM=Multimode",
       "Verkabelung: Primär/Sekundär/Tertiär",
     ],
-    questionIds: ["q-kabel-1","q-kabel-tf-1","fc-kabel-1"],
+    deepDive: [
+      { heading: "Kupfer (Twisted Pair) vs. Lichtwellenleiter",
+        html: `<table>
+          <thead><tr><th></th><th>Twisted Pair (Cu)</th><th>LWL (Glasfaser)</th></tr></thead>
+          <tbody>
+            <tr><td>Reichweite</td><td>bis 100 m</td><td>mehrere km (Singlemode)</td></tr>
+            <tr><td>Störanfälligkeit</td><td>EMV-empfindlich</td><td>unempfindlich gegen EMV</td></tr>
+            <tr><td>Einsatz</td><td>Etage/Arbeitsplatz</td><td>Backbone/Gebäude</td></tr>
+          </tbody>
+        </table>
+        <p>Twisted-Pair-Kategorien: Cat 5e (1 GbE), Cat 6/6A (10 GbE über kürzere/volle Distanz), Cat 7. LWL als Singlemode (lange Strecken) oder Multimode (kürzere Strecken).</p>` },
+      { heading: "Topologien",
+        html: `<p>Die <strong>Stern-Topologie</strong> dominiert moderne LANs: jedes Gerät hängt am zentralen Switch; ein Kabelausfall betrifft nur einen Teilnehmer. Bus und Ring sind historisch. Logisch entstehen oft <strong>Baum-/Hierarchie</strong>-Strukturen (Core/Distribution/Access).</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Kupfer max. 100 m (90 m fest + 10 m Patch).</li>
+          <li>LWL für lange/EMV-belastete Strecken & Backbone.</li>
+          <li>Stern = heutiger Standard, zentraler Switch.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-kabel-1","q-kabel-tf-1","fc-kabel-1","q-kabel-2","q-kabel-tf-2"],
   },
 
   /* ===================== 2. IT-SICHERHEIT ===================== */

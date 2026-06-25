@@ -42,6 +42,12 @@ function el(tag, attrs = {}, html) {
 let pomodoroCleanup = null;
 function clearPomodoro() { if (pomodoroCleanup) { pomodoroCleanup(); pomodoroCleanup = null; } }
 
+// Aufräum-Hook für Scroll-/Observer-Listener der Themenseite (Lesefortschritt, TOC)
+let topicCleanup = null;
+function clearTopic() { if (topicCleanup) { topicCleanup(); topicCleanup = null; } }
+
+const stripTags = (s) => String(s == null ? "" : s).replace(/<[^>]+>/g, "");
+
 /* ------------------------------------------------------------------ *
  *  Theme & Ansicht
  * ------------------------------------------------------------------ */
@@ -278,6 +284,7 @@ function showGlossaryPopover(anchor) {
 
 function router() {
   clearPomodoro();
+  clearTopic();
   closeGlossaryPopover();
   stats.destroyAllCharts();
   const hash = location.hash.replace(/^#/, "") || "/dashboard";
@@ -409,13 +416,24 @@ function renderTopic(id) {
   const cat = currentView === "lernfeld" ? lernfelder[t.lernfeld].title : examAreas[t.examArea].title;
 
   const v = main();
+  const sections = t.sections || [];
+
+  // Geschätzte Lesezeit grob aus dem Textumfang (≈ 200 Wörter/Minute)
+  const plainText = [...sections, ...(t.examples || []), ...(t.deepDive || [])]
+    .map((s) => s.html || "").join(" ").replace(/<[^>]+>/g, " ");
+  const wordCount = (plainText.match(/\S+/g) || []).length;
+  const readMin = Math.max(1, Math.round(wordCount / 200));
+  const showToc = sections.length >= 3;
+
   v.innerHTML = `
+    <div class="reading-progress" aria-hidden="true"><span></span></div>
     <article class="topic">
       <header class="page-head topic-head">
         <div>
           <span class="crumb">${cat}</span>
           <h1>${t.icon || ""} ${t.title}</h1>
           <p class="lead">${t.summary}</p>
+          <span class="read-meta">⏱️ ca. ${readMin} Min Lesezeit · ${(t.questionIds || []).length} Fragen</span>
         </div>
         <div class="topic-actions">
           <button class="icon-btn fav-btn ${fav ? "active" : ""}" title="Favorit" aria-pressed="${fav}">${fav ? "⭐" : "☆"}</button>
@@ -423,11 +441,18 @@ function renderTopic(id) {
         </div>
       </header>
 
-      <div class="topic-body">
-        ${t.sections.map((s) => `<section class="content-section"><h2>${s.heading}</h2>${s.html}</section>`).join("")}
-        ${t.visual ? `<section class="content-section"><h2>Interaktive Darstellung</h2><div id="topic-visual"></div></section>` : ""}
-        ${t.examples && t.examples.length ? `<section class="content-section example-block"><h2>💡 Praxisbeispiel${t.examples.length > 1 ? "e" : ""}</h2>${t.examples.map((e) => `<div class="example"><h4>${e.title}</h4>${e.html}</div>`).join("")}</section>` : ""}
-        ${t.merksaetze && t.merksaetze.length ? `<section class="content-section merk-block"><h2>📌 Merksätze</h2><ul class="merk-list">${t.merksaetze.map((m) => `<li>${m}</li>`).join("")}</ul></section>` : ""}
+      <div class="topic-layout ${showToc ? "has-toc" : ""}">
+        ${showToc ? `<nav class="topic-toc" aria-label="Inhaltsverzeichnis">
+          <h4>Auf dieser Seite</h4>
+          <ul>${sections.map((s, i) => `<li><a role="link" tabindex="0" data-sec="sec-${i}">${escapeHtml(stripTags(s.heading))}</a></li>`).join("")}</ul>
+        </nav>` : ""}
+        <div class="topic-body">
+          ${sections.map((s, i) => `<section class="content-section" id="sec-${i}"><h2>${s.heading}</h2>${s.html}</section>`).join("")}
+          ${t.visual ? `<section class="content-section"><h2>Interaktive Darstellung</h2><div id="topic-visual"></div></section>` : ""}
+          ${t.examples && t.examples.length ? `<section class="content-section example-block"><h2>💡 Praxisbeispiel${t.examples.length > 1 ? "e" : ""}</h2>${t.examples.map((e) => `<div class="example"><h4>${e.title}</h4>${e.html}</div>`).join("")}</section>` : ""}
+          ${t.deepDive && t.deepDive.length ? `<details class="deepdive"><summary>Vertiefung &amp; Lesestoff</summary><div class="deepdive-body">${t.deepDive.map((d) => `<div><h4>${d.heading}</h4>${d.html}</div>`).join("")}</div></details>` : ""}
+          ${t.merksaetze && t.merksaetze.length ? `<section class="content-section merk-block"><h2>📌 Merksätze</h2><ul class="merk-list">${t.merksaetze.map((m) => `<li>${m}</li>`).join("")}</ul></section>` : ""}
+        </div>
       </div>
 
       <section class="content-section note-block">
@@ -465,6 +490,43 @@ function renderTopic(id) {
     clearTimeout(noteTimer);
     noteTimer = setTimeout(() => { stats.setNote(id, ta.value); saved.hidden = false; setTimeout(() => (saved.hidden = true), 1200); }, 400);
   });
+
+  // Lesefortschritts-Balken (an das Scrollen des Artikels gekoppelt)
+  const article = $(".topic", v);
+  const progressBar = $(".reading-progress > span", v);
+  const onScroll = () => {
+    if (!article || !progressBar) return;
+    const rect = article.getBoundingClientRect();
+    const total = article.offsetHeight - window.innerHeight;
+    const scrolled = Math.min(Math.max(-rect.top, 0), Math.max(total, 0));
+    progressBar.style.width = (total > 0 ? (scrolled / total) * 100 : 0) + "%";
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  onScroll();
+
+  // Inhaltsverzeichnis: Sprung zur Sektion + aktive Markierung beim Scrollen
+  const tocLinks = $$(".topic-toc a", v);
+  let tocObserver = null;
+  if (tocLinks.length) {
+    const jump = (a) => { const sec = $("#" + a.dataset.sec, v); if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" }); };
+    tocLinks.forEach((a) => {
+      a.addEventListener("click", (e) => { e.preventDefault(); jump(a); });
+      a.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); jump(a); } });
+    });
+    tocObserver = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) tocLinks.forEach((a) => a.classList.toggle("active", a.dataset.sec === en.target.id));
+      });
+    }, { rootMargin: "-15% 0px -75% 0px" });
+    sections.forEach((_, i) => { const sec = $("#sec-" + i, v); if (sec) tocObserver.observe(sec); });
+  }
+
+  topicCleanup = () => {
+    window.removeEventListener("scroll", onScroll);
+    window.removeEventListener("resize", onScroll);
+    if (tocObserver) tocObserver.disconnect();
+  };
 }
 
 /* ------------------------------------------------------------------ *

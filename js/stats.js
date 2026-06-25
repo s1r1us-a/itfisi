@@ -603,9 +603,28 @@ function chartColors() {
   };
 }
 
+/**
+ * Wartet auf das (per `defer` vom CDN geladene) Chart.js. Solange zeigt der
+ * Diagramm-Container einen Skeleton-Loader statt einer leeren Fläche. Lädt die
+ * Bibliothek nach einigen Sekunden nicht, wird auf die Textdarstellung zurückgefallen.
+ */
+const chartWait = { start: 0 };
+function chartBox(canvas) { return canvas.closest(".chart-wrap") || canvas.parentElement || canvas; }
+function waitForChart(canvas, retry) {
+  if (!canvas) return false;
+  if (typeof Chart !== "undefined") { chartBox(canvas).classList.remove("skeleton", "skeleton-block"); chartWait.start = 0; return true; }
+  const box = chartBox(canvas);
+  if (!chartWait.start) chartWait.start = Date.now();
+  if (Date.now() - chartWait.start > 7000) { box.classList.remove("skeleton", "skeleton-block"); fallbackChartMsg(canvas); return false; }
+  box.classList.add("skeleton", "skeleton-block");
+  setTimeout(retry, 160);
+  return false;
+}
+
 /** Liniendiagramm Lernverlauf. */
 export function renderHistoryChart(canvas, days = 14) {
-  if (typeof Chart === "undefined" || !canvas) { fallbackChartMsg(canvas); return; }
+  if (!canvas) return;
+  if (!waitForChart(canvas, () => renderHistoryChart(canvas, days))) return;
   const data = historySeries(days);
   const c = chartColors();
   destroyChart("history");
@@ -624,7 +643,8 @@ export function renderHistoryChart(canvas, days = 14) {
 
 /** Balkendiagramm Genauigkeit je Bereich. */
 export function renderBereichChart(canvas, topics, bereiche) {
-  if (typeof Chart === "undefined" || !canvas) { fallbackChartMsg(canvas); return; }
+  if (!canvas) return;
+  if (!waitForChart(canvas, () => renderBereichChart(canvas, topics, bereiche))) return;
   const acc = accuracyByBereich(topics, bereiche);
   const entries = Object.values(acc);
   const c = chartColors();
@@ -649,7 +669,8 @@ export function renderBereichChart(canvas, topics, bereiche) {
 
 /** Doughnut richtig/falsch. */
 export function renderAccuracyDoughnut(canvas) {
-  if (typeof Chart === "undefined" || !canvas) { fallbackChartMsg(canvas); return; }
+  if (!canvas) return;
+  if (!waitForChart(canvas, () => renderAccuracyDoughnut(canvas))) return;
   const { answered, correct } = state.totals;
   const wrong = Math.max(0, answered - correct);
   const c = chartColors();
@@ -666,7 +687,8 @@ export function renderAccuracyDoughnut(canvas) {
 
 /** Wissensradar: Quiz-Trefferquote vs. Selbsteinschätzung je Bereich. */
 export function renderRadarChart(canvas, topics, bereiche) {
-  if (typeof Chart === "undefined" || !canvas) { fallbackChartMsg(canvas); return; }
+  if (!canvas) return;
+  if (!waitForChart(canvas, () => renderRadarChart(canvas, topics, bereiche))) return;
   const acc = accuracyByBereich(topics, bereiche);
   const c = chartColors();
   destroyChart("radar");
