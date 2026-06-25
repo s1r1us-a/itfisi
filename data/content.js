@@ -1491,7 +1491,26 @@ export const topics = [
       "Kardinalitäten: 1:1 · 1:n · n:m",
       "n:m → Junction-Tabelle",
     ],
-    questionIds: ["q-er-1","q-er-tf-1","fc-er-1"],
+    deepDive: [
+      { heading: "Vom ER-Modell zur Tabelle",
+        html: `<ul>
+          <li><strong>Entität</strong> → Tabelle (Relation), z. B. Kunde.</li>
+          <li><strong>Attribut</strong> → Spalte, z. B. Name.</li>
+          <li><strong>Tupel/Datensatz</strong> → Zeile.</li>
+          <li><strong>Primärschlüssel</strong> identifiziert jede Zeile eindeutig; <strong>Fremdschlüssel</strong> verweist auf einen Primärschlüssel einer anderen Tabelle.</li>
+        </ul>` },
+      { heading: "Kardinalitäten umsetzen",
+        html: `<table>
+          <thead><tr><th>Beziehung</th><th>Umsetzung</th></tr></thead>
+          <tbody>
+            <tr><td>1:1</td><td>Fremdschlüssel auf einer Seite (oft zusammenfassbar)</td></tr>
+            <tr><td>1:n</td><td>Fremdschlüssel auf der n-Seite</td></tr>
+            <tr><td>n:m</td><td>eigene Zwischen-/Beziehungstabelle mit zwei Fremdschlüsseln</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> n:m gibt es relational nur über eine Zwischentabelle.</p>` },
+    ],
+    questionIds: ["q-er-1","q-er-tf-1","fc-er-1","q-er-2","q-er-3","q-er-tf-2"],
   },
 
   {
@@ -1521,7 +1540,22 @@ export const topics = [
       "2NF=keine partielle Abhängigkeit",
       "3NF=keine transitive Abhängigkeit",
     ],
-    questionIds: ["q-norm-1","q-norm-2","q-norm-tf-1","fc-norm-1"],
+    deepDive: [
+      { heading: "Die ersten drei Normalformen",
+        html: `<table>
+          <thead><tr><th>NF</th><th>Forderung</th><th>beseitigt</th></tr></thead>
+          <tbody>
+            <tr><td>1NF</td><td>nur atomare Werte, keine Wiederholgruppen</td><td>Mehrfachwerte je Feld</td></tr>
+            <tr><td>2NF</td><td>1NF + volle Abhängigkeit vom Gesamtschlüssel</td><td>partielle Abhängigkeiten</td></tr>
+            <tr><td>3NF</td><td>2NF + keine Nichtschlüssel→Nichtschlüssel-Abhängigkeit</td><td>transitive Abhängigkeiten</td></tr>
+          </tbody>
+        </table>
+        <p>Merksatz (BCNF-nah): „Der Schlüssel, der ganze Schlüssel und nichts als der Schlüssel.“</p>` },
+      { heading: "Warum normalisieren?",
+        html: `<p>Redundanz erzeugt <strong>Anomalien</strong>: Beim <em>Einfügen</em> fehlen Daten, beim <em>Ändern</em> bleiben Kopien inkonsistent, beim <em>Löschen</em> gehen ungewollt Informationen verloren. Normalisierung verteilt Daten redundanzfrei auf verknüpfte Tabellen. In der Praxis wird für Performance manchmal bewusst <strong>denormalisiert</strong>.</p>
+        <p><strong>Kurz gemerkt:</strong> 1NF atomar · 2NF keine partielle · 3NF keine transitive Abhängigkeit.</p>` },
+    ],
+    questionIds: ["q-norm-1","q-norm-2","q-norm-tf-1","fc-norm-1","q-norm-3","q-norm-cloze-1","q-norm-tf-2"],
   },
 
   {
@@ -1564,7 +1598,27 @@ INNER JOIN bestellung b ON b.kunden_id = k.id;</code></pre>` },
       "JOIN: INNER·LEFT·RIGHT·FULL",
       "Aggregat: COUNT·SUM·AVG·MIN·MAX",
     ],
-    questionIds: ["q-sql-1","q-sql-2","q-sql-match-1","q-sql-tf-1","fc-sql-1"],
+    deepDive: [
+      { heading: "SQL-Sprachfamilien & Grundabfrage",
+        html: `<ul>
+          <li><strong>DDL</strong> (Struktur): CREATE, ALTER, DROP.</li>
+          <li><strong>DML</strong> (Daten): INSERT, UPDATE, DELETE, SELECT.</li>
+          <li><strong>DCL</strong> (Rechte): GRANT, REVOKE.</li>
+        </ul>
+        <p>Grundabfrage: <code>SELECT spalten FROM tabelle WHERE bedingung GROUP BY … HAVING … ORDER BY …;</code></p>` },
+      { heading: "JOINs & Filter richtig einsetzen",
+        html: `<table>
+          <thead><tr><th>JOIN</th><th>Ergebnis</th></tr></thead>
+          <tbody>
+            <tr><td>INNER JOIN</td><td>nur Treffer in beiden Tabellen</td></tr>
+            <tr><td>LEFT JOIN</td><td>alle links + passende rechts (sonst NULL)</td></tr>
+            <tr><td>RIGHT JOIN</td><td>alle rechts + passende links</td></tr>
+          </tbody>
+        </table>
+        <p><strong>WHERE</strong> filtert vor der Gruppierung, <strong>HAVING</strong> nach <code>GROUP BY</code> (auf Aggregate wie COUNT/SUM).</p>
+        <p><strong>Kurz gemerkt:</strong> PRIMARY KEY = unique + NOT NULL; INNER JOIN = Schnittmenge.</p>` },
+    ],
+    questionIds: ["q-sql-1","q-sql-2","q-sql-match-1","q-sql-tf-1","fc-sql-1","q-sql-3","q-sql-4","q-sql-cloze-1","q-sql-tf-2"],
   },
 
   /* ===================== 5. PROGRAMMIERUNG ===================== */
@@ -1602,7 +1656,23 @@ print(summe)        # 15</code></pre>` },
       "while(Kopf) · do-while(Fuß) · for(zählend)",
       "Typen: int·float·bool·string",
     ],
-    questionIds: ["q-prog-1","q-prog-tf-1","fc-prog-1"],
+    deepDive: [
+      { heading: "Grundbausteine jedes Programms",
+        html: `<ul>
+          <li><strong>Variablen & Datentypen:</strong> benannte Speicher (int, float, string, bool).</li>
+          <li><strong>Operatoren:</strong> arithmetisch (+ − * /), Vergleich (== &lt; &gt;), logisch (AND/OR/NOT).</li>
+          <li><strong>Kontrollstrukturen:</strong> Sequenz, Verzweigung (if/else, switch), Schleifen (for/while).</li>
+          <li><strong>Funktionen:</strong> kapseln wiederverwendbare Teilaufgaben, nehmen Parameter, liefern Rückgaben.</li>
+        </ul>` },
+      { heading: "Schleifen & strukturierte Programmierung",
+        html: `<p>Die <strong>for-Schleife</strong> nutzt man bei bekannter Anzahl, die <strong>while-Schleife</strong> (kopfgesteuert) bzw. <strong>do-while</strong> (fußgesteuert, mind. 1 Durchlauf) bei bedingungsabhängiger Anzahl. Strukturierte Programmierung verzichtet auf GOTO und kommt mit Sequenz, Auswahl und Wiederholung aus.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>for = Anzahl bekannt; while = Bedingung entscheidet.</li>
+          <li>Funktionen reduzieren Codeverdopplung (DRY).</li>
+        </ul>` },
+    ],
+    questionIds: ["q-prog-1","q-prog-tf-1","fc-prog-1","q-prog-2","q-prog-3","q-prog-tf-2"],
   },
 
   {
@@ -1631,7 +1701,22 @@ print(summe)        # 15</code></pre>` },
       "PAP nach DIN 66001",
       "Pseudocode = sprachunabhängig",
     ],
-    questionIds: ["q-pap-1","q-pap-match-1","fc-pap-1"],
+    deepDive: [
+      { heading: "PAP-Symbole (DIN 66001)",
+        html: `<table>
+          <thead><tr><th>Symbol</th><th>Bedeutung</th></tr></thead>
+          <tbody>
+            <tr><td>Oval / abgerundet</td><td>Start / Ende</td></tr>
+            <tr><td>Rechteck</td><td>Operation / Anweisung</td></tr>
+            <tr><td>Raute (Rhombus)</td><td>Verzweigung / Entscheidung</td></tr>
+            <tr><td>Parallelogramm</td><td>Ein-/Ausgabe</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Struktogramm vs. PAP",
+        html: `<p>Das <strong>Struktogramm</strong> (Nassi-Shneiderman) bildet Strukturen als ineinander geschachtelte Blöcke ab und erzwingt strukturierte Programmierung (keine Sprünge). Der <strong>PAP</strong> nutzt Pfeile/Symbole und erlaubt prinzipiell auch Sprünge. Beide bilden die drei Grundstrukturen ab: <strong>Sequenz, Auswahl, Wiederholung</strong>.</p>
+        <p><strong>Kurz gemerkt:</strong> Raute = Entscheidung; Struktogramm = Nassi-Shneiderman, blockweise, ohne GOTO.</p>` },
+    ],
+    questionIds: ["q-pap-1","q-pap-match-1","fc-pap-1","q-pap-2","q-pap-tf-2","q-pap-cloze-1"],
   },
 
   {
@@ -1667,7 +1752,30 @@ done</code></pre>` },
       "Bash: for/if/grep/awk/sed/pipe",
       "De Morgan: ¬(A∧B)=¬A∨¬B",
     ],
-    questionIds: ["q-skript-1","q-skript-2","q-bool-tf-1","fc-skript-1"],
+    deepDive: [
+      { heading: "PowerShell vs. Bash",
+        html: `<table>
+          <thead><tr><th></th><th>PowerShell</th><th>Bash</th></tr></thead>
+          <tbody>
+            <tr><td>Plattform</td><td>v. a. Windows (auch Linux)</td><td>v. a. Linux/Unix</td></tr>
+            <tr><td>Befehle</td><td>Cmdlets: Verb-Nomen (Get-Process)</td><td>Programme: ls, grep, cat</td></tr>
+            <tr><td>Pipeline</td><td>Objekte</td><td>Text</td></tr>
+            <tr><td>Skriptstart</td><td>.ps1</td><td>Shebang #!/bin/bash</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Boolesche Algebra & Wahrheitstabelle",
+        html: `<table>
+          <thead><tr><th>A</th><th>B</th><th>A AND B</th><th>A OR B</th><th>NOT A</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+            <tr><td>0</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+            <tr><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+            <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> AND nur bei beidem wahr; OR bei mindestens einem; NOT invertiert. PowerShell = Verb-Nomen.</p>` },
+    ],
+    questionIds: ["q-skript-1","q-skript-2","q-bool-tf-1","fc-skript-1","q-skript-3","q-bool-tf-2","q-bool-cloze-1"],
   },
 
   /* ===================== 6. HARDWARE & IT-ARBEITSPLATZ (AP1) ===================== */

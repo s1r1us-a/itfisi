@@ -261,6 +261,45 @@ export const scenarios = [
       },
     ],
   },
+
+  {
+    id: "szenario-sql-auswertung",
+    topicId: "sql",
+    title: "Umsatzauswertung per SQL",
+    difficulty: "schwer",
+    scenario: `<p>Im Shop der <strong>Yilmaz KG</strong> gibt es die Tabellen <code>kunde</code>,
+      <code>bestellung</code> (mit Fremdschlüssel <code>kunde_id</code>) und <code>position</code>.
+      Die Geschäftsführung möchte verschiedene Auswertungen.</p>`,
+    parts: [
+      {
+        type: "mc-single",
+        question: "Wie verbindet man Kunden mit ihren Bestellungen, sodass nur Kunden mit Bestellungen erscheinen?",
+        options: ["INNER JOIN über kunde_id", "CROSS JOIN", "LEFT JOIN", "UNION"],
+        answer: 0,
+        explanation: "Der INNER JOIN über den Fremdschlüssel kunde_id liefert nur Kunden, zu denen mindestens eine Bestellung existiert.",
+      },
+      {
+        type: "mc-single",
+        question: "Womit filtert man Gruppen, z. B. „nur Kunden mit mehr als 5 Bestellungen“?",
+        options: ["HAVING COUNT(*) > 5 nach GROUP BY", "WHERE COUNT(*) > 5", "ORDER BY COUNT(*)", "DISTINCT"],
+        answer: 0,
+        explanation: "Aggregatbedingungen gehören in HAVING (nach GROUP BY). WHERE filtert nur einzelne Zeilen vor der Gruppierung.",
+      },
+      {
+        type: "calc",
+        question: "Schreibe die Abfrage, die alle Spalten der Tabelle bestellung absteigend nach datum sortiert (Standardform, ohne Semikolon nötig).",
+        answer: "SELECT * FROM bestellung ORDER BY datum DESC",
+        accept: ["select * from bestellung order by datum desc", "SELECT * FROM bestellung ORDER BY datum DESC;"],
+        explanation: "ORDER BY <spalte> DESC sortiert absteigend; ASC (Standard) wäre aufsteigend.",
+      },
+      {
+        type: "truefalse",
+        question: "Ein Fremdschlüssel in bestellung.kunde_id verweist auf den Primärschlüssel der Tabelle kunde.",
+        answer: true,
+        explanation: "Richtig – der Fremdschlüssel stellt die referenzielle Integrität zur 1-Seite (kunde) her.",
+      },
+    ],
+  },
 ];
 
 export function getScenario(id) { return scenarios.find((s) => s.id === id) || null; }
