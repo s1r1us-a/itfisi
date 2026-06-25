@@ -217,6 +217,50 @@ export const scenarios = [
       },
     ],
   },
+
+  {
+    id: "szenario-servervirtualisierung",
+    topicId: "virtualisierung",
+    title: "Konsolidierung per Server-Virtualisierung",
+    difficulty: "mittel",
+    scenario: `<p>Die <strong>Hofmann GmbH</strong> betreibt fünf alte physische Server mit geringer
+      Auslastung. Sie sollen auf einer neuen, leistungsstarken Hardware virtualisiert (konsolidiert)
+      werden. Active Directory und ein Fileserver gehören dazu.</p>`,
+    parts: [
+      {
+        type: "mc-single",
+        question: "Welcher Hypervisor-Typ ist für den produktiven Server-Betrieb am besten geeignet?",
+        options: ["Typ 1 (bare metal, z. B. ESXi/Hyper-V)", "Typ 2 (auf einem Desktop-OS)", "Ein Emulator", "Gar kein Hypervisor"],
+        answer: 0,
+        explanation: "Typ-1-Hypervisoren laufen direkt auf der Hardware und bieten beste Leistung und Stabilität für Server.",
+      },
+      {
+        type: "mc-multi",
+        question: "Welche Vorteile bringt die Virtualisierung hier? (Mehrfachauswahl)",
+        options: [
+          "Bessere Hardwareauslastung",
+          "Schnellere Bereitstellung neuer Server",
+          "Snapshots vor Updates",
+          "Backups werden überflüssig",
+        ],
+        answer: [0, 1, 2],
+        explanation: "Konsolidierung verbessert Auslastung, beschleunigt Bereitstellung und erlaubt Snapshots. Backups bleiben dennoch zwingend nötig.",
+      },
+      {
+        type: "truefalse",
+        question: "Ein Snapshot ersetzt eine reguläre Datensicherung.",
+        answer: false,
+        explanation: "Nein – ein Snapshot ist nur ein kurzfristiger Wiederherstellungspunkt auf demselben Speicher und kein vollwertiges Backup.",
+      },
+      {
+        type: "mc-single",
+        question: "Womit verteilt man im AD zentral Einstellungen an die virtualisierten Clients/Server?",
+        options: ["Gruppenrichtlinien (GPO)", "DHCP", "RAID", "VLAN"],
+        answer: 0,
+        explanation: "GPOs verteilen zentral Richtlinien und Konfigurationen an Benutzer und Computer der Domäne.",
+      },
+    ],
+  },
 ];
 
 export function getScenario(id) { return scenarios.find((s) => s.id === id) || null; }

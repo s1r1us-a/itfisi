@@ -1240,7 +1240,25 @@ export const topics = [
       "GPO: LSDOU, Enforced schlägt Block",
       "AGDLP-Prinzip",
     ],
-    questionIds: ["q-ad-1","q-ad-2","q-ad-tf-1","fc-ad-1"],
+    deepDive: [
+      { heading: "AD-Bausteine",
+        html: `<ul>
+          <li><strong>Domäne:</strong> administrative Sicherheitsgrenze mit gemeinsamer Datenbank.</li>
+          <li><strong>Domänencontroller (DC):</strong> hält das Verzeichnis und authentifiziert (Kerberos).</li>
+          <li><strong>OU (Organisationseinheit):</strong> Container zur Strukturierung und für GPO-Zuweisung.</li>
+          <li><strong>Gruppen:</strong> bündeln Benutzer für Berechtigungen (AGDLP-Prinzip).</li>
+          <li><strong>GPO:</strong> verteilt zentral Richtlinien/Einstellungen.</li>
+        </ul>` },
+      { heading: "OU vs. Gruppe & GPO-Verarbeitung",
+        html: `<p>Häufige Verwechslung: <strong>OUs strukturieren</strong> und sind GPO-Ziel; <strong>Gruppen vergeben Rechte</strong>. GPOs werden in der Reihenfolge <em>Local → Site → Domain → OU</em> (LSDOU) angewendet – die später angewendete gewinnt bei Konflikten.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>DC + Kerberos = Anmeldung/Authentifizierung.</li>
+          <li>GPO-Reihenfolge LSDOU, OU „sticht“ Domain.</li>
+          <li>Berechtigungen über Gruppen, Struktur über OUs.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-ad-1","q-ad-2","q-ad-tf-1","fc-ad-1","q-ad-3","q-ad-tf-2","q-ad-4"],
   },
 
   {
@@ -1270,7 +1288,28 @@ export const topics = [
       "apt (Debian) · dnf (RHEL)",
       "/etc Config · /var Logs · /home Nutzer",
     ],
-    questionIds: ["q-linux-1","q-linux-calc-1","q-linux-tf-1","fc-linux-1"],
+    deepDive: [
+      { heading: "Dateirechte verstehen (rwx)",
+        html: `<p>Jede Datei hat Rechte für <strong>Eigentümer (u)</strong>, <strong>Gruppe (g)</strong> und <strong>Andere (o)</strong>. Werte: <code>r=4</code>, <code>w=2</code>, <code>x=1</code> – pro Stelle addiert.</p>
+        <table>
+          <thead><tr><th>Symbolisch</th><th>Oktal</th><th>Bedeutung</th></tr></thead>
+          <tbody>
+            <tr><td>rwxr-xr-x</td><td>755</td><td>Eigentümer voll, andere lesen/ausführen</td></tr>
+            <tr><td>rw-r--r--</td><td>644</td><td>typische Datei</td></tr>
+            <tr><td>rwx------</td><td>700</td><td>nur Eigentümer</td></tr>
+          </tbody>
+        </table>
+        <p>Bei Verzeichnissen bedeutet <code>x</code> „hineinwechseln dürfen“.</p>` },
+      { heading: "Wichtige Befehle & Aufbau",
+        html: `<ul>
+          <li><code>chmod</code> Rechte, <code>chown</code> Eigentümer, <code>ls -l</code> anzeigen.</li>
+          <li><code>sudo</code> führt Befehle mit erhöhten Rechten aus (statt dauerhaft root).</li>
+          <li>Paketverwaltung: <code>apt</code> (Debian/Ubuntu), <code>dnf/yum</code> (RHEL/Fedora).</li>
+          <li>Alles ist eine Datei – auch Geräte unter <code>/dev</code>.</li>
+        </ul>
+        <p><strong>Kurz gemerkt:</strong> root = UID 0; r=4, w=2, x=1; 755 für Ausführbares, 644 für Dateien.</p>` },
+    ],
+    questionIds: ["q-linux-1","q-linux-calc-1","q-linux-tf-1","fc-linux-1","q-linux-2","q-linux-calc-2","q-linux-tf-2"],
   },
 
   {
@@ -1300,7 +1339,25 @@ export const topics = [
       "Container leicht, VM stark isoliert",
       "vSwitch verbindet VMs & physisches Netz",
     ],
-    questionIds: ["q-virt-1","q-virt-2","q-virt-tf-1","fc-virt-1"],
+    deepDive: [
+      { heading: "Hypervisor Typ 1 vs. Typ 2",
+        html: `<ul>
+          <li><strong>Typ 1 (bare metal):</strong> läuft direkt auf der Hardware – z. B. VMware ESXi, Microsoft Hyper-V, KVM/Proxmox. Performant, für Rechenzentren.</li>
+          <li><strong>Typ 2 (hosted):</strong> läuft als Programm auf einem Host-OS – z. B. VirtualBox, VMware Workstation. Praktisch für Desktop/Test.</li>
+        </ul>` },
+      { heading: "VM vs. Container",
+        html: `<table>
+          <thead><tr><th></th><th>Virtuelle Maschine</th><th>Container</th></tr></thead>
+          <tbody>
+            <tr><td>Betriebssystem</td><td>eigenes Gast-OS</td><td>teilt Host-Kernel</td></tr>
+            <tr><td>Größe/Start</td><td>schwer, langsamer</td><td>schlank, sekundenschnell</td></tr>
+            <tr><td>Isolation</td><td>stark</td><td>schwächer</td></tr>
+            <tr><td>Beispiel</td><td>ESXi-VM</td><td>Docker, Kubernetes</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Kurz gemerkt:</strong> Snapshots sichern VM-Zustände (≠ Backup). Container = ein Kernel, viele isolierte Prozesse.</p>` },
+    ],
+    questionIds: ["q-virt-1","q-virt-2","q-virt-tf-1","fc-virt-1","q-virt-3","q-virt-tf-2","q-virt-4"],
   },
 
   {
@@ -1331,7 +1388,27 @@ export const topics = [
       "Public·Private·Hybrid·Community",
       "Shared-Responsibility-Modell",
     ],
-    questionIds: ["q-cloud-1","q-cloud-match-1","fc-cloud-1"],
+    deepDive: [
+      { heading: "Servicemodelle: Verantwortungsteilung",
+        html: `<table>
+          <thead><tr><th>Modell</th><th>Anbieter verantwortet</th><th>Kunde verantwortet</th></tr></thead>
+          <tbody>
+            <tr><td>IaaS</td><td>Hardware, Virtualisierung</td><td>OS, Patches, Middleware, App</td></tr>
+            <tr><td>PaaS</td><td>+ Betriebssystem, Laufzeit</td><td>App & Daten</td></tr>
+            <tr><td>SaaS</td><td>alles bis zur Anwendung</td><td>nur Nutzung/Konfiguration</td></tr>
+          </tbody>
+        </table>
+        <p>Merksatz: „Pizza as a Service“ – je weiter Richtung SaaS, desto weniger muss man selbst tun.</p>` },
+      { heading: "Bereitstellungsmodelle & Eigenschaften",
+        html: `<p><strong>Public</strong> (geteilte Anbieter-Infrastruktur), <strong>Private</strong> (exklusiv), <strong>Hybrid</strong> (Mischung) und <strong>Community Cloud</strong>. Typische Cloud-Eigenschaften: On-Demand-Self-Service, breiter Netzzugang, Ressourcen-Pooling, schnelle Elastizität und nutzungsabhängige Abrechnung.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>IaaS = am meisten Eigenverantwortung, SaaS = am wenigsten.</li>
+          <li>Shared Responsibility: Sicherheit ist immer geteilt.</li>
+          <li>Hybrid Cloud erlaubt Cloud-Bursting bei Lastspitzen.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-cloud-1","q-cloud-match-1","fc-cloud-1","q-cloud-2","q-cloud-tf-1","q-cloud-3"],
   },
 
   {
@@ -1365,7 +1442,27 @@ export const topics = [
       "Share-Rechte nur im Netz, NTFS überall",
       "Restriktivste Regel gewinnt",
     ],
-    questionIds: ["q-fs-1","q-fs-tf-1","fc-fs-1"],
+    deepDive: [
+      { heading: "Dateisysteme im Vergleich",
+        html: `<table>
+          <thead><tr><th>FS</th><th>Plattform</th><th>Merkmale</th></tr></thead>
+          <tbody>
+            <tr><td>FAT32</td><td>universell</td><td>max. ~4 GB/Datei, keine Rechte, kein Journal</td></tr>
+            <tr><td>exFAT</td><td>universell</td><td>große Dateien, für USB/SD</td></tr>
+            <tr><td>NTFS</td><td>Windows</td><td>ACLs, Journaling, Komprimierung/Verschlüsselung</td></tr>
+            <tr><td>ext4</td><td>Linux</td><td>Journaling, große Volumes</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "NTFS-Berechtigungen & Vererbung",
+        html: `<p>NTFS-Rechte (Lesen, Schreiben, Ändern, Vollzugriff) gelten lokal <em>und</em> über Freigaben. Bei Konflikt aus Freigabe- und NTFS-Recht gilt das <strong>restriktivere</strong> Recht. Ein explizites <strong>Verweigern</strong> sticht ein Erlauben. Rechte werden i. d. R. von übergeordneten Ordnern <strong>vererbt</strong>.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>FAT32: 4-GB-Dateigrenze, keine Rechte.</li>
+          <li>NTFS: Verweigern &gt; Erlauben; restriktiveres Recht gewinnt.</li>
+          <li>ext4 = Linux-Standard mit Journal.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-fs-1","q-fs-tf-1","fc-fs-1","q-fs-2","q-fs-tf-2","q-fs-3"],
   },
 
   /* ===================== 4. DATENBANKEN ===================== */
