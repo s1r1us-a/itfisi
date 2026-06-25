@@ -130,6 +130,93 @@ export const scenarios = [
       },
     ],
   },
+
+  {
+    id: "szenario-perimeter-dmz",
+    topicId: "firewall",
+    title: "Sicheres Netzkonzept mit DMZ",
+    difficulty: "schwer",
+    scenario: `<p>Die <strong>Bergmann GmbH</strong> betreibt künftig einen eigenen Web- und Mailserver,
+      die aus dem Internet erreichbar sein müssen. Das interne LAN mit Buchhaltung und Fileserver
+      soll dabei bestmöglich geschützt bleiben. Du planst das Firewall-/Zonenkonzept.</p>`,
+    parts: [
+      {
+        type: "mc-single",
+        question: "In welche Zone gehören der öffentlich erreichbare Web- und Mailserver?",
+        options: ["In die DMZ", "Direkt ins interne LAN", "Ins Gäste-WLAN", "Auf den Arbeitsplatz-PCs"],
+        answer: 0,
+        explanation: "Öffentlich erreichbare Dienste gehören in die DMZ, damit ein kompromittierter Server nicht direkt Zugriff auf das interne LAN eröffnet.",
+      },
+      {
+        type: "mc-single",
+        question: "Welche Grundregel sollte die Firewall verfolgen?",
+        options: [
+          "Default-Deny: alles sperren, nur Benötigtes gezielt erlauben",
+          "Default-Allow: alles erlauben, nur Bekanntes sperren",
+          "Nur ausgehenden Verkehr filtern",
+          "Gar nicht filtern, NAT genügt",
+        ],
+        answer: 0,
+        explanation: "Default-Deny ist das sichere Grundprinzip: erst alles verbieten, dann nur die notwendigen Dienste/Ports freigeben.",
+      },
+      {
+        type: "truefalse",
+        question: "Eine Stateful-Inspection-Firewall lässt Antwortpakete einer erlaubten Verbindung automatisch zu.",
+        answer: true,
+        explanation: "Sie führt eine Zustandstabelle; zu einer zugelassenen Session gehörende Antwortpakete werden ohne separate Regel durchgelassen.",
+      },
+      {
+        type: "mc-multi",
+        question: "Welche Maßnahmen erhöhen die Sicherheit zusätzlich? (Mehrfachauswahl)",
+        options: [
+          "Regelmäßige Updates/Patches der DMZ-Server",
+          "Protokollierung (Logging) und Monitoring",
+          "Den Fileserver ebenfalls in die DMZ stellen",
+          "Netztrennung per VLAN",
+        ],
+        answer: [0, 1, 3],
+        explanation: "Patches, Logging/Monitoring und VLAN-Segmentierung erhöhen die Sicherheit. Der interne Fileserver gehört NICHT in die DMZ.",
+      },
+    ],
+  },
+
+  {
+    id: "szenario-zugriffsschutz",
+    topicId: "auth-rbac",
+    title: "Zugriffsschutz & Authentifizierung",
+    difficulty: "mittel",
+    scenario: `<p>Nach einem Audit soll die <strong>Klein &amp; Partner KG</strong> ihren Zugriffsschutz
+      verbessern. Aktuell teilen sich mehrere Mitarbeitende Sammelkonten, Passwörter sind schwach
+      und Rechte werden einzeln pro Person vergeben.</p>`,
+    parts: [
+      {
+        type: "mc-single",
+        question: "Wie sollten Berechtigungen künftig sinnvoll verwaltet werden?",
+        options: ["Über Rollen (RBAC)", "Weiterhin einzeln je Person", "Über Sammelkonten", "Gar nicht einschränken"],
+        answer: 0,
+        explanation: "RBAC bündelt Rechte in Rollen; Mitarbeitende erhalten Rollen. Das ist übersichtlich, prüfbar und reduziert Fehler.",
+      },
+      {
+        type: "mc-single",
+        question: "Welches Prinzip besagt, dass jede Person nur die nötigsten Rechte erhält?",
+        options: ["Least Privilege", "Default-Allow", "Striping", "Zweckbindung"],
+        answer: 0,
+        explanation: "Least Privilege (geringste Rechte) minimiert Schaden bei Missbrauch oder Kontoübernahme.",
+      },
+      {
+        type: "truefalse",
+        question: "Passwort + Einmalcode aus einer Authenticator-App ist eine echte Multi-Faktor-Authentifizierung.",
+        answer: true,
+        explanation: "Es kombiniert Wissen (Passwort) und Besitz (App/Gerät) – zwei verschiedene Faktoren ⇒ MFA.",
+      },
+      {
+        type: "cloze",
+        question: "Sammelkonten sollten abgeschafft werden, damit Aktionen einer {{}} Person zuordenbar sind (Nachvollziehbarkeit).",
+        blanks: [["einzelnen", "individuellen", "bestimmten"]],
+        explanation: "Personalisierte Konten ermöglichen Nachvollziehbarkeit/Accountability – wichtig für Audits und Forensik.",
+      },
+    ],
+  },
 ];
 
 export function getScenario(id) { return scenarios.find((s) => s.id === id) || null; }

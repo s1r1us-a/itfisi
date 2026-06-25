@@ -170,6 +170,32 @@ export const glossary = [
     related: ["git-qs"] },
   { term: "Unittest", definition: "Automatisierter Test einer einzelnen, isolierten Programmeinheit (Funktion/Methode).",
     related: ["git-qs"] },
+
+  /* --- Ergänzte Begriffe --- */
+  { term: "Default-Route", definition: "Route 0.0.0.0/0 als „Tor nach außen“ für alle Ziele ohne spezifischeren Eintrag in der Routing-Tabelle.",
+    related: ["routing", "nat"] },
+  { term: "Longest Prefix Match", definition: "Auswahlregel beim Routing: Es gewinnt stets die spezifischste (längste) passende Netzmaske.",
+    related: ["routing"] },
+  { term: "MX-Record", definition: "DNS-Eintrag, der den zuständigen Mailserver einer Domain benennt.",
+    related: ["dhcp-dns"] },
+  { term: "Multicast", definition: "Adressierung an eine Gruppe von Empfängern; ersetzt in IPv6 den klassischen Broadcast (z. B. ff02::1).",
+    related: ["ipv6"] },
+  { term: "ESP", definition: "Encapsulating Security Payload – IPsec-Bestandteil, der Nutzdaten verschlüsselt und deren Integrität sichert.",
+    related: ["vpn"] },
+  { term: "AH", definition: "Authentication Header – IPsec-Bestandteil für Integrität/Authentizität, jedoch ohne Verschlüsselung.",
+    related: ["vpn"] },
+  { term: "ACL", definition: "Access Control List – geordnete Regelliste (erlauben/verweigern) zur Zugriffs-/Paketsteuerung.",
+    related: ["firewall", "auth-rbac"] },
+  { term: "Stateful Inspection", definition: "Firewall-Technik, die den Verbindungszustand verfolgt und Antwortpakete erlaubter Sessions automatisch zulässt.",
+    related: ["firewall"] },
+  { term: "Digitale Signatur", definition: "Mit dem privaten Schlüssel erzeugte Prüfsumme; belegt Integrität, Authentizität und Nichtabstreitbarkeit.",
+    related: ["krypto"] },
+  { term: "Hybride Verschlüsselung", definition: "Kombination aus asymmetrischem Schlüsselaustausch und schneller symmetrischer Verschlüsselung (z. B. TLS).",
+    related: ["krypto"] },
+  { term: "Least Privilege", definition: "Prinzip der geringsten Rechte: jede Person/jeder Dienst erhält nur die unbedingt nötigen Berechtigungen.",
+    related: ["auth-rbac"] },
+  { term: "USV", definition: "Unterbrechungsfreie Stromversorgung – überbrückt Stromausfälle und ermöglicht geordnetes Herunterfahren.",
+    related: ["raid-backup"] },
 ];
 
 /** Liefert einen Glossarbegriff (case-insensitive). */

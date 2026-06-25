@@ -873,7 +873,22 @@ export const topics = [
       "ISO 27001 → ISMS",
       "Maximumprinzip bei Schutzbedarf",
     ],
-    questionIds: ["q-cia-1","q-cia-2","q-cia-match-1","fc-cia-1"],
+    deepDive: [
+      { heading: "Die CIA-Triade im Detail",
+        html: `<table>
+          <thead><tr><th>Schutzziel</th><th>Bedeutung</th><th>Bedrohung / Schutz</th></tr></thead>
+          <tbody>
+            <tr><td>Vertraulichkeit</td><td>nur Befugte sehen Daten</td><td>Abhören → Verschlüsselung, Rechtekonzept</td></tr>
+            <tr><td>Integrität</td><td>Daten unverändert/korrekt</td><td>Manipulation → Hashes, Signaturen</td></tr>
+            <tr><td>Verfügbarkeit</td><td>nutzbar bei Bedarf</td><td>DoS/Ausfall → Redundanz, USV, Backup</td></tr>
+          </tbody>
+        </table>
+        <p>Ergänzend werden oft <strong>Authentizität</strong> (Echtheit), <strong>Nichtabstreitbarkeit</strong> und <strong>Verbindlichkeit</strong> genannt.</p>` },
+      { heading: "Schutzbedarf & Maßnahmen",
+        html: `<p>Der <strong>Schutzbedarf</strong> (normal/hoch/sehr hoch) richtet sich nach dem möglichen Schaden. Maßnahmen gliedern sich in <em>technische</em> (Firewall, Verschlüsselung) und <em>organisatorische</em> (Richtlinien, Schulungen). Das BSI-Grundschutz-Kompendium ist hierfür der deutsche Standard.</p>
+        <p><strong>Kurz gemerkt:</strong> Vertraulichkeit ≠ Integrität ≠ Verfügbarkeit – jede Maßnahme einem Ziel zuordnen können.</p>` },
+    ],
+    questionIds: ["q-cia-1","q-cia-2","q-cia-match-1","fc-cia-1","q-cia-3","q-cia-tf-1","q-cia-cloze-1"],
   },
 
   {
@@ -906,7 +921,28 @@ export const topics = [
       "Hybrid: asym. Schlüsseltausch + sym. Daten",
       "PKI: CA signiert X.509-Zertifikate",
     ],
-    questionIds: ["q-krypto-1","q-krypto-2","q-krypto-tf-1","q-krypto-match-1","q-krypto-cloze-1","fc-krypto-1"],
+    deepDive: [
+      { heading: "Symmetrisch, asymmetrisch & hybrid",
+        html: `<table>
+          <thead><tr><th></th><th>Symmetrisch</th><th>Asymmetrisch</th></tr></thead>
+          <tbody>
+            <tr><td>Schlüssel</td><td>ein gemeinsamer Schlüssel</td><td>Schlüsselpaar (public/private)</td></tr>
+            <tr><td>Tempo</td><td>sehr schnell</td><td>langsam</td></tr>
+            <tr><td>Problem</td><td>sicherer Schlüsselaustausch</td><td>Rechenaufwand</td></tr>
+            <tr><td>Beispiel</td><td>AES</td><td>RSA, ECC</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Hybrid</strong> (z. B. TLS) kombiniert beides: asymmetrisch wird ein symmetrischer Sitzungsschlüssel ausgetauscht, danach läuft die schnelle symmetrische Verschlüsselung.</p>` },
+      { heading: "Hash vs. Signatur vs. Verschlüsselung",
+        html: `<ul>
+          <li><strong>Hash</strong> (SHA-256): Einwegfunktion, prüft Integrität – nicht umkehrbar, kein Schlüssel.</li>
+          <li><strong>Verschlüsselung für Vertraulichkeit:</strong> mit dem <em>öffentlichen</em> Schlüssel des Empfängers verschlüsseln.</li>
+          <li><strong>Digitale Signatur:</strong> mit dem <em>privaten</em> Schlüssel des Absenders signieren ⇒ Integrität + Authentizität + Nichtabstreitbarkeit.</li>
+        </ul>
+        <p>Eine <strong>PKI</strong> mit Zertifikaten (CA) bindet öffentliche Schlüssel verlässlich an Identitäten.</p>
+        <p><strong>Kurz gemerkt:</strong> Verschlüsseln = Public Key des Empfängers; Signieren = Private Key des Absenders.</p>` },
+    ],
+    questionIds: ["q-krypto-1","q-krypto-2","q-krypto-tf-1","q-krypto-match-1","q-krypto-cloze-1","fc-krypto-1","q-krypto-3","q-krypto-tf-2","q-krypto-4"],
   },
 
   {
@@ -940,7 +976,19 @@ export const topics = [
       "DMZ trennt öffentliche Dienste vom LAN",
       "Whitelisting > Blacklisting",
     ],
-    questionIds: ["q-fw-1","q-fw-2","q-fw-tf-1","fc-fw-1"],
+    deepDive: [
+      { heading: "Paketfilter vs. Stateful Inspection",
+        html: `<p>Ein einfacher <strong>Paketfilter</strong> entscheidet je Paket anhand von IP-Adresse, Port und Protokoll. Eine <strong>Stateful-Inspection-Firewall</strong> führt zusätzlich eine Zustandstabelle: Antwortpakete zu einer erlaubten, bestehenden Verbindung werden automatisch durchgelassen – sicherer und einfacher zu konfigurieren. <strong>ACLs</strong> sind die zugrunde liegenden Regellisten (erlauben/verweigern).</p>` },
+      { heading: "DMZ & Zonenkonzept",
+        html: `<p>Öffentlich erreichbare Dienste (Web-, Mail-, Reverse-Proxy) gehören in eine <strong>DMZ</strong> – eine eigene Zone zwischen zwei Firewalls bzw. an einem separaten Interface. Wird ein DMZ-Server übernommen, ist das interne LAN dadurch nicht sofort offen.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Default-Deny: erst alles verbieten, dann gezielt erlauben.</li>
+          <li>DMZ trennt „außen erreichbar“ von „intern“.</li>
+          <li>Eine Firewall ersetzt keinen Endpunktschutz/Virenschutz.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-fw-1","q-fw-2","q-fw-tf-1","fc-fw-1","q-fw-3","q-fw-tf-2","q-fw-match-1"],
   },
 
   {
@@ -982,7 +1030,28 @@ export const topics = [
       "DDoS·MITM·Phishing·SQLi·XSS·BruteForce",
       "Gegenmaßnahme SQLi: Prepared Statements",
     ],
-    questionIds: ["q-mal-1","q-mal-2","q-mal-match-1","q-mal-tf-1","fc-mal-1"],
+    deepDive: [
+      { heading: "Schadsoftware-Typen",
+        html: `<table>
+          <thead><tr><th>Typ</th><th>Merkmal</th></tr></thead>
+          <tbody>
+            <tr><td>Virus</td><td>hängt sich an Dateien, braucht Ausführung</td></tr>
+            <tr><td>Wurm</td><td>verbreitet sich selbstständig über Netze</td></tr>
+            <tr><td>Trojaner</td><td>tarnt sich als nützliches Programm</td></tr>
+            <tr><td>Ransomware</td><td>verschlüsselt Daten, fordert Lösegeld</td></tr>
+            <tr><td>Spyware/Keylogger</td><td>spioniert Eingaben/Verhalten aus</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Angriffsarten & Social Engineering",
+        html: `<p>Viele Angriffe zielen auf den Menschen: <strong>Phishing</strong> (gefälschte Mails/Seiten), <strong>Spear-Phishing</strong> (gezielt), <strong>CEO-Fraud</strong>. Technische Angriffe sind u. a. <strong>(D)DoS</strong>, <strong>Man-in-the-Middle</strong>, <strong>SQL-Injection</strong> und <strong>Brute-Force</strong>.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Wurm = selbstverbreitend, Virus = braucht Wirt.</li>
+          <li>Bester Ransomware-Schutz: Offline-Backups + Patches + Awareness.</li>
+          <li>Phishing ist Social Engineering – Schulung wirkt.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-mal-1","q-mal-2","q-mal-match-1","q-mal-tf-1","fc-mal-1","q-mal-3","q-mal-tf-2","q-mal-4"],
   },
 
   {
@@ -1010,7 +1079,24 @@ export const topics = [
       "RBAC + Least Privilege + Need-to-know",
       "Passwort: lang > komplex-kurz; besser Passphrasen",
     ],
-    questionIds: ["q-auth-1","q-auth-tf-1","fc-auth-1"],
+    deepDive: [
+      { heading: "Die drei Authentifizierungsfaktoren",
+        html: `<ul>
+          <li><strong>Wissen:</strong> Passwort, PIN, Antwort auf Sicherheitsfrage.</li>
+          <li><strong>Besitz:</strong> Smartcard, Hardware-Token, TAN-/Authenticator-App.</li>
+          <li><strong>Inhärenz (Biometrie):</strong> Fingerabdruck, Gesicht, Iris.</li>
+        </ul>
+        <p><strong>MFA</strong> kombiniert mindestens zwei <em>verschiedene</em> Kategorien. Zwei Passwörter sind keine MFA (beides „Wissen“).</p>` },
+      { heading: "Berechtigungsmodelle & Prinzipien",
+        html: `<p><strong>RBAC</strong> vergibt Rechte über Rollen statt einzeln – einfacher zu verwalten und zu auditieren. Leitprinzipien:</p>
+        <ul>
+          <li><strong>Least Privilege:</strong> nur so viele Rechte wie nötig.</li>
+          <li><strong>Need-to-know:</strong> Zugriff nur bei tatsächlichem Bedarf.</li>
+          <li><strong>Funktionstrennung (SoD):</strong> kritische Schritte auf mehrere Personen verteilen.</li>
+        </ul>
+        <p><strong>Kurz gemerkt:</strong> Authentifizierung (wer bist du?) ≠ Autorisierung (was darfst du?).</p>` },
+    ],
+    questionIds: ["q-auth-1","q-auth-tf-1","fc-auth-1","q-auth-2","q-auth-tf-2","q-auth-match-1"],
   },
 
   {
@@ -1053,7 +1139,28 @@ export const topics = [
       "Inkrementell=schnell/lange Kette · Differenziell=Voll+letztes Diff",
       "RTO=Ausfallzeit · RPO=Datenverlust",
     ],
-    questionIds: ["q-raid-1","q-raid-2","q-raid-calc-1","q-backup-1","q-raid-match-1","fc-raid-1"],
+    deepDive: [
+      { heading: "RAID-Level im Vergleich",
+        html: `<table>
+          <thead><tr><th>Level</th><th>Prinzip</th><th>min. Platten</th><th>Nettokapazität</th><th>Ausfall</th></tr></thead>
+          <tbody>
+            <tr><td>RAID 0</td><td>Striping (Tempo)</td><td>2</td><td>n × Größe</td><td>0 (keine Redundanz!)</td></tr>
+            <tr><td>RAID 1</td><td>Spiegelung</td><td>2</td><td>1 × Größe</td><td>1</td></tr>
+            <tr><td>RAID 5</td><td>Striping + verteilte Parität</td><td>3</td><td>(n−1) × Größe</td><td>1</td></tr>
+            <tr><td>RAID 6</td><td>doppelte Parität</td><td>4</td><td>(n−2) × Größe</td><td>2</td></tr>
+            <tr><td>RAID 10</td><td>Spiegeln + Striping</td><td>4</td><td>n/2 × Größe</td><td>je Spiegel 1</td></tr>
+          </tbody>
+        </table>` },
+      { heading: "Backup-Strategien & USV",
+        html: `<ul>
+          <li><strong>Voll:</strong> alles, einfach wiederherstellbar, viel Speicher.</li>
+          <li><strong>Differenziell:</strong> alles seit dem letzten Vollbackup.</li>
+          <li><strong>Inkrementell:</strong> nur Änderungen seit dem letzten Backup – sparsam, aber Restore über Kette.</li>
+        </ul>
+        <p>Die <strong>3-2-1-Regel</strong>: 3 Kopien, 2 Medientypen, 1 extern/offline. Eine <strong>USV</strong> überbrückt Stromausfälle und erlaubt geordnetes Herunterfahren.</p>
+        <p><strong>Kurz gemerkt:</strong> RAID ≠ Backup! RAID schützt vor Plattenausfall, nicht vor Löschen/Ransomware.</p>` },
+    ],
+    questionIds: ["q-raid-1","q-raid-2","q-raid-calc-1","q-backup-1","q-raid-match-1","fc-raid-1","q-raid-3","q-raid-calc-2","q-raid-tf-2","q-backup-2"],
   },
 
   {
@@ -1083,7 +1190,25 @@ export const topics = [
       "Betroffenenrechte: Auskunft·Löschung·Berichtigung…",
       "TOMs = technisch + organisatorisch",
     ],
-    questionIds: ["q-dsgvo-1","q-dsgvo-tf-1","fc-dsgvo-1"],
+    deepDive: [
+      { heading: "Grundprinzipien (Art. 5 DSGVO)",
+        html: `<ul>
+          <li><strong>Rechtmäßigkeit & Transparenz</strong> – nachvollziehbare, erlaubte Verarbeitung.</li>
+          <li><strong>Zweckbindung</strong> – Daten nur für den festgelegten Zweck.</li>
+          <li><strong>Datenminimierung</strong> – nur das Nötige erheben.</li>
+          <li><strong>Richtigkeit</strong>, <strong>Speicherbegrenzung</strong>, <strong>Integrität/Vertraulichkeit</strong>.</li>
+          <li><strong>Rechenschaftspflicht</strong> – Nachweisbarkeit der Einhaltung.</li>
+        </ul>` },
+      { heading: "Betroffenenrechte & Pflichten",
+        html: `<p>Betroffene haben u. a. Rechte auf <strong>Auskunft</strong>, <strong>Berichtigung</strong>, <strong>Löschung</strong> („Recht auf Vergessenwerden“) und <strong>Datenübertragbarkeit</strong>. Verantwortliche müssen ein <strong>Verarbeitungsverzeichnis</strong> führen und eine <strong>meldepflichtige Datenpanne binnen 72 Stunden</strong> melden.</p>
+        <p><strong>Kurz gemerkt:</strong></p>
+        <ul>
+          <li>Personenbezogene Daten = auf eine natürliche Person beziehbar.</li>
+          <li>Datenpanne: 72-Stunden-Meldefrist an die Aufsichtsbehörde.</li>
+          <li>Verstöße: Bußgeld bis 20 Mio. € oder 4 % des weltweiten Jahresumsatzes.</li>
+        </ul>` },
+    ],
+    questionIds: ["q-dsgvo-1","q-dsgvo-tf-1","fc-dsgvo-1","q-dsgvo-2","q-dsgvo-3","q-dsgvo-tf-2"],
   },
 
   /* ===================== 3. BETRIEBSSYSTEME & VIRTUALISIERUNG ===================== */
